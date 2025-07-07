@@ -1,122 +1,101 @@
 <?= $this->extend('admin/layout/default') ?>
 
-<?= $this->section('breadcrumb') ?>
-    <?= view('admin/layout/default', [
-        'title' => $title,
-        'breadcrumb' => $breadcrumb
-    ]) ?>
-<?= $this->endSection() ?>
-
 <?= $this->section('content') ?>
-    <!-- Start Container Fluid -->
-            <div class="container-fluid">
 
-                <!-- ========== Page Title Start ========== -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="page-title-box">
-                            <h4 class="mb-0">Dashboard</h4>
-                        </div>
-                    </div>
-                </div>
-                <!-- ========== Page Title End ========== -->
+<!-- Start Container Fluid -->
+<div class="container-fluid">
 
-
-                <div class="row">
-                    <!-- Card 1 -->
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted mb-0 text-truncate">Total Income</p>
-                                        <h3 class="text-dark mt-2 mb-0">$78.8k</h3>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="ms-auto avatar-md bg-soft-primary rounded">
-                                            <iconify-icon icon="solar:globus-outline"
-                                                class="fs-32 avatar-title text-primary"></iconify-icon>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="chart01"></div>
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted mb-0 text-truncate">New Users</p>
-                                        <h3 class="text-dark mt-2 mb-0">2,150</h3>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="ms-auto avatar-md bg-soft-primary rounded">
-                                            <iconify-icon icon="solar:users-group-two-rounded-broken"
-                                                class="fs-32 avatar-title text-primary"></iconify-icon>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="chart02"></div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted mb-0 text-truncate">Orders</p>
-                                        <h3 class="text-dark mt-2 mb-0">1,784</h3>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="ms-auto avatar-md bg-soft-primary rounded">
-                                            <iconify-icon icon="solar:cart-5-broken"
-                                                class="fs-32 avatar-title text-primary"></iconify-icon>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="chart03"></div>
-                        </div>
-                    </div>
-
-                    <!-- Card 4 -->
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted mb-0 text-truncate">Conversion Rate</p>
-                                        <h3 class="text-dark mt-2 mb-0">12.3%</h3>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="ms-auto avatar-md bg-soft-primary rounded">
-                                            <iconify-icon icon="solar:pie-chart-2-broken"
-                                                class="fs-32 avatar-title text-primary"></iconify-icon>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="chart04"></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- end card-->
-            </div>
-            <!-- end col -->
+    <!-- Welcome Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-white">Selamat Datang, <?= esc($username) ?>!</h2>
+            <p class="text-muted mb-0">
+                Hari ini : <?= tanggal_indo(date('Y-m-d')) ?>
+            </p>
         </div>
-        <!-- end row -->
+    </div>
+
+    <div class="row">
+        <!-- Total Property -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="text-muted mb-0">Total Properti</p>
+                            <h3 class="text-dark mt-2 mb-0"><?= esc($totalProperty) ?></h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="avatar-md bg-soft-primary rounded">
+                                <iconify-icon icon="solar:buildings-outline" class="fs-32 avatar-title text-primary"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total User Role Karyawan -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="text-muted mb-0">Total User</p>
+                            <h3 class="text-dark mt-2 mb-0"><?= esc($totalUser) ?></h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="avatar-md bg-soft-primary rounded">
+                                <iconify-icon icon="solar:user-outline" class="fs-32 avatar-title text-primary"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Penjualan -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="text-muted mb-0">Total Penjualan</p>
+                            <h3 class="text-dark mt-2 mb-0"><?= number_to_currency($totalPenjualan, 'IDR', 'id_ID') ?></h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="avatar-md bg-soft-primary rounded">
+                                <iconify-icon icon="solar:bag-5-outline" class="fs-32 avatar-title text-primary"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Customer -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="text-muted mb-0">Total Customer</p>
+                            <h3 class="text-dark mt-2 mb-0"><?= esc($totalCustomer) ?></h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="avatar-md bg-soft-primary rounded">
+                                <iconify-icon icon="solar:users-group-rounded-outline" class="fs-32 avatar-title text-primary"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
-    <!-- End Container Fluid -->
+    <!-- end row -->
+
+</div>
+<!-- End Container Fluid -->
+
 <?= $this->endSection() ?>

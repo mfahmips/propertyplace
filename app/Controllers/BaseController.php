@@ -8,6 +8,8 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Config\Services;
+use App\Models\SettingsModel;
 
 /**
  * Class BaseController
@@ -46,13 +48,26 @@ abstract class BaseController extends Controller
     /**
      * @return void
      */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+   public function initController(\CodeIgniter\HTTP\RequestInterface $request,
+                                   \CodeIgniter\HTTP\ResponseInterface $response,
+                                   \Psr\Log\LoggerInterface $logger)
     {
-        // Do Not Edit This Line
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
+        // Load model dan share data settings
+        $settingsModel = new SettingsModel();
+        $settings      = $settingsModel->first();
 
-        // E.g.: $this->session = service('session');
+        // Agar $settings tersedia di semua view
+        $renderer = Services::renderer();
+        $renderer->setData(['settings' => $settings]);
     }
+
+    protected function requireLogin()
+    {
+        if (!session()->get('is_logged_in')) {
+            return redirect()->to('/login');
+        }
+    }
+
 }

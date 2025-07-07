@@ -17,7 +17,7 @@
                     <!-- App Search-->
                     <form class="app-search d-none d-md-block me-auto">
                         <div class="position-relative">
-                            <input type="search" class="form-control" placeholder="admin,widgets..."
+                            <input type="search" class="form-control" placeholder="cari apa saja..."
                                 autocomplete="off" value="">
                             <iconify-icon icon="solar:magnifer-outline" class="search-widget-icon"></iconify-icon>
                         </div>
@@ -147,51 +147,39 @@
                         </div>
                     </div>
 
-                    <!-- User -->
+                    <!-- User Dropdown -->
                     <div class="dropdown topbar-item">
                         <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
                             <span class="d-flex align-items-center">
                                 <img class="rounded-circle" width="32"
-                                    src="<?= base_url('assets/admin/images/users/avatar-1.jpg') ?>"
-                                    alt="avatar-3">
+                                    src="<?= !empty(session('foto')) && file_exists(FCPATH . 'uploads/user/' . session('foto'))
+                                            ? base_url('uploads/user/' . session('foto'))
+                                            : base_url('assets/images/default-avatar.png') ?>"
+                                    alt="avatar"
+                                    onerror="this.onerror=null;this.src='<?= base_url('assets/images/default-avatar.png') ?>';">
                             </span>
                         </a>
+
                         <div class="dropdown-menu dropdown-menu-end">
-                            <!-- item-->
-                            <h6 class="dropdown-header">Welcome!</h6>
+                            <h6 class="dropdown-header">
+                                Halo, <?= esc(session('name')) ?>!
+                            </h6>
 
-                            <a class="dropdown-item" href="#">
-                                <iconify-icon icon="solar:user-outline"
-                                    class="align-middle me-2 fs-18"></iconify-icon><span class="align-middle">My
-                                    Account</span>
-                            </a>
-
-                            <a class="dropdown-item" href="#">
-                                <iconify-icon icon="solar:wallet-outline"
-                                    class="align-middle me-2 fs-18"></iconify-icon><span
-                                    class="align-middle">Pricing</span>
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <iconify-icon icon="solar:help-outline"
-                                    class="align-middle me-2 fs-18"></iconify-icon><span
-                                    class="align-middle">Help</span>
-                            </a>
-                            <a class="dropdown-item" href="auth-lock-screen.html">
-                                <iconify-icon icon="solar:lock-keyhole-outline"
-                                    class="align-middle me-2 fs-18"></iconify-icon><span class="align-middle">Lock
-                                    screen</span>
+                            <a class="dropdown-item" href="<?= base_url('dashboard/user/profile') ?>">
+                                <iconify-icon icon="solar:user-outline" class="align-middle me-2 fs-18"></iconify-icon>
+                                <span class="align-middle">Profil Saya</span>
                             </a>
 
                             <div class="dropdown-divider my-1"></div>
 
-                            <a class="dropdown-item text-danger" href="auth-signin.html">
-                                <iconify-icon icon="solar:logout-3-outline"
-                                    class="align-middle me-2 fs-18"></iconify-icon><span
-                                    class="align-middle">Logout</span>
+                            <a class="dropdown-item text-danger" href="<?= site_url('logout') ?>">
+                                <iconify-icon icon="solar:logout-3-outline" class="align-middle me-2 fs-18"></iconify-icon>
+                                <span class="align-middle">Keluar</span>
                             </a>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

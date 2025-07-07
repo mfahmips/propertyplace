@@ -130,7 +130,7 @@ abstract class BaseCommand
         $message   = $e->getMessage();
         $config    = config(Exceptions::class);
 
-        require $config->errorViewPath . '/cli/error_exception.php';
+        //require $config->errorViewPath . '/cli/error_exception.php';
     }
 
     /**

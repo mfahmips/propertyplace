@@ -25,6 +25,12 @@ class Modules extends BaseModules
      */
     public $enabled = true;
 
+    public $psr4 = [
+    APPPATH,
+    ROOTPATH . 'vendor/codeigniter4/shield/src',
+];
+
+
     /**
      * --------------------------------------------------------------------------
      * Enable Auto-Discovery Within Composer Packages?

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title><?= $title ?? 'Analytics | Darkone - Dark Admin & UI Kit Template' ?></title>
+    <title><?= esc($settings['site_name'] ?? 'My Site') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Darkone: An advanced, fully responsive admin dashboard template packed with features to streamline your analytics and management needs." />
     <meta name="author" content="StackBros" />
@@ -13,7 +13,7 @@
     <meta name="theme-color" content="#ffffff">
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="<?= base_url('assets/admin/images/favicon.ico') ?>">
+    <link rel="shortcut icon" href="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>" sizes="320x320" type="image/png">
 
     <!-- Google Font Family link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
