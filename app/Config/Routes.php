@@ -14,7 +14,7 @@ $routes->setAutoRoute(false); // tetap disarankan disable untuk keamanan
 // ===========================
 // ✅ Route publik (non-dashboard)
 // ===========================
-$routes->get('/', 'Home::index');
+$routes->get('/', 'Frontend\Home::index');
 
 // === DETAIL USER BERDASARKAN SLUG (contoh: /user/john-doe)
 $routes->get('user/(:segment)', 'User::detail/$1');
