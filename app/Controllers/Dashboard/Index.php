@@ -38,6 +38,7 @@ class Index extends BaseController
             'title'           => 'Dashboard',
             'breadcrumb'      => [['label' => 'Dashboard']],
             'username'        => $username,
+            'foto'            => $userData['foto'] ?? null,
             'totalProperty'   => $this->propertyModel->countAll(),
             'totalUser'       => $this->userModel->countAll(),
             'totalPenjualan'  => $jumlahPenjualan,

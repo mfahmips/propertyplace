@@ -152,11 +152,15 @@
                         <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
                             <span class="d-flex align-items-center">
-                                <img class="rounded-circle" width="32"
-                                    src="<?= base_url('uploads/' . ($settings['profile_photo'] ?? 'default-photo.png')) ?>" alt="Profile Photo">
+                                <img class="rounded-circle" width="32" height="32"
+                                src="<?= base_url(!empty(session('foto')) ? 'uploads/user/' . session('foto') : 'assets/images/default-avatar.png') ?>"
+                                alt="avatar"
+                                onerror="this.onerror=null;this.src='<?= base_url('assets/images/default-avatar.png') ?>';"
+                                style="object-fit: cover;">
 
-                                    onerror="this.onerror=null;this.src='<?= base_url('assets/images/default-avatar.png') ?>';">
+
                             </span>
+
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-end">

@@ -44,7 +44,7 @@
                   width="60" 
                   class="img-thumbnail" 
                   alt="<?= esc($d['name']) ?> Logo"
-                >
+                  style=background-color:white;>
               </td>
               <td>
                 <a href="<?= base_url('dashboard/property/developer/' . esc($d['slug'])) ?>">

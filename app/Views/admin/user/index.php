@@ -42,12 +42,11 @@
                         <table class="table table-striped table-borderless table-centered">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Foto</th>
-                                    <th>name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Role</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -59,13 +58,17 @@
                                     <?php foreach ($users as $user) : ?>
                                         <tr>
                                             <td>
-                                                <?php if (!empty($user['foto'])) : ?>
-                                                    <img src="<?= base_url('uploads/user/' . esc($user['foto'])) ?>" width="50" height="50" class="rounded-circle">
-                                                <?php else : ?>
-                                                    <img src="https://via.placeholder.com/50x50?text=No+Image" class="rounded-circle">
-                                                <?php endif ?>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <?php if (!empty($user['foto'])) : ?>
+                                                        <img src="<?= base_url('uploads/user/' . esc($user['foto'])) ?>" width="50" height="50" class="rounded-circle">
+                                                    <?php else : ?>
+                                                        <img src="https://via.placeholder.com/50x50?text=No+Image" class="rounded-circle">
+                                                    <?php endif ?>
+                                                    <div class="d-block">
+                                                            <h5 class="mb-0"><?= esc($user['name']) ?></h5>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td><?= esc($user['name']) ?></td>
                                             <td><?= esc($user['email']) ?></td>
                                             <td><span class="badge bg-info"><?= esc($user['role']) ?></span></td>
                                             <td>
