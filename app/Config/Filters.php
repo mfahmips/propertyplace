@@ -36,20 +36,22 @@ class Filters extends BaseFilters
 
     // Middleware global (semua route)
     public array $globals = [
-        'before' => [
-            'auth' => [
-                'except' => [
-                    '/', // jika kamu punya halaman welcome
-                    'login', 'login/*',
-                    'logout', 'logout/*',
-                    'register', 'register/*',
-                ]
+    'before' => [
+        'auth' => [
+            'except' => [
+                '/', // home
+                'login', 'login/*',
+                'logout', 'logout/*',
+                'register', 'register/*',
+                'property', 'property/*',
             ]
-        ],
-        'after' => [
-            'toolbar',
-        ],
-    ];
+        ]
+    ],
+    'after' => [
+        'toolbar',
+    ],
+];
+
 
     public array $methods = [];
 

@@ -11,7 +11,7 @@
                                 <div class="about-logo">
                                     <a href="index.html"><img src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>" alt="Logo" style="max-height: 60px;"></a>
                                 </div>
-                                <p class="about-text"> Rapidiously myocardinate cross-platform intellectual capital model. Appropriately create interactive infrastructures</p>
+                                <p class="about-text"><?= esc($tagline) ?></p>
                                 <div class="th-social style5" stye="color: #DAD3C5">
                                     <a href="https://www.facebook.com/"><i class="fab fa-facebook-f"></i></a>
                                     <a href="https://www.twitter.com/"><i class="fab fa-twitter"></i></a>
@@ -27,7 +27,7 @@
                             <h3 class="widget_title">Get In Touch</h3>
                             <div class="th-widget-contact">
                                 <div class="info-box_text">
-                                    <div class="icon"><img src="assets/img/icon/location-dot.svg" alt="img"></div>
+                                    <div class="icon"><img src="<?= base_url('assets/frontend/img/icon/location-dot.svg') ?>" alt="img"></div>
                                     <div class="details">
                                         <p>789 Inner Lane, Holy park,</p>
                                         <p>California, USA</p>
@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="info-box_text">
                                     <div class="icon">
-                                        <img src="assets/img/icon/phone.svg" alt="img">
+                                        <img src="<?= base_url('assets/frontend/img/icon/phone.svg') ?>" alt="img">
                                     </div>
                                     <div class="details">
                                         <p><a href="tel:+0123456789" class="info-box_link">+01 234 567 890</a></p>
@@ -44,7 +44,7 @@
                                 </div>
                                 <div class="info-box_text">
                                     <div class="icon">
-                                        <img src="assets/img/icon/envelope.svg" alt="img">
+                                        <img src="<?= base_url('assets/frontend/img/icon/envelope.svg') ?>" alt="img">
                                     </div>
                                     <div class="details">
                                         <p><a href="mailto:mailinfo00@realar.com" class="info-box_link">mailinfo00@realar.com</a></p>

@@ -48,20 +48,28 @@ abstract class BaseController extends Controller
     /**
      * @return void
      */
-   public function initController(\CodeIgniter\HTTP\RequestInterface $request,
-                                   \CodeIgniter\HTTP\ResponseInterface $response,
-                                   \Psr\Log\LoggerInterface $logger)
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
 
-        // Load model dan share data settings
-        $settingsModel = new SettingsModel();
-        $settings      = $settingsModel->first();
+        // Load SettingsModel dan ambil 1 baris data settings
+        $settingsModel = new \App\Models\SettingsModel();
+        $settings = $settingsModel->first(); // karena hanya 1 baris
 
-        // Agar $settings tersedia di semua view
-        $renderer = Services::renderer();
-        $renderer->setData(['settings' => $settings]);
+        // Kirim ke semua view
+        $renderer = \Config\Services::renderer();
+        $renderer->setData([
+            'settings' => $settings,
+            'about'    => $settings['about'] ?? '',
+            'tagline'    => $settings['tagline'] ?? '',
+            'location'  => $settings['location'] ?? '',
+            'phone'     => $settings['phone'] ?? '',
+            'instagram' => $settings['instagram'] ?? '',
+            'tiktok'    => $settings['tiktok'] ?? '',
+        ]);
     }
+
+
 
     protected function requireLogin()
     {

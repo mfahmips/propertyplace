@@ -1,6 +1,4 @@
-<?= $this->extend('frontend/layout/default') ?>
-<?= $this->section('content') ?>
- 
+
  
  <!--==============================
 Hero Area
@@ -11,24 +9,32 @@ Hero Area
                 <span class="sub-title">Top-Notch Real Estate Properties</span>
                 <h1 class="hero-title text-theme">Find Your </h1>
                 <h1 class="hero-title text-theme">Dream Home</h1>
-                <form class="property-search-form">
-                    <div class="form-group">
-                        <i class="far fa-search"></i>
-                        <input class="form-control" type="text" placeholder="Lisiting ID or Location">
-                    </div>
-                    <select class="form-select">
-                        <option value="category" selected="selected">Category</option>
-                        <option value="luxury">Luxury</option>
-                        <option value="commercial">Commercial</option>
-                    </select>
-                    <select class="form-select">
-                        <option value="offer_type" selected="selected">Offer Type</option>
-                        <option value="popularity">Popularity</option>
-                        <option value="rating">Rating</option>
-                        <option value="date">Latest</option>
-                    </select>
-                    <button class="th-btn" type="submit"><i class="far fa-search"></i> <span class="d-inline-block d-xl-none">Search</span></button>
+                <form class="property-search-form" action="<?= base_url('property/search') ?>" method="get">
+                <div class="form-group">
+                    <i class="far fa-search"></i>
+                    <input class="form-control" type="text" name="location" placeholder="Cari berdasarkan lokasi...">
+                </div>
+
+                <select class="form-select" name="developer">
+                    <option value="">Pilih Developer</option>
+                    <?php foreach ($developers as $dev): ?>
+                    <option value="<?= esc($dev['id']) ?>"><?= esc($dev['name']) ?></option>
+                    <?php endforeach ?>
+                </select>
+
+                <select class="form-select" name="sort">
+                    <option value="">Urutkan Berdasarkan</option>
+                    <option value="latest">Terbaru</option>
+                    <option value="popular">Populer</option>
+                    <option value="rating">Rating</option>
+                </select>
+
+                <button class="th-btn" type="submit">
+                    <i class="far fa-search"></i> 
+                    <span class="d-inline-block d-xl-none">Cari</span>
+                </button>
                 </form>
+
                 <div class="counter-card-wrap">
                     <div class="counter-card">
                         <div class="media-body">

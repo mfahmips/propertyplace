@@ -8,13 +8,20 @@ class PropertyModel extends Model
 {
     protected $table = 'properties';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['title',
-                                'slug', // pastikan ini ada
-                                'location',
-                                'price',
-                                'description',
-                                // ... kolom lain jika ada];
-                                ];
+    protected $allowedFields = [
+            'title',
+            'slug',
+            'location',
+            'price',
+            'description',
+            'thumbnail',        // ✅ tambahkan ini
+            'developer_id',     // ✅ biasanya penting juga
+            'type',             // opsional jika kamu pakai kategori
+            'status',           // misal rent/sale
+            'size',             // ukuran properti (opsional)
+            // ... tambahkan kolom lainnya jika ada
+        ];
+
 
     public function withDeveloper()
     {

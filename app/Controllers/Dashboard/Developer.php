@@ -20,7 +20,8 @@ class Developer extends BaseController
                 ['label'=>'Dashboard','url'=>base_url('dashboard')],
                 ['label'=>'Developer'],
             ],
-            'devs'       => $this->model->orderBy('name','ASC')->findAll(),
+            'devs'  => $this->model->orderBy('name','ASC')->paginate(5, 'developers'), // <= Ganti ini
+            'pager' => $this->model->pager // <= Tambahkan ini
         ];
         return view('admin/developer/index', $data);
     }
@@ -42,7 +43,6 @@ class Developer extends BaseController
     {
         helper('form');
 
-        // 1) Validasi
         $validationRule = [
             'name'     => 'required|min_length[3]',
             'location' => 'permit_empty',
@@ -55,45 +55,40 @@ class Developer extends BaseController
             ],
         ];
         if (! $this->validate($validationRule)) {
-            return redirect()->back()
-                             ->withInput()
-                             ->with('validation', $this->validator);
+            return redirect()->back()->withInput()->with('validation', $this->validator);
         }
 
-        // 2) Persiapkan folder upload
         $targetDir = FCPATH . 'uploads/developer/';
         if (! is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
 
-        // 3) Proses upload logo
-        $file     = $this->request->getFile('logo');
+        $file = $this->request->getFile('logo');
         $filename = $file->getRandomName();
         $file->move($targetDir, $filename);
 
         $name = $this->request->getPost('name');
         $slug = url_title($name, '-', true);
 
-        // Jika slug sudah ada, tambahkan angka unik
+        // Cek slug unik
         $i = 1;
+        $baseSlug = $slug;
         while ($this->model->where('slug', $slug)->first()) {
-            $slug = url_title($name, '-', true) . '-' . $i++;
+            $slug = $baseSlug . '-' . $i++;
         }
 
-        // 4) Simpan ke database
         $this->model->insert([
-            'name'      => $this->request->getPost('name'),
-            'slug'      => $slug,
-            'location'  => $this->request->getPost('location'),
-            'logo'      => $filename,
-            'created_at'=> date('Y-m-d H:i:s'),
-            'updated_at'=> date('Y-m-d H:i:s'),
+            'name'       => $name,
+            'slug'       => $slug,
+            'location'   => $this->request->getPost('location'),
+            'logo'       => $filename,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
         return redirect()->to(base_url('dashboard/developer'))
                          ->with('success', 'Developer added successfully.');
     }
-
 
     public function edit($id)
     {
@@ -101,6 +96,7 @@ class Developer extends BaseController
         if (! $dev) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
         }
+
         $data = [
             'title'      => 'Edit Developer',
             'breadcrumb' => [
@@ -117,7 +113,6 @@ class Developer extends BaseController
     {
         helper('form');
 
-        // 1) Validasi
         $validationRule = [
             'name'     => 'required|min_length[3]',
             'location' => 'permit_empty',
@@ -130,18 +125,17 @@ class Developer extends BaseController
             ],
         ];
         if (! $this->validate($validationRule)) {
-            return redirect()->back()
-                             ->withInput()
-                             ->with('validation', $this->validator);
+            return redirect()->back()->withInput()->with('validation', $this->validator);
         }
 
         $name = $this->request->getPost('name');
         $slug = url_title($name, '-', true);
 
-        // Pastikan slug unik (kecuali untuk record yang sama)
+        // Pastikan slug unik
+        $baseSlug = $slug;
         $i = 1;
         while (($dev = $this->model->where('slug', $slug)->first()) && $dev['id'] != $id) {
-            $slug = url_title($name, '-', true) . '-' . $i++;
+            $slug = $baseSlug . '-' . $i++;
         }
 
         $data = [
@@ -151,7 +145,7 @@ class Developer extends BaseController
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        // 3) Proses logo baru jika di-upload
+        // Cek apakah logo di-upload ulang
         $file = $this->request->getFile('logo');
         if ($file && $file->isValid() && ! $file->hasMoved()) {
             $targetDir = FCPATH . 'uploads/developer/';
@@ -159,19 +153,17 @@ class Developer extends BaseController
                 mkdir($targetDir, 0755, true);
             }
 
-            // Hapus logo lama jika ada
-            $old = $this->model->find($id)['logo'] ?? null;
-            if ($old && file_exists($targetDir . $old)) {
-                unlink($targetDir . $old);
+            // Hapus logo lama
+            $oldLogo = $this->model->find($id)['logo'] ?? null;
+            if ($oldLogo && file_exists($targetDir . $oldLogo)) {
+                unlink($targetDir . $oldLogo);
             }
 
-            // Simpan logo baru
             $newName = $file->getRandomName();
             $file->move($targetDir, $newName);
             $data['logo'] = $newName;
         }
 
-        // 4) Simpan update
         $this->model->update($id, $data);
 
         return redirect()->to(base_url('dashboard/developer'))
@@ -182,14 +174,16 @@ class Developer extends BaseController
     {
         $dev = $this->model->find($id);
         if ($dev) {
-            // hapus file logo
-            if (! empty($dev['logo']) && file_exists(WRITEPATH.'uploads/developers/'.$dev['logo'])) {
-                unlink(WRITEPATH.'uploads/developers/'.$dev['logo']);
+            // Hapus file logo jika ada
+            $targetDir = FCPATH . 'uploads/developer/';
+            if (! empty($dev['logo']) && file_exists($targetDir . $dev['logo'])) {
+                unlink($targetDir . $dev['logo']);
             }
+
             $this->model->delete($id);
         }
-        return redirect()
-            ->to(base_url('dashboard/developer'))
-            ->with('success','Developer deleted.');
+
+        return redirect()->to(base_url('dashboard/developer'))
+                         ->with('success','Developer deleted.');
     }
 }

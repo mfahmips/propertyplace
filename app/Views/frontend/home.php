@@ -2,8 +2,8 @@
 
 <?= $this->section('content') ?>
 
-
-
-    <h1 style="color: red">Halaman Home Tampil!</h1>
+<?= $this->include('frontend/layout/hero') ?>
+<?= $this->include('frontend/layout/developer') ?>
 
 <?= $this->endSection() ?>
+    

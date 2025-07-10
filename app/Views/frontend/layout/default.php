@@ -59,7 +59,7 @@
     <div class="preloader ">
         <button class="th-btn style2 preloaderCls">Cancel Preloader </button>
         <div id="preloader" class="preloader-inner">
-            <img src="assets/frontend/img/logo.svg" alt="img">
+            <img src="<?= base_url('assets/frontend/img/logo.svg') ?>" alt="img">
             <div class="txt-loading">
                 <span data-text-preloader="R" class="letters-loading">
                     R </span>
@@ -89,32 +89,19 @@
     <?= $this->include('frontend/layout/partials/footer') ?>
 
     <!-- JS -->
-    <!-- Jquery -->
-    <script src="assets/frontend/js/vendor/jquery-3.7.1.min.js"></script>
+    <script src="<?= base_url('assets/frontend/js/vendor/jquery-3.7.1.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/swiper-bundle.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/bootstrap.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/jquery.magnific-popup.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/jquery.counterup.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/jquery-ui.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/imagesloaded.pkgd.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/isotope.pkgd.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/gsap.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/jquery.datetimepicker.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/threesixty.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/panolens.min.js') ?>"></script>
+    <script src="<?= base_url('assets/frontend/js/main.js') ?>"></script>
 
-    <!-- Swiper Js -->
-    <script src="assets/frontend/js/swiper-bundle.min.js"></script>
-    <!-- Bootstrap -->
-    <script src="assets/frontend/js/bootstrap.min.js"></script>
-    <!-- Magnific Popup -->
-    <script src="assets/frontend/js/jquery.magnific-popup.min.js"></script>
-    <!-- Counter Up -->
-    <script src="assets/frontend/js/jquery.counterup.min.js"></script>
-    <!-- Range Slider -->
-    <script src="assets/frontend/js/jquery-ui.min.js"></script>
-    <!-- Isotope Filter -->
-    <script src="assets/frontend/js/imagesloaded.pkgd.min.js"></script>
-    <script src="assets/frontend/js/isotope.pkgd.min.js"></script>
-    <!-- Gsap -->
-    <script src="assets/frontend/js/gsap.min.js"></script>
-    <!-- DateTime JS -->
-    <script src="assets/frontend/js/jquery.datetimepicker.min.js"></script>
-
-    <!-- 360 degree Js -->
-    <script src="assets/frontend/js/threesixty.min.js"></script>
-    <script src="assets/frontend/js/panolens.min.js"></script>
-
-    <!-- Main Js File -->
-    <script src="assets/frontend/js/main.js"></script>
 </body>
 </html>

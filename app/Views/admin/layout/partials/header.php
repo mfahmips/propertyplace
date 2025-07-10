@@ -153,10 +153,8 @@
                             aria-haspopup="true" aria-expanded="false">
                             <span class="d-flex align-items-center">
                                 <img class="rounded-circle" width="32"
-                                    src="<?= !empty(session('foto')) && file_exists(FCPATH . 'uploads/user/' . session('foto'))
-                                            ? base_url('uploads/user/' . session('foto'))
-                                            : base_url('assets/images/default-avatar.png') ?>"
-                                    alt="avatar"
+                                    src="<?= base_url('uploads/' . ($settings['profile_photo'] ?? 'default-photo.png')) ?>" alt="Profile Photo">
+
                                     onerror="this.onerror=null;this.src='<?= base_url('assets/images/default-avatar.png') ?>';">
                             </span>
                         </a>
