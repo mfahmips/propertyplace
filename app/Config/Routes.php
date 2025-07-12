@@ -89,6 +89,18 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('developer/(:segment)/store',    'Dashboard\Property::storeByDeveloper/$1');
         $routes->get('developer/(:segment)/edit/(:segment)', 'Dashboard\Property::editByDeveloper/$1/$2');
         $routes->post('developer/(:segment)/update/(:segment)', 'Dashboard\Property::updateByDeveloper/$1/$2');
+
+        // Floor plan routes
+        $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorplan/$1');
+        $routes->post('(:segment)/floorplan/store', 'Dashboard\Property::floorplanStore/$1');
+        $routes->get('(:segment)/floorplan/delete/(:num)', 'Dashboard\Property::floorplanDelete/$1/$2');
+
+        // Property Document routes
+        $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
+        $routes->post('(:segment)/documents/store', 'Dashboard\Property::documentsStore/$1');
+        $routes->get('(:segment)/documents/delete/(:num)', 'Dashboard\Property::documentsDelete/$1/$2');
+
+
     });
 
             // === SETTINGS ===

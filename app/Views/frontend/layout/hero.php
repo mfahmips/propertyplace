@@ -3,13 +3,13 @@
  <!--==============================
 Hero Area
 ==============================-->
-    <div class="th-hero-wrapper hero-4" id="hero" data-bg-src="assets/img/hero/hero_bg_4_1.jpg">
+    <div class="th-hero-wrapper hero-4" id="hero" style="background-color: #DAD3C5;">
         <div class="container">
             <div class="hero-style4">
                 <span class="sub-title">Top-Notch Real Estate Properties</span>
                 <h1 class="hero-title text-theme">Find Your </h1>
                 <h1 class="hero-title text-theme">Dream Home</h1>
-                <form class="property-search-form" action="<?= base_url('property/search') ?>" method="get">
+                <form class="property-search-form" action="<?= base_url('property/search') ?>" method="get" style="background-color: #B86C3A;">
                 <div class="form-group">
                     <i class="far fa-search"></i>
                     <input class="form-control" type="text" name="location" placeholder="Cari berdasarkan lokasi...">

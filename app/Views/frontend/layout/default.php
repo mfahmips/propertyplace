@@ -57,24 +57,44 @@
     Preloader
 ==============================-->
     <div class="preloader ">
-        <button class="th-btn style2 preloaderCls">Cancel Preloader </button>
         <div id="preloader" class="preloader-inner">
-            <img src="<?= base_url('assets/frontend/img/logo.svg') ?>" alt="img">
             <div class="txt-loading">
+                <span data-text-preloader="P" class="letters-loading">
+                    P </span>
                 <span data-text-preloader="R" class="letters-loading">
                     R </span>
+                <span data-text-preloader="O" class="letters-loading">
+                    O </span>
+                <span data-text-preloader="P" class="letters-loading">
+                    P
+                </span>
                 <span data-text-preloader="E" class="letters-loading">
-                    E </span>
-                <span data-text-preloader="A" class="letters-loading">
-                    A </span>
+                    E
+                </span>
+                <span data-text-preloader="R" class="letters-loading">
+                    R
+                </span>
+                <span data-text-preloader="T" class="letters-loading">
+                    T
+                </span>
+                <span data-text-preloader="Y" class="letters-loading">
+                    Y
+                </span>
+                <br/>
+                <span data-text-preloader="P" class="letters-loading">
+                    P
+                </span>
                 <span data-text-preloader="L" class="letters-loading">
                     L
                 </span>
                 <span data-text-preloader="A" class="letters-loading">
                     A
                 </span>
-                <span data-text-preloader="R" class="letters-loading">
-                    R
+                <span data-text-preloader="C" class="letters-loading">
+                    C
+                </span>
+                <span data-text-preloader="E" class="letters-loading">
+                    E
                 </span>
             </div>
         </div>

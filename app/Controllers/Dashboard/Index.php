@@ -6,21 +6,21 @@ use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\UserModel;
 use App\Models\PenjualanModel;
-use App\Models\CustomerModel;
+use App\Models\DeveloperModel;
 
 class Index extends BaseController
 {
     protected $propertyModel;
     protected $userModel;
     protected $penjualanModel;
-    protected $customerModel;
+    protected $developerModel;
 
     public function __construct()
     {
         $this->propertyModel   = new PropertyModel();
         $this->userModel       = new UserModel();
         $this->penjualanModel  = new PenjualanModel();
-        $this->customerModel   = new CustomerModel();
+        $this->developerModel  = new DeveloperModel();
     }
 
     public function index()
@@ -38,16 +38,13 @@ class Index extends BaseController
             'title'           => 'Dashboard',
             'breadcrumb'      => [['label' => 'Dashboard']],
             'username'        => $username,
-            'foto'            => $userData['foto'] ?? null,
+            'foto'            => session('foto') ?? null, // ganti $userData yang tidak didefinisikan
             'totalProperty'   => $this->propertyModel->countAll(),
             'totalUser'       => $this->userModel->countAll(),
             'totalPenjualan'  => $jumlahPenjualan,
-            'totalCustomer'   => $this->customerModel->countAll(),
+            'totalDeveloper'  => $this->developerModel->countAll(),
         ];
 
         return view('admin/index', $data);
     }
-
-
-
 }

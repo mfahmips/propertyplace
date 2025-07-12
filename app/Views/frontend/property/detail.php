@@ -66,51 +66,6 @@ Property Page Area
                     <div class="swiper-wrapper">
                         <div class="swiper-slide">
                             <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_1.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_2.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_3.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_4.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_5.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_1.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_2.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_3.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_4.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
                                 <img src="<?= base_url('assets/frontend/img/property/property_inner_5.jpg' ) ?>" alt="Image">
                             </div>
                         </div>
@@ -124,11 +79,6 @@ Property Page Area
                 <div class="col-xxl-8 col-lg-7">
                     <div class="property-page-single">
                         <div class="page-content">
-                            <div class="property-meta mb-30">
-                                <a class="property-tag" href="blog.html">Featured</a>
-                                <a href="blog.html"><img src="<?= base_url('assets/frontend/img/icon/calendar.svg' ) ?>" alt="img">05 Jun, 2025</a>
-                                <a href="blog.html"><img src="<?= base_url('assets/frontend/img/icon/comments.svg' ) ?>" alt="img">32 Comments</a>
-                            </div>
                             <h2 class="page-title">About This Property</h2>
                             <p class="mb-30">voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur</p>
                             <p class="mb-30"> Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur</p>
@@ -225,105 +175,6 @@ Property Page Area
                                     </div>
                                 </li>
                             </ul>
-                            <h3 class="page-title mt-50 mb-30">From Our Gallery</h3>
-                            <div class="row gy-4">
-                                <div class="col-xl-5">
-                                    <div class="property-gallery-card">
-                                        <div class="property-gallery-card-img">
-                                            <img class="w-100" src="<?= base_url('assets/frontend/img/property/property_inner_6.jpg' ) ?>" alt="img">
-                                        </div>
-                                        <a class="icon-btn popup-image" href="<?= base_url('assets/frontend/img/property/property_inner_6.jpg' ) ?>"><i class="fal fa-magnifying-glass-plus"></i></a>
-                                    </div>
-                                </div>
-                                <div class="col-xl-7">
-                                    <div class="property-gallery-card">
-                                        <div class="property-gallery-card-img">
-                                            <img class="w-100" src="<?= base_url('assets/frontend/img/property/property_inner_7.jp' ) ?>g" alt="img">
-                                        </div>
-                                        <a class="icon-btn popup-image" href="<?= base_url('assets/frontend/img/property/property_inner_7.jpg' ) ?>"><i class="fal fa-magnifying-glass-plus"></i></a>
-                                    </div>
-                                </div>
-                                <div class="col-xl-7">
-                                    <div class="property-gallery-card">
-                                        <div class="property-gallery-card-img">
-                                            <img class="w-100" src="<?= base_url('assets/frontend/img/property/property_inner_8.jpg' ) ?>" alt="img">
-                                        </div>
-                                        <a class="icon-btn popup-image" href="<?= base_url('assets/frontend/img/property/property_inner_8.jpg' ) ?>"><i class="fal fa-magnifying-glass-plus"></i></a>
-                                    </div>
-                                </div>
-                                <div class="col-xl-5">
-                                    <div class="property-gallery-card">
-                                        <div class="property-gallery-card-img">
-                                            <img class="w-100" src="<?= base_url('assets/frontend/img/property/property_inner_9.jp' ) ?>g" alt="img">
-                                        </div>
-                                        <a class="icon-btn popup-image" href="<?= base_url('assets/frontend/img/property/property_inner_9.jpg' ) ?>"><i class="fal fa-magnifying-glass-plus"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <h3 class="page-title mt-50 mb-25">Features & amenities</h3>
-                            <div class="row gy-3">
-                                <div class="col-xxl-3 col-sm-6">
-                                    <div class="checklist">
-                                        <ul>
-                                            <li><i class="far fa-square-check"></i>Airconditioning</li>
-                                            <li><i class="far fa-square-check"></i>Balcony</li>
-                                            <li><i class="far fa-square-check"></i>Garage</li>
-                                            <li><i class="far fa-square-check"></i>Landscaping</li>
-                                            <li><i class="far fa-square-check"></i>Outdoor Kitchen</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-xxl-3 col-sm-6">
-                                    <div class="checklist">
-                                        <ul>
-                                            <li><i class="far fa-square-check"></i>Barbeque</li>
-                                            <li><i class="far fa-square-check"></i>Recreation</li>
-                                            <li><i class="far fa-square-check"></i>Microwave</li>
-                                            <li><i class="far fa-square-check"></i>Basketball</li>
-                                            <li><i class="far fa-square-check"></i>Fireplace</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-xxl-3 col-sm-6">
-                                    <div class="checklist">
-                                        <ul>
-                                            <li><i class="far fa-square-check"></i>24x7 Seccurity</li>
-                                            <li><i class="far fa-square-check"></i>Indoor Game</li>
-                                            <li><i class="far fa-square-check"></i>Pool</li>
-                                            <li><i class="far fa-square-check"></i>Tanis Courts</li>
-                                            <li><i class="far fa-square-check"></i>Internet</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-xxl-3 col-sm-6">
-                                    <div class="checklist">
-                                        <ul>
-                                            <li><i class="far fa-square-check"></i>Jaguzzi</li>
-                                            <li><i class="far fa-square-check"></i>Modern Kitchen</li>
-                                            <li><i class="far fa-square-check"></i>Refrigerator</li>
-                                            <li><i class="far fa-square-check"></i>Window Coverings</li>
-                                            <li><i class="far fa-square-check"></i>Washer</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <h3 class="page-title mt-45 mb-30">Location</h3>
-                            <div class="location-map">
-                                <div class="contact-map">
-                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3644.7310056272386!2d89.2286059153658!3d24.00527418490799!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fe9b97badc6151%3A0x30b048c9fb2129bc!2sAngfuztheme!5e0!3m2!1sen!2sbd!4v1651028958211!5m2!1sen!2sbd" allowfullscreen="" loading="lazy"></iframe>
-                                </div>
-                                <div class="location-map-address">
-                                    <div class="thumb">
-                                        <img src="<?= base_url('assets/frontend/img/property/property_inner_1.jpg' ) ?>" alt="img">
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="title">Address:</h4>
-                                        <p class="text">Brooklyn, New York 11233, United States</p>
-                                        <h4 class="title">Post Code:</h4>
-                                        <p class="text">12345</p>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="row align-items-center justify-content-between">
                                 <div class="col-lg-auto">
                                     <h3 class="page-title mt-50 mb-30">Floor Plan</h3>

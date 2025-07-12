@@ -48,21 +48,27 @@
                 <div class="card-body">
                     <form action="<?= base_url('dashboard/property/update/' . $property['id']) ?>" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
+                            <label class="form-label">Developer</label>
+                            <select name="developer_id" class="form-select <?= (session('errors.developer_id') ? 'is-invalid' : '') ?>" required>
+                                <option value="">-- Pilih Developer --</option>
+                                <?php foreach ($developers as $dev): ?>
+                                    <option value="<?= $dev['id'] ?>" <?= $dev['id'] == $property['developer_id'] ? 'selected' : '' ?>>
+                                        <?= esc($dev['name']) ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <?php if (session('errors.developer_id')) : ?>
+                                <div class="invalid-feedback">
+                                    <?= esc(session('errors.developer_id')) ?>
+                                </div>
+                            <?php endif ?>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Title</label>
                             <input type="text" name="title" class="form-control <?= (session('errors.title') ? 'is-invalid' : '') ?>" value="<?= esc($property['title']) ?>">
                             <?php if (session('errors.title')) : ?>
                                 <div class="invalid-feedback">
                                     <?= esc(session('errors.title')) ?>
-                                </div>
-                            <?php endif ?>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Location</label>
-                            <input type="text" name="location" class="form-control <?= (session('errors.location') ? 'is-invalid' : '') ?>" value="<?= esc($property['location']) ?>">
-                            <?php if (session('errors.location')) : ?>
-                                <div class="invalid-feedback">
-                                    <?= esc(session('errors.location')) ?>
                                 </div>
                             <?php endif ?>
                         </div>

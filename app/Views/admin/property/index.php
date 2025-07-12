@@ -26,7 +26,14 @@
             Add Property for <?= esc($filterDeveloper['name']) ?>
           </a>
         </div>
+      <?php else: ?>
+        <div class="justify-content mb-3">
+          <a href="<?= base_url('dashboard/property/create') ?>" class="btn btn-success">
+            + Create New Property
+          </a>
+        </div>
       <?php endif ?>
+
 
       <div class="table-responsive">
         <table class="table table-striped table-borderless table-centered">
@@ -34,9 +41,11 @@
             <tr>
               <th>Image</th>
               <th>Name</th>
-              <th>Location</th>
-              <th>Price</th>
-              <th>Description</th>
+              <?php if (!isset($filterDeveloper)): ?>
+                <th>Developer</th>
+              <?php endif ?>
+              <th>Media</th>
+              <th>Floor Plan</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -57,9 +66,15 @@
                     </a>
                   </td>
                   <td><?= esc($p['title']) ?></td>
-                  <td><?= esc($p['location']) ?></td>
-                  <td><?= number_to_currency($p['price'], 'IDR', 'id_ID') ?></td>
-                  <td><?= esc($p['description']) ?></td>
+                  <?php if (!isset($filterDeveloper)): ?>
+                    <td><?= esc($p['developer_name'] ?? '-') ?></td>
+                  <?php endif ?>
+
+                  <td><a href="<?= base_url('dashboard/property/' . $p['slug'] . '/documents') ?>" class="btn btn-info btn-sm">Documents</a>
+                  </td>
+                  <td>
+                    <a href="<?= base_url('dashboard/property/' . esc($p['slug']) . '/floorplan') ?>"class="btn btn-info btn-sm">Floor Plan</a>
+                    </td>
                   <td>
                       <?php if (! empty($filterDeveloper)): ?>
                         <!-- Edit via developer context -->

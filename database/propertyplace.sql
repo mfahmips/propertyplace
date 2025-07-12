@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 10 Jul 2025 pada 18.50
--- Versi server: 8.4.3
--- Versi PHP: 8.3.16
+-- Generation Time: Jul 12, 2025 at 03:23 PM
+-- Server version: 8.0.30
+-- PHP Version: 8.1.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `customers`
+-- Table structure for table `customers`
 --
 
 CREATE TABLE `customers` (
@@ -39,7 +39,7 @@ CREATE TABLE `customers` (
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `developers`
+-- Table structure for table `developers`
 --
 
 CREATE TABLE `developers` (
@@ -53,7 +53,7 @@ CREATE TABLE `developers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `developers`
+-- Dumping data for table `developers`
 --
 
 INSERT INTO `developers` (`id`, `slug`, `name`, `logo`, `location`, `created_at`, `updated_at`) VALUES
@@ -77,7 +77,7 @@ INSERT INTO `developers` (`id`, `slug`, `name`, `logo`, `location`, `created_at`
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `migrations`
+-- Table structure for table `migrations`
 --
 
 CREATE TABLE `migrations` (
@@ -91,7 +91,7 @@ CREATE TABLE `migrations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `migrations`
+-- Dumping data for table `migrations`
 --
 
 INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES
@@ -100,7 +100,7 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `penjualan`
+-- Table structure for table `penjualan`
 --
 
 CREATE TABLE `penjualan` (
@@ -115,7 +115,7 @@ CREATE TABLE `penjualan` (
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `properties`
+-- Table structure for table `properties`
 --
 
 CREATE TABLE `properties` (
@@ -123,45 +123,98 @@ CREATE TABLE `properties` (
   `developer_id` int UNSIGNED DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `slug` varchar(255) DEFAULT NULL,
-  `location` varchar(255) NOT NULL,
   `price` decimal(15,2) NOT NULL,
   `description` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `properties`
+-- Dumping data for table `properties`
 --
 
-INSERT INTO `properties` (`id`, `developer_id`, `title`, `slug`, `location`, `price`, `description`, `created_at`) VALUES
-(1, 1, 'Rumah Cluster BSD', 'rumah-cluster-bsd', 'BSD City', 1500000000.00, 'Rumah modern minimalis siap huni.', '2025-06-28 01:24:56'),
-(6, NULL, 'Agung podomoro', 'agung-podomoro', 'serpong', 600000000.00, 'OK', '2025-07-01 19:21:17');
+INSERT INTO `properties` (`id`, `developer_id`, `title`, `slug`, `price`, `description`, `created_at`) VALUES
+(1, 1, 'Centronia Residence', 'centronia-residence', 2000000000.00, 'Rumah tiga lantai yang luar biasa dengan sky lounge\r\natap yang terletak di kawasan premium dan eksklusif\r\nSentul City.\r\nTingkatkan hidup Anda dengan pemandangan dan\r\nalam yang menakjubkan untuk lingkungan yang nyaman. Nikmati\r\ngaya hidup holistik dengan kenyamanan Argenia\r\nSport Club dan Centronia Square tepat di depan pintu Anda.\r\nSebuah karya seni sejati dengan kesempurnaan di dalamnya.', '2025-06-28 01:24:56'),
+(6, 2, 'Agung podomoro', 'agung-podomoro', 600000000.00, 'OK', '2025-07-01 19:21:17');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `property_images`
+-- Table structure for table `property_details`
+--
+
+CREATE TABLE `property_details` (
+  `id` int NOT NULL,
+  `property_id` int NOT NULL,
+  `rooms` int DEFAULT NULL,
+  `bedrooms` int DEFAULT NULL,
+  `bathrooms` int DEFAULT NULL,
+  `sqft` int DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `purpose` varchar(100) DEFAULT NULL,
+  `parking` tinyint(1) DEFAULT '0',
+  `elevator` tinyint(1) DEFAULT '0',
+  `wifi` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `property_documents`
+--
+
+CREATE TABLE `property_documents` (
+  `id` int NOT NULL,
+  `property_id` int NOT NULL,
+  `type` enum('pdf','video') NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `video_url` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `property_floor_plan`
+--
+
+CREATE TABLE `property_floor_plan` (
+  `id` int NOT NULL,
+  `property_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `description` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `property_images`
 --
 
 CREATE TABLE `property_images` (
   `id` int NOT NULL,
   `property_id` int NOT NULL,
   `filename` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `sort_order` int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `property_images`
+-- Dumping data for table `property_images`
 --
 
-INSERT INTO `property_images` (`id`, `property_id`, `filename`, `created_at`) VALUES
-(1, 1, '1751123359_9fe5c95a6cadfa137471.png', '2025-06-28 08:09:19'),
-(2, 1, '1751823663_e7a43e57523277b21553.jpeg', '2025-07-06 10:41:03');
+INSERT INTO `property_images` (`id`, `property_id`, `filename`, `created_at`, `sort_order`) VALUES
+(1, 1, '1751123359_9fe5c95a6cadfa137471.png', '2025-06-28 08:09:19', 0);
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `settings`
+-- Table structure for table `settings`
 --
 
 CREATE TABLE `settings` (
@@ -185,7 +238,7 @@ CREATE TABLE `settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `settings`
+-- Dumping data for table `settings`
 --
 
 INSERT INTO `settings` (`id`, `site_name`, `site_logo`, `site_icon`, `tagline`, `about`, `phone`, `instagram`, `tiktok`, `location`, `maintenance`, `created_at`, `updated_at`, `timezone`, `date_format`, `datetime_format`, `language`) VALUES
@@ -194,7 +247,7 @@ INSERT INTO `settings` (`id`, `site_name`, `site_logo`, `site_icon`, `tagline`, 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -212,7 +265,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data untuk tabel `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `name`, `slug`, `email`, `password`, `foto`, `role`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
@@ -220,58 +273,78 @@ INSERT INTO `users` (`id`, `name`, `slug`, `email`, `password`, `foto`, `role`, 
 (2, 'Karyawan Sample', 'karyawan-sample', 'karyawan@propertyplace.id', '$2y$10$3nN2ctRJoQ8gUTbqNVMRoe2DiaPuppwBDP2lb.DeRiS8BQR4IHNB6', NULL, 'karyawan', 1, '2025-07-04 21:50:16', '2025-07-04 21:50:16', NULL),
 (3, 'Customer Dummy', 'customer-dummy', 'customer@propertyplace.id', '$2y$10$xFBV7b9Z9JTFuIG5EsxCl.G8eUrfRDFq..zJdYZG0gc5mORUIeBMG', NULL, 'customer', 1, '2025-07-04 21:50:16', '2025-07-04 21:50:16', NULL),
 (4, 'Muhamad Fahmi PS', 'muhamad-fahmi-ps', 'fahmi@propertyplace.id', '$2y$10$fBJqxyFNLgDJQYeDhUjr.OADNRkouXmL/IwwCNU8IajRAh4uIYpAe', '1752170761_7e62da6707fe75eb19a6.jpg', 'admin', 1, '2025-07-04 23:30:18', '2025-07-10 11:41:21', NULL),
-(5, 'Maulidina', 'maulidina', 'maulidina@propertyplace.id', '$2y$10$.jmATbK1xT1FxtNAyHEnIO0BRQYCfGJXrmmQOT6dSRpK3tDaAzuM2', '1752170842_190de76ecd37e540440d.jpg', 'karyawan', 1, '2025-07-05 03:00:21', '2025-07-10 11:32:07', NULL);
+(5, 'Maulidina Fadzri', 'maulidina-fadzri', 'maulidina@propertyplace.id', '$2y$10$.jmATbK1xT1FxtNAyHEnIO0BRQYCfGJXrmmQOT6dSRpK3tDaAzuM2', '1752170842_190de76ecd37e540440d.jpg', 'karyawan', 1, '2025-07-05 03:00:21', '2025-07-12 08:15:57', NULL);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indeks untuk tabel `customers`
+-- Indexes for table `customers`
 --
 ALTER TABLE `customers`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `developers`
+-- Indexes for table `developers`
 --
 ALTER TABLE `developers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`);
 
 --
--- Indeks untuk tabel `migrations`
+-- Indexes for table `migrations`
 --
 ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `penjualan`
+-- Indexes for table `penjualan`
 --
 ALTER TABLE `penjualan`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `properties`
+-- Indexes for table `properties`
 --
 ALTER TABLE `properties`
   ADD PRIMARY KEY (`id`),
   ADD KEY `developer_id` (`developer_id`);
 
 --
--- Indeks untuk tabel `property_images`
+-- Indexes for table `property_details`
+--
+ALTER TABLE `property_details`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `property_documents`
+--
+ALTER TABLE `property_documents`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `property_id` (`property_id`);
+
+--
+-- Indexes for table `property_floor_plan`
+--
+ALTER TABLE `property_floor_plan`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `property_id` (`property_id`);
+
+--
+-- Indexes for table `property_images`
 --
 ALTER TABLE `property_images`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `settings`
+-- Indexes for table `settings`
 --
 ALTER TABLE `settings`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -279,66 +352,96 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- AUTO_INCREMENT untuk tabel yang dibuang
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT untuk tabel `customers`
+-- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT untuk tabel `developers`
+-- AUTO_INCREMENT for table `developers`
 --
 ALTER TABLE `developers`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT untuk tabel `migrations`
+-- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT untuk tabel `penjualan`
+-- AUTO_INCREMENT for table `penjualan`
 --
 ALTER TABLE `penjualan`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT untuk tabel `properties`
+-- AUTO_INCREMENT for table `properties`
 --
 ALTER TABLE `properties`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT untuk tabel `property_images`
+-- AUTO_INCREMENT for table `property_details`
+--
+ALTER TABLE `property_details`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `property_documents`
+--
+ALTER TABLE `property_documents`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `property_floor_plan`
+--
+ALTER TABLE `property_floor_plan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `property_images`
 --
 ALTER TABLE `property_images`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT untuk tabel `settings`
+-- AUTO_INCREMENT for table `settings`
 --
 ALTER TABLE `settings`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT untuk tabel `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
+-- Constraints for dumped tables
 --
 
 --
--- Ketidakleluasaan untuk tabel `properties`
+-- Constraints for table `properties`
 --
 ALTER TABLE `properties`
   ADD CONSTRAINT `fk_properties_developer` FOREIGN KEY (`developer_id`) REFERENCES `developers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `property_documents`
+--
+ALTER TABLE `property_documents`
+  ADD CONSTRAINT `property_documents_ibfk_1` FOREIGN KEY (`property_id`) REFERENCES `properties` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `property_floor_plan`
+--
+ALTER TABLE `property_floor_plan`
+  ADD CONSTRAINT `property_floor_plan_ibfk_1` FOREIGN KEY (`property_id`) REFERENCES `properties` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

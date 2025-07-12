@@ -5,22 +5,25 @@
 
     <section class="space-top space-extra-bottom">
         <div class="container">
-            <ul class="nav nav-tabs property-tab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="rent-tab" data-bs-toggle="tab" data-bs-target="#rent-tab-pane" type="button" role="tab" aria-controls="rent-tab-pane" aria-selected="true">Rent</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy-tab-pane" type="button" role="tab" aria-controls="buy-tab-pane" aria-selected="false">Buy</button>
-                </li>
-            </ul>
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="rent-tab-pane" role="tabpanel" aria-labelledby="rent-tab" tabindex="0">
                     <form method="get" class="property-search-form">
                         <label>Property Search</label>
+
                         <div class="form-group">
                             <i class="far fa-search"></i>
-                            <input class="form-control" type="text" name="location" placeholder="Cari lokasi" value="<?= esc($active_location) ?>">
+                            <input class="form-control" type="text" name="keyword" placeholder="Cari properti apa saja..." value="<?= esc($active_keyword) ?>">
                         </div>
+
+                        <select class="form-select" name="city">
+                            <option value="">Pilih Kota</option>
+                            <?php foreach ($cities as $city): ?>
+                                <option value="<?= $city ?>" <?= $active_city == $city ? 'selected' : '' ?>>
+                                    <?= esc($city) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
                         <select class="form-select" name="developer">
                             <option value="">Pilih Developer</option>
                             <?php foreach ($developers as $dev): ?>
@@ -29,8 +32,11 @@
                                 </option>
                             <?php endforeach; ?>
                         </select>
+
                         <button class="th-btn" type="submit"><i class="far fa-search"></i> Cari</button>
                     </form>
+
+
 
                 </div>
                 <div class="tab-pane fade" id="buy-tab-pane" role="tabpanel" aria-labelledby="buy-tab" tabindex="0">
@@ -99,7 +105,10 @@
                             </a>
                         </h4>
                         <h5 class="property-card-price">Rp <?= number_format($property['price'], 0, ',', '.') ?></h5>
-                        <p class="property-card-location"><?= esc($property['location']) ?></p>
+                        <p class="property-card-location">
+                          <?= esc($property['developer_name'] ?? '-') ?> - <?= esc($property['developer_location'] ?? '-') ?>
+                        </p>
+
                     </div>
                     <div class="btn-wrap">
                         <a href="<?= base_url('property/' . $property['slug']) ?>" class="th-btn style-border2 th-btn-icon">Details</a>

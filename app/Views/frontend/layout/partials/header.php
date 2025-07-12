@@ -17,14 +17,8 @@
                                 <li><a href="<?= base_url('/') ?>" style="color: #DAD3C5;">Home</a></li>
                                 <li style="color: #DAD3C5;"><a href="<?= base_url('/about') ?>" style="color: #DAD3C5;">About Us</a></li>
 
-                                <li class="menu-item-has-children">
-                                    <a href="#" >Properties</a>
-                                    <ul class="sub-menu" style="background-color: #DAD3C5;">
-                                        <li><a href="<?= base_url('/property') ?>" style="color: #B86C3A;">All Properties</a></li>
-                                        <li><a href="<?= base_url('/property/detail/sample') ?>" style="color: #B86C3A;">Property Details</a></li>
-                                    </ul>
-                                </li>
-
+                                <li style="color: #DAD3C5;"><a href="<?= base_url('/property') ?>" style="color: #DAD3C5;">Property</a></li>
+                                
                                 <li class="menu-item-has-children">
                                     <a href="<?= base_url('/blog') ?>" style="color: #DAD3C5;">Blog</a>
                                     <ul class="sub-menu">
@@ -39,7 +33,7 @@
 
                         <!-- Mobile button -->
                         <div class="header-button d-flex d-lg-none">
-                            <button type="button" class="th-menu-toggle sidebar-btn">
+                            <button type="button" class="th-menu-toggle sidebar-btn" style="color: #DAD3C5;">
                                 <span class="line"></span>
                                 <span class="line"></span>
                                 <span class="line"></span>
@@ -47,7 +41,7 @@
                         </div>
                     </div>
 
-                    <div class="col-auto d-none d-xxl-block">
+                    <div class="col-auto">
                         <div class="header-button"  style="color: #DAD3C5;">
                             <a href="<?= base_url('/contact') ?>" class="th-btn style-border th-btn-icon"  style="color: #DAD3C5;">Request A Visit</a>
                             <button type="button" class="simple-icon sideMenuInfo sidebar-btn style2">
