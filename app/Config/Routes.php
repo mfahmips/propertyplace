@@ -23,8 +23,6 @@ $routes->get('/about', 'Frontend\About::index');
 
 
 
-
-
 // === DETAIL USER BERDASARKAN SLUG (contoh: /user/john-doe)
 $routes->get('user/(:segment)', 'User::detail/$1');
 
@@ -44,6 +42,7 @@ $routes->get('session-test', 'SessionTest::index');
 // ✅ Route ke halaman dashboard utama
 // ===========================
 $routes->get('dashboard', 'Dashboard\Index::index');
+
 
 // ===========================
 // ✅ Route-group: Dashboard (dengan prefix /dashboard)
@@ -100,6 +99,17 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/documents/store', 'Dashboard\Property::documentsStore/$1');
         $routes->get('(:segment)/documents/delete/(:num)', 'Dashboard\Property::documentsDelete/$1/$2');
 
+
+    });
+
+        // === BLOG ===
+        $routes->group('blog', ['filter' => 'auth'], function ($routes) {
+        $routes->get('/', 'Dashboard\Blog::index');
+        $routes->get('create', 'Dashboard\Blog::create');
+        $routes->post('store', 'Dashboard\Blog::store');
+        $routes->get('edit/(:segment)', 'Dashboard\Blog::edit/$1');
+        $routes->post('update/(:segment)', 'Dashboard\Blog::update/$1');
+        $routes->post('delete/(:num)', 'Dashboard\Blog::delete/$1');
 
     });
 

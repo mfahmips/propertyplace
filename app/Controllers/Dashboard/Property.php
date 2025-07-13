@@ -725,5 +725,4 @@ class Property extends BaseController
     }
 
 
-
 }

@@ -7,6 +7,7 @@ use App\Models\PropertyModel;
 use App\Models\UserModel;
 use App\Models\PenjualanModel;
 use App\Models\DeveloperModel;
+use App\Models\NotificationModel;
 
 class Index extends BaseController
 {
@@ -47,4 +48,5 @@ class Index extends BaseController
 
         return view('admin/index', $data);
     }
+
 }
