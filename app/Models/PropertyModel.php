@@ -13,6 +13,7 @@ class PropertyModel extends Model
             'slug',
             'location',
             'price',
+            'price_text',
             'description',
             'thumbnail',        // ✅ tambahkan ini
             'developer_id',     // ✅ biasanya penting juga

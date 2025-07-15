@@ -50,9 +50,9 @@
 
                         <div class="mb-3">
                             <label class="form-label">Price</label>
-                            <input type="number" name="price" class="form-control" value="<?= old('price') ?>">
-                            <?php if (isset($errors['price'])) : ?>
-                                <div class="text-danger"><?= $errors['price'] ?></div>
+                            <input type="text" name="price_text" class="form-control" value="<?= old('price_text') ?>" placeholder="cth: 1.2 M, 750 Juta, 500 jt-an" required>
+                            <?php if (isset($errors['price_text'])) : ?>
+                                <div class="text-danger"><?= $errors['price_text'] ?></div>
                             <?php endif ?>
                         </div>
 

@@ -22,17 +22,20 @@
     </div>
   </div>
 
-  <?php if (session('validation')): ?>
-    <div class="alert alert-danger"><?= session('validation')->listErrors() ?></div>
-  <?php endif ?>
+<?php if (session('validation')): ?>
+  <div class="alert alert-danger"><?= session('validation')->listErrors() ?></div>
+<?php endif ?>
 
-  <form action="<?= base_url('dashboard/property/developer/' . esc($developer['slug']) . '/edit/' . esc($property['slug'])) ?>" method="post" enctype="multipart/form-data">
-    <?= csrf_field() ?>
-    <div class="row gx-4">
-      <!-- Kiri: Form -->
-      <div class="col-md-6">
-        <div class="card mb-4">
-          <div class="card-body">
+<form action="<?= base_url('dashboard/property/updateByDeveloper/' . esc($developer['slug']) . '/' . esc($property['slug'])) ?>" method="post" enctype="multipart/form-data">
+
+  <?= csrf_field() ?>
+  <div class="row gx-4">
+    <!-- Kiri: Form -->
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Form isi lainnya tetap sama -->
+
             <!-- Input fields (title, price, description, etc.) -->
             <input type="hidden" name="developer_id" value="<?= esc($developer['id']) ?>">
             <div class="mb-3">
@@ -44,17 +47,41 @@
               <input type="text" name="title" class="form-control" value="<?= old('title', esc($property['title'])) ?>" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Price (IDR)</label>
-              <input type="number" name="price" class="form-control" value="<?= old('price', esc($property['price'])) ?>" required>
+              <label class="form-label">Price</label>
+              <input type="text" id="price_display" class="form-control <?= (session('errors.price') ? 'is-invalid' : '') ?>" value="<?= number_format($property['price'] ?? 0, 0, ',', '.') ?>">
+              <input type="hidden" name="price" id="price" value="<?= old('price', $property['price'] ?? '') ?>">
+              <?php if (session('errors.price')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.price')) ?></div>
+              <?php endif ?>
             </div>
+
+            <input type="hidden" name="price_text" id="price_text" value="<?= old('price_text', $property['price_text'] ?? '') ?>">
+
+
+
             <div class="mb-3">
               <label class="form-label">Description</label>
               <textarea name="description" class="form-control" rows="4" required><?= old('description', esc($property['description'])) ?></textarea>
             </div>
             <div class="mb-3">
               <label class="form-label">Type</label>
-              <input type="text" name="type" class="form-control" value="<?= old('type', $propertyDetail['type'] ?? '') ?>">
+              <select name="type" class="form-select <?= (session('errors.type') ? 'is-invalid' : '') ?>">
+                <option value="">-- Pilih Type --</option>
+                <?php 
+                  $options = ['rumah', 'apartemen', 'ruko', 'kavling'];
+                  $selected = old('type', $propertyDetail['type'] ?? '');
+                ?>
+                <?php foreach ($options as $opt): ?>
+                  <option value="<?= $opt ?>" <?= $selected === $opt ? 'selected' : '' ?>>
+                    <?= ucfirst($opt) ?>
+                  </option>
+                <?php endforeach ?>
+              </select>
+              <?php if (session('errors.type')) : ?>
+                <div class="invalid-feedback"><?= esc(session('errors.type')) ?></div>
+              <?php endif ?>
             </div>
+
             <div class="mb-3">
               <label class="form-label">Purpose</label>
               <select name="purpose" class="form-select" required>
@@ -163,5 +190,41 @@
     });
   }
 </script>
+
+<script>
+  const priceDisplay = document.getElementById('price_display');
+  const priceHidden = document.getElementById('price');
+  const priceText = document.getElementById('price_text');
+
+  priceDisplay.addEventListener('input', function () {
+    let raw = this.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+    let number = parseInt(raw);
+
+    if (!isNaN(number)) {
+      // Format dengan titik ribuan
+      this.value = number.toLocaleString('id-ID');
+
+      // Set nilai ke input hidden
+      priceHidden.value = number;
+
+      // Isi price_text
+      if (number >= 1_000_000_000) {
+        priceText.value = (number / 1_000_000_000).toFixed(1).replace('.0', '') + ' M';
+      } else if (number >= 1_000_000) {
+        priceText.value = (number / 1_000_000).toFixed(1).replace('.0', '') + ' juta';
+      } else if (number >= 1_000) {
+        priceText.value = (number / 1_000).toFixed(1).replace('.0', '') + ' ribu';
+      } else {
+        priceText.value = number;
+      }
+    } else {
+      this.value = '';
+      priceHidden.value = '';
+      priceText.value = '';
+    }
+  });
+</script>
+
+
 
 <?= $this->endSection() ?>

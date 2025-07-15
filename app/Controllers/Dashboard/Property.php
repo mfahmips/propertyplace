@@ -22,7 +22,6 @@ class Property extends BaseController
     {
         $perPage = 5;
 
-        // Join dengan developer untuk ambil nama developer
         $properties = $this->propertyModel
             ->select('properties.*, developers.name as developer_name')
             ->join('developers', 'developers.id = properties.developer_id')
@@ -49,7 +48,6 @@ class Property extends BaseController
             'pager'      => $pager,
         ]);
     }
-
 
     public function create()
     {
@@ -86,12 +84,16 @@ class Property extends BaseController
         $developerId = $this->request->getPost('developer_id');
         $title       = $this->request->getPost('title');
         $slug        = generateUniqueSlug($title, $this->propertyModel);
+        $priceText   = $this->request->getPost('price_text');
+        $priceNumber = (int) str_replace(['.', ','], '', $priceText);
+
 
         $this->propertyModel->save([
             'title'        => $title,
             'slug'         => $slug,
             'developer_id' => $developerId,
-            'price'        => $this->request->getPost('price'),
+            'price'        => $priceNumber,
+            'price_text'   => $priceText,
             'description'  => $this->request->getPost('description'),
         ]);
 
@@ -124,19 +126,23 @@ class Property extends BaseController
 
         $images     = (new PropertyImageModel())->where('property_id', $property['id'])->findAll();
         $developers = model(DeveloperModel::class)->findAll();
+        $developer  = model(DeveloperModel::class)->find($property['developer_id']);
 
         return view('admin/property/edit', [
-            'title' => $property['title'],
+            'title' => 'Edit: ' . $property['title'],
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Property', 'url' => base_url('dashboard/property')],
                 ['label' => 'Edit Property']
             ],
-            'property'   => $property,
-            'images'     => $images,
-            'developers' => $developers
+            'property'       => $property,
+            'propertyDetail' => $property,
+            'images'         => $images,
+            'developers'     => $developers,
+            'developer'      => $developer,
         ]);
     }
+
 
     public function update($id)
     {
@@ -159,6 +165,9 @@ class Property extends BaseController
         $newTitle    = $this->request->getPost('title');
         $slug        = $existing['slug'];
         $developerId = $this->request->getPost('developer_id');
+        $priceText   = $this->request->getPost('price_text');
+        $priceNumber = (int) str_replace(['.', ','], '', $priceText);
+
 
         if ($newTitle !== $existing['title']) {
             $slug = generateUniqueSlug($newTitle, $this->propertyModel);
@@ -168,7 +177,8 @@ class Property extends BaseController
             'title'        => $newTitle,
             'slug'         => $slug,
             'developer_id' => $developerId,
-            'price'        => $this->request->getPost('price'),
+            'price'        => $priceNumber,
+            'price_text'   => $priceText,
             'description'  => $this->request->getPost('description'),
         ]);
 
@@ -260,7 +270,7 @@ class Property extends BaseController
         $rules = [
             'title'        => 'required|min_length[3]',
             'location'     => 'required',
-            'price'        => 'required|numeric',
+            'price'         => 'required|string|max_length[100]',
             'description'  => 'required',
             'images'       => 'permit_empty'
                               .'|is_image[images.*]'
@@ -372,24 +382,30 @@ class Property extends BaseController
         // Validasi input
         $rules = [
             'title'       => 'required|min_length[3]',
-            'location'    => 'required',
             'price'       => 'required|numeric',
+            'price_text'  => 'required|string|max_length[100]',
             'description' => 'required',
             'images'      => 'permit_empty'
                             .'|is_image[images.*]'
                             .'|max_size[images.*,2048]'
                             .'|max_files[images,10]',
         ];
+
         if (! $this->validate($rules)) {
             return redirect()->back()
                              ->withInput()
                              ->with('validation', $this->validator);
         }
 
-        // Temukan developer & property
+        // Cari developer & property
         $devModel  = model('App\Models\DeveloperModel');
         $developer = $devModel->where('slug', $devSlug)->first();
-        $property  = $this->propertyModel
+
+        if (! $developer) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
+        }
+
+        $property = $this->propertyModel
             ->where('slug', $propSlug)
             ->where('developer_id', $developer['id'])
             ->first();
@@ -398,16 +414,16 @@ class Property extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
         }
 
-        // Update property
+        // Update property utama
         $this->propertyModel->update($property['id'], [
             'title'       => $this->request->getPost('title'),
-            'location'    => $this->request->getPost('location'),
             'price'       => $this->request->getPost('price'),
+            'price_text'  => $this->request->getPost('price_text'),
             'description' => $this->request->getPost('description'),
             'updated_at'  => date('Y-m-d H:i:s'),
         ]);
 
-        // Update or insert ke property_detail
+        // Simpan detail
         $detailModel = new \App\Models\PropertyDetailModel();
         $detailData = [
             'type'      => $this->request->getPost('type'),
@@ -429,9 +445,10 @@ class Property extends BaseController
             $detailModel->insert($detailData);
         }
 
-        // Upload gambar baru (jika ada)
+        // Upload gambar baru jika ada
         $files = $this->request->getFileMultiple('images');
         $imgModel = new \App\Models\PropertyImageModel();
+
         foreach ($files as $file) {
             if ($file->isValid() && ! $file->hasMoved()) {
                 $name = $file->getRandomName();
@@ -448,6 +465,7 @@ class Property extends BaseController
             ->to(base_url("dashboard/property/developer/{$devSlug}"))
             ->with('success','Property updated successfully.');
     }
+
 
 
     public function delete($id)
@@ -508,39 +526,6 @@ class Property extends BaseController
     }
 
 
-    public function storeFloorPlan(string $slug)
-    {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $rules = [
-            'name'        => 'required|min_length[3]',
-            'description' => 'permit_empty',
-            'image'       => 'uploaded[image]|is_image[image]|max_size[image,2048]'
-        ];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $image = $this->request->getFile('image');
-        $newName = $image->getRandomName();
-        $image->move(FCPATH . 'uploads/property/floorplan/', $newName);
-
-        $model = new PropertyFloorPlanModel();
-        $model->insert([
-            'property_id' => $property['id'],
-            'name'        => $this->request->getPost('name'),
-            'description' => $this->request->getPost('description'),
-            'image'       => $newName
-        ]);
-
-        return redirect()->to(base_url("dashboard/property/{$slug}/floorplan"))->with('success', 'Floor plan added successfully.');
-    }
-
-
     public function deleteFloorPlan(string $slug, int $id)
     {
         $planModel = new PropertyFloorPlanModel();
@@ -592,51 +577,6 @@ class Property extends BaseController
         ]);
     }
 
-
-    public function storeDocument(string $slug)
-    {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $rules = [
-            'title' => 'required|min_length[3]',
-            'type'  => 'required|in_list[pdf,video]',
-            'video_url' => 'permit_empty|valid_url',
-            'file' => 'permit_empty|uploaded[file]|max_size[file,2048]|ext_in[file,pdf]'
-        ];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
-        $docModel = new PropertyDocumentModel();
-        $data = [
-            'property_id' => $property['id'],
-            'title'       => $this->request->getPost('title'),
-            'type'        => $this->request->getPost('type'),
-        ];
-
-        if ($data['type'] === 'pdf') {
-            $file = $this->request->getFile('file');
-            if ($file && $file->isValid() && ! $file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'uploads/property/documents/', $newName);
-                $data['file_path'] = $newName;
-            }
-        } else {
-            $data['video_url'] = $this->request->getPost('video_url');
-        }
-
-        $docModel->insert($data);
-
-        return redirect()
-            ->to(base_url("dashboard/property/{$slug}/documents"))
-            ->with('success', 'Document added successfully.');
-    }
 
     public function updateDocument(string $slug, int $id)
     {
@@ -723,6 +663,156 @@ class Property extends BaseController
             ->to(base_url("dashboard/property/{$slug}/documents"))
             ->with('success', 'Document deleted successfully.');
     }
+
+    public function detail($slug)
+    {
+        $property = model(\App\Models\PropertyModel::class)
+            ->where('slug', $slug)
+            ->first();
+
+        if (!$property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        }
+
+        $details = model(\App\Models\PropertyDetailModel::class)
+            ->where('property_id', $property['id'])
+            ->first();
+
+        return view('admin/property/detail/index', [
+            'title'    => 'Property Detail: ' . $property['title'],
+            'property' => $property,
+            'details'  => $details,
+            'breadcrumb' => [
+                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
+                ['label' => 'Property', 'url' => base_url('dashboard/property')],
+                ['label' => 'Detail'],
+            ],
+        ]);
+    }
+
+
+    public function updateDetail($slug)
+    {
+        $property = model('App\Models\PropertyModel')->where('slug', $slug)->first();
+        if (!$property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        }
+
+        $detailModel = new \App\Models\PropertyDetailModel();
+
+        $data = [
+            'type'      => $this->request->getPost('type'),
+            'purpose'   => $this->request->getPost('purpose'),
+            'rooms'     => $this->request->getPost('rooms'),
+            'bedrooms'  => $this->request->getPost('bedrooms'),
+            'bathrooms' => $this->request->getPost('bathrooms'),
+            'sqft'      => $this->request->getPost('sqft'),
+            'wifi'      => $this->request->getPost('wifi') ? 1 : 0,
+            'elevator'  => $this->request->getPost('elevator') ? 1 : 0,
+            'parking'   => $this->request->getPost('parking') ? 1 : 0,
+        ];
+
+        $existing = $detailModel->where('property_id', $property['id'])->first();
+
+        if ($existing) {
+            $detailModel->update($existing['id'], $data);
+        } else {
+            $data['property_id'] = $property['id'];
+            $detailModel->insert($data);
+        }
+
+        return redirect()->back()->with('success', 'Detail updated.');
+    }
+
+    public function storeFloorPlanFromDetail(string $slug)
+    {
+        return $this->storeFloorPlan($slug);
+    }
+
+    public function storeDocumentFromDetail(string $slug)
+    {
+        return $this->storeDocument($slug);
+    }
+
+    public function storeFloorPlan(string $slug)
+    {
+        $property = $this->propertyModel->where('slug', $slug)->first();
+        if (! $property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        }
+
+        $rules = [
+            'name'        => 'required|min_length[3]',
+            'description' => 'permit_empty',
+            'image'       => 'uploaded[image]|is_image[image]|max_size[image,2048]'
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $image = $this->request->getFile('image');
+        $newName = $image->getRandomName();
+        $image->move(FCPATH . 'uploads/property/floorplan/', $newName);
+
+        $model = new PropertyFloorPlanModel();
+        $model->insert([
+            'property_id' => $property['id'],
+            'name'        => $this->request->getPost('name'),
+            'description' => $this->request->getPost('description'),
+            'image'       => $newName
+        ]);
+
+        return redirect()->to(base_url("dashboard/property/{$slug}/floorplan"))->with('success', 'Floor plan added successfully.');
+    }
+
+    public function storeDocument(string $slug)
+    {
+        $property = $this->propertyModel->where('slug', $slug)->first();
+        if (! $property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        }
+
+        $rules = [
+            'title' => 'required|min_length[3]',
+            'type'  => 'required|in_list[pdf,video]',
+            'video_url' => 'permit_empty|valid_url',
+            'file' => 'permit_empty|uploaded[file]|max_size[file,2048]|ext_in[file,pdf]'
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $docModel = new PropertyDocumentModel();
+        $data = [
+            'property_id' => $property['id'],
+            'title'       => $this->request->getPost('title'),
+            'type'        => $this->request->getPost('type'),
+        ];
+
+        if ($data['type'] === 'pdf') {
+            $file = $this->request->getFile('file');
+            if ($file && $file->isValid() && ! $file->hasMoved()) {
+                $newName = $file->getRandomName();
+                $file->move(FCPATH . 'uploads/property/documents/', $newName);
+                $data['file_path'] = $newName;
+            }
+        } else {
+            $data['video_url'] = $this->request->getPost('video_url');
+        }
+
+        $docModel->insert($data);
+
+        return redirect()
+            ->to(base_url("dashboard/property/{$slug}/documents"))
+            ->with('success', 'Document added successfully.');
+    }
+
+
+
 
 
 }

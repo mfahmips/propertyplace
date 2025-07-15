@@ -54,7 +54,7 @@
 
             <div class="mb-3">
               <label class="form-label">Price (IDR)</label>
-              <input type="number" name="price" class="form-control" value="<?= old('price') ?>" required>
+              <input type="text" name="price_text" class="form-control" value="<?= old('price_text') ?>" placeholder="cth: 1.2 M, 750 Juta, 500 jt-an" required>
             </div>
 
             <div class="mb-3">

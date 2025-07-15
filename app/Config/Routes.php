@@ -81,6 +81,8 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:segment)', 'Dashboard\Property::update/$1');
         $routes->get('delete/(:num)', 'Dashboard\Property::delete/$1');
         $routes->get('deleteImage/(:num)', 'Dashboard\Property::deleteImage/$1');
+        $routes->get('detail/(:segment)', 'Dashboard\Property::detail/$1');
+        $routes->post('detail/update/(:segment)', 'Dashboard\Property::updateDetail/$1');
 
         // property filtered by developer
         $routes->get('developer/(:segment)', 'Dashboard\Property::byDeveloper/$1');
@@ -93,11 +95,20 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorplan/$1');
         $routes->post('(:segment)/floorplan/store', 'Dashboard\Property::floorplanStore/$1');
         $routes->get('(:segment)/floorplan/delete/(:num)', 'Dashboard\Property::floorplanDelete/$1/$2');
+        $routes->post('dashboard/property/(:segment)/add-floorplan', 'Dashboard\Property::storeFloorPlanFromDetail/$1');
+
 
         // Property Document routes
         $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
         $routes->post('(:segment)/documents/store', 'Dashboard\Property::documentsStore/$1');
         $routes->get('(:segment)/documents/delete/(:num)', 'Dashboard\Property::documentsDelete/$1/$2');
+        $routes->post('dashboard/property/(:segment)/add-document', 'Dashboard\Property::storeDocumentFromDetail/$1');
+
+
+
+
+
+
 
 
     });

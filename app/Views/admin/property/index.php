@@ -44,8 +44,7 @@
               <?php if (!isset($filterDeveloper)): ?>
                 <th>Developer</th>
               <?php endif ?>
-              <th>Media</th>
-              <th>Floor Plan</th>
+              <th>Details</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -69,11 +68,9 @@
                   <?php if (!isset($filterDeveloper)): ?>
                     <td><?= esc($p['developer_name'] ?? '-') ?></td>
                   <?php endif ?>
-
-                  <td><a href="<?= base_url('dashboard/property/' . $p['slug'] . '/documents') ?>" class="btn btn-info btn-sm">Documents</a>
-                  </td>
+                  
                   <td>
-                    <a href="<?= base_url('dashboard/property/' . esc($p['slug']) . '/floorplan') ?>"class="btn btn-info btn-sm">Floor Plan</a>
+                    <a href="<?= base_url('dashboard/property/detail/' . esc($p['slug'])) ?>"class="btn btn-info btn-sm">Property Details</a>
                     </td>
                   <td>
                       <?php if (! empty($filterDeveloper)): ?>

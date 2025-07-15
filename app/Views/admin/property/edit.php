@@ -74,14 +74,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Price</label>
-                            <input type="number" name="price" class="form-control <?= (session('errors.price') ? 'is-invalid' : '') ?>" value="<?= esc($property['price']) ?>">
-                            <?php if (session('errors.price')) : ?>
-                                <div class="invalid-feedback">
-                                    <?= esc(session('errors.price')) ?>
-                                </div>
-                            <?php endif ?>
+                          <label class="form-label">Price</label>
+                          <input type="text" id="price_display" class="form-control <?= (session('errors.price') ? 'is-invalid' : '') ?>" value="<?= number_format($property['price'] ?? 0, 0, ',', '.') ?>">
+                          <input type="hidden" name="price" id="price" value="<?= old('price', $property['price'] ?? '') ?>">
+                          <?php if (session('errors.price')) : ?>
+                              <div class="invalid-feedback"><?= esc(session('errors.price')) ?></div>
+                          <?php endif ?>
                         </div>
+
+                        <input type="hidden" name="price_text" id="price_text" value="<?= old('price_text', $property['price_text'] ?? '') ?>">
+
 
                         <div class="mb-3">
                             <label class="form-label">Description</label>
@@ -158,5 +160,49 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     }
 });
 </script>
+
+<script>
+  const priceDisplay = document.getElementById('price_display');
+  const priceHidden = document.getElementById('price');
+  const priceText = document.getElementById('price_text');
+
+  priceDisplay.addEventListener('input', function () {
+    // Hapus semua karakter non angka
+    let raw = this.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+    let number = parseInt(raw);
+
+    if (!isNaN(number)) {
+      // Format angka dengan titik ribuan (contoh: 650000000 -> 650.000.000)
+      this.value = number.toLocaleString('id-ID');
+
+      // Set nilai ke input hidden
+      priceHidden.value = number;
+
+      // Set nilai ke price_text dalam format singkat
+      if (number >= 1_000_000_000) {
+        priceText.value = (number / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + ' M';
+      } else if (number >= 1_000_000) {
+        priceText.value = (number / 1_000_000).toFixed(1).replace(/\.0$/, '') + ' Juta';
+      } else if (number >= 1_000) {
+        priceText.value = (number / 1_000).toFixed(1).replace(/\.0$/, '') + ' Ribu';
+      } else {
+        priceText.value = number;
+      }
+    } else {
+      this.value = '';
+      priceHidden.value = '';
+      priceText.value = '';
+    }
+  });
+
+  // Trigger formatting saat pertama load jika ada nilai default
+  window.addEventListener('DOMContentLoaded', function () {
+    if (priceDisplay.value) {
+      const event = new Event('input');
+      priceDisplay.dispatchEvent(event);
+    }
+  });
+</script>
+
 
 <?= $this->endSection() ?>
