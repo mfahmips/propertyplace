@@ -1,5 +1,7 @@
 <?php
 
+use CodeIgniter\Model;
+
 if (!function_exists('tanggal_indo')) {
     function tanggal_indo($tanggal)
     {
@@ -37,17 +39,18 @@ if (!function_exists('tanggal_indo')) {
     }
 }
 
+
 if (!function_exists('generateUniqueSlug')) {
     /**
-     * Generate slug unik berdasarkan kolom slug di tabel properti
+     * Generate slug unik dari string kombinasi
      *
-     * @param string $title Judul yang akan dikonversi menjadi slug
-     * @param \App\Models\PropertyModel $model Model untuk cek slug
-     * @return string Slug yang unik
+     * @param string $baseSlug
+     * @param \CodeIgniter\Model $model
+     * @return string
      */
-    function generateUniqueSlug(string $title, \App\Models\PropertyModel $model): string
+    function generateUniqueSlug(string $baseSlug, \CodeIgniter\Model $model): string
     {
-        $slug = url_title($title, '-', true);
+        $slug = url_title($baseSlug, '-', true);
         $originalSlug = $slug;
         $i = 1;
 
@@ -58,5 +61,7 @@ if (!function_exists('generateUniqueSlug')) {
         return $slug;
     }
 }
+
+
 
 

@@ -51,8 +51,8 @@
                   style=background-color:white;>
               </td>
               <td>
-                <a href="<?= base_url('dashboard/property/developer/' . esc($d['slug'])) ?>">
-                  <?= esc($d['name']) ?>
+                <a href="<?= base_url('dashboard/developer/' . esc($d['slug']) . '/property') ?>">
+                    <?= esc($d['name']) ?>
                 </a>
               </td>
               <td><?= esc($d['location']) ?></td>

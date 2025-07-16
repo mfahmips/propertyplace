@@ -23,15 +23,15 @@
     </div>
   </div>
 
-  <?php if (isset($errors)): ?>
+  <?php if (session('errors')): ?>
     <div class="alert alert-danger">
-      <?php foreach ($errors as $err): ?>
+      <?php foreach (session('errors') as $err): ?>
         <p class="mb-0"><?= esc($err) ?></p>
       <?php endforeach ?>
     </div>
   <?php endif ?>
 
-  <form action="<?= base_url('dashboard/property/developer/' . $developer['slug'] . '/store') ?>" method="post" enctype="multipart/form-data">
+  <form action="<?= base_url('dashboard/developer/' . esc($developer['slug']) . '/property/store') ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <div class="row gx-4">
@@ -53,67 +53,21 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Price (IDR)</label>
-              <input type="text" name="price_text" class="form-control" value="<?= old('price_text') ?>" placeholder="cth: 1.2 M, 750 Juta, 500 jt-an" required>
+              <label class="form-label">Price</label>
+              <input type="text" id="price_display" class="form-control" value="<?= old('price') ? number_format(old('price'), 0, ',', '.') : '' ?>">
+              <input type="hidden" name="price" id="price" value="<?= old('price') ?>">
             </div>
+
+            <input type="hidden" name="price_text" id="price_text" value="<?= old('price_text') ?>">
 
             <div class="mb-3">
               <label class="form-label">Description</label>
-              <textarea name="description" class="form-control" rows="4" required><?= old('description') ?></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Type</label>
-              <input type="text" name="type" class="form-control" value="<?= old('type') ?>">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Purpose</label>
-              <select name="purpose" class="form-select" required>
-                <option value="">-- Select Purpose --</option>
-                <option value="For Sale" <?= old('purpose') == 'For Sale' ? 'selected' : '' ?>>For Sale</option>
-                <option value="For Rent" <?= old('purpose') == 'For Rent' ? 'selected' : '' ?>>For Rent</option>
-              </select>
-            </div>
-
-            <div class="row">
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Rooms</label>
-                <input type="number" name="rooms" class="form-control" value="<?= old('rooms') ?>" min="0">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Bedrooms</label>
-                <input type="number" name="bedrooms" class="form-control" value="<?= old('bedrooms') ?>" min="0">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Bathrooms</label>
-                <input type="number" name="bathrooms" class="form-control" value="<?= old('bathrooms') ?>" min="0">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Sqft</label>
-                <input type="number" name="sqft" class="form-control" value="<?= old('sqft') ?>" min="0">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label d-block">Facilities</label>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" name="wifi" value="1" <?= old('wifi') ? 'checked' : '' ?>>
-                <label class="form-check-label">WiFi</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" name="elevator" value="1" <?= old('elevator') ? 'checked' : '' ?>>
-                <label class="form-check-label">Elevator</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" name="parking" value="1" <?= old('parking') ? 'checked' : '' ?>>
-                <label class="form-check-label">Parking</label>
-              </div>
+              <textarea name="description" class="form-control" rows="4"><?= old('description') ?></textarea>
             </div>
 
             <div class="text-end">
               <button type="submit" class="btn btn-primary">Save Property</button>
-              <a href="<?= base_url('dashboard/property/developer/' . $developer['slug']) ?>" class="btn btn-secondary">Cancel</a>
+              <a href="<?= base_url('dashboard/developer/' . esc($developer['slug']) . '/property') ?>" class="btn btn-secondary">Kembali</a>
             </div>
           </div>
         </div>
@@ -121,11 +75,9 @@
 
       <!-- Kanan: Upload Gambar -->
       <div class="col-md-6">
-        <!-- Dropzone Container -->
         <div class="card">
           <div class="card-header"><strong>Upload Images</strong></div>
           <div class="card-body">
-
             <div id="custom-dropzone" class="dropzone border rounded p-4 position-relative text-center" style="cursor: pointer;">
               <div class="fallback">
                 <input name="images[]" type="file" id="imageInput" accept="image/*" multiple hidden>
@@ -139,15 +91,14 @@
 
             <!-- Preview Container -->
             <div class="row mt-4" id="previewContainer"></div>
-
           </div>
         </div>
-
       </div>
     </div>
   </form>
 </div>
 
+<!-- JavaScript -->
 <script>
   const dropzone = document.getElementById('custom-dropzone');
   const input = document.getElementById('imageInput');
@@ -155,10 +106,8 @@
   let imageCount = 0;
   const maxImages = 10;
 
-  // Click to open file input
   dropzone.addEventListener('click', () => input.click());
 
-  // Drag & drop highlight
   ['dragenter', 'dragover'].forEach(evt => {
     dropzone.addEventListener(evt, e => {
       e.preventDefault();
@@ -172,16 +121,14 @@
     });
   });
 
-  // Handle drop
   dropzone.addEventListener('drop', e => {
     e.preventDefault();
     handleFiles(e.dataTransfer.files);
   });
 
-  // Handle manual input
   input.addEventListener('change', () => {
     handleFiles(input.files);
-    input.value = ''; // reset input
+    input.value = '';
   });
 
   function handleFiles(files) {
@@ -214,7 +161,35 @@
       reader.readAsDataURL(file);
     });
   }
-</script>
 
+  const priceDisplay = document.getElementById('price_display');
+  const priceHidden = document.getElementById('price');
+  const priceText = document.getElementById('price_text');
+
+  priceDisplay.addEventListener('input', function () {
+    let raw = this.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+    let number = parseInt(raw);
+
+    if (!isNaN(number)) {
+      this.value = number.toLocaleString('id-ID');
+      priceHidden.value = number;
+
+      if (number >= 1_000_000_000) {
+        priceText.value = (number / 1_000_000_000).toFixed(1).replace('.0', '') + ' M';
+      } else if (number >= 1_000_000) {
+        priceText.value = (number / 1_000_000).toFixed(1).replace('.0', '') + ' juta';
+      } else if (number >= 1_000) {
+        priceText.value = (number / 1_000).toFixed(1).replace('.0', '') + ' ribu';
+      } else {
+        priceText.value = number;
+      }
+    } else {
+      this.value = '';
+      priceHidden.value = '';
+      priceText.value = '';
+    }
+  });
+
+</script>
 
 <?= $this->endSection() ?>

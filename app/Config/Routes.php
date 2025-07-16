@@ -72,6 +72,13 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('delete/(:num)',  'Dashboard\Developer::delete/$1');
     });
 
+    // property filtered by developer
+        $routes->get('developer/(:segment)/property', 'Dashboard\Property::byDeveloper/$1'); // index
+        $routes->get('developer/(:segment)/property/create', 'Dashboard\Property::createByDeveloper/$1'); // create form
+        $routes->post('developer/(:segment)/property/store', 'Dashboard\Property::storeByDeveloper/$1'); // store (POST)
+        $routes->get('developer/(:segment)/property/(:segment)/edit', 'Dashboard\Property::editByDeveloper/$1/$2'); // edit
+        $routes->post('developer/(:segment)/property/(:segment)/update', 'Dashboard\Property::updateByDeveloper/$1/$2'); // update
+
     // === PROPERTY ===
     $routes->group('property', function ($routes) {
         $routes->get('/', 'Dashboard\Property::index');
@@ -83,13 +90,6 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('deleteImage/(:num)', 'Dashboard\Property::deleteImage/$1');
         $routes->get('detail/(:segment)', 'Dashboard\Property::detail/$1');
         $routes->post('detail/update/(:segment)', 'Dashboard\Property::updateDetail/$1');
-
-        // property filtered by developer
-        $routes->get('developer/(:segment)', 'Dashboard\Property::byDeveloper/$1');
-        $routes->get('developer/(:segment)/create',    'Dashboard\Property::createByDeveloper/$1');
-        $routes->post('developer/(:segment)/store',    'Dashboard\Property::storeByDeveloper/$1');
-        $routes->get('developer/(:segment)/edit/(:segment)', 'Dashboard\Property::editByDeveloper/$1/$2');
-        $routes->post('developer/(:segment)/update/(:segment)', 'Dashboard\Property::updateByDeveloper/$1/$2');
 
         // Floor plan routes
         $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorplan/$1');
@@ -103,6 +103,11 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/documents/store', 'Dashboard\Property::documentsStore/$1');
         $routes->get('(:segment)/documents/delete/(:num)', 'Dashboard\Property::documentsDelete/$1/$2');
         $routes->post('dashboard/property/(:segment)/add-document', 'Dashboard\Property::storeDocumentFromDetail/$1');
+
+        $routes->get('unit/(:segment)', 'Dashboard\Property::unitTypes/$1');
+        $routes->post('unit/save', 'Dashboard\Property::saveUnit');
+        $routes->get('unit/delete/(:num)', 'Dashboard\Property::deleteUnit/$1');
+
 
 
 
