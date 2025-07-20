@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Halaman Masuk</title>
+  <title><?= esc($site_name) ?> - Login</title>
+  <link rel="shortcut icon" href="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>" sizes="320x320" type="image/png">
+
 
   <!-- Font Awesome -->
   <link rel="stylesheet"

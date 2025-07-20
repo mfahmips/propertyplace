@@ -43,15 +43,11 @@
     <input type="text" name="name" class="form-control" value="<?= old('name') ?>" required>
   </div>
   <div class="mb-3">
-    <label class="form-label">Location</label>
-    <input type="text" name="location" class="form-control" value="<?= old('location') ?>">
-  </div>
-  <div class="mb-3">
     <label class="form-label">Logo</label>
     <input type="file" name="logo" class="form-control" accept="image/*" required>
   </div>
   <button type="submit" class="btn btn-primary">Save</button>
-  <a href="<?= base_url('dashboard/developer') ?>" class="btn btn-secondary">Cancel</a>
+  <a href="<?= base_url('dashboard/developer') ?>" class="btn btn-secondary">Kembali</a>
 </form>
 
 <?= $this->endSection() ?>

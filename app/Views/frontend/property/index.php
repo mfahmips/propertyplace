@@ -87,37 +87,51 @@
                     </div>
                 </div>
             </div>
+            
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade active show" id="tab-list" role="tabpanel" aria-labelledby="tab-shop-list">
-                    <div class="row gy-40">
-    <?php foreach ($properties as $property): ?>
-        <div class="col-md-6 col-xl-4">
-            <div class="property-card2">
-                <div class="property-card-thumb img-shine">
-                    <img src="<?= base_url('uploads/property/' . ($property['thumbnail'] ?? 'default.jpg')) ?>" alt="<?= esc($property['title']) ?>">
+    <div class="tab-pane fade active show" id="tab-list" role="tabpanel" aria-labelledby="tab-shop-list">
+        <div class="row gy-40">
+            <?php foreach ($properties as $property): ?>
+                <div class="col-md-6 col-xl-4">
+                    <div class="property-card2">
+                        <div class="property-card-thumb img-shine">
+                            <?php
+                                $db = \Config\Database::connect();
+                                $image = $db->table('property_images')
+                                            ->where('property_id', $property['id'])
+                                            ->orderBy('id', 'ASC')
+                                            ->get(1)
+                                            ->getRowArray();
 
-                </div>
-                <div class="property-card-details">
-                    <div class="media-left">
-                        <h4 class="property-card-title">
-                            <a href="<?= base_url('property/' . $property['slug']) ?>">
-                                <?= esc($property['title']) ?>
-                            </a>
-                        </h4>
-                        <h5 class="property-card-price">Rp <?= number_format($property['price'], 0, ',', '.') ?></h5>
-                        <p class="property-card-location">
-                          <?= esc($property['developer_name'] ?? '-') ?> - <?= esc($property['developer_location'] ?? '-') ?>
-                        </p>
-
+                                $imageUrl = $image 
+                                    ? base_url('uploads/property/' . $image['filename']) 
+                                    : base_url('uploads/property/default.jpg');
+                            ?>
+                            <img src="<?= $imageUrl ?>" alt="<?= esc($property['title']) ?>">
+                        </div>
+                        <div class="property-card-details">
+                            <div class="media-left">
+                                <h4 class="property-card-title">
+                                    <a href="<?= base_url('property/' . $property['slug']) ?>">
+                                        <?= esc($property['title']) ?>
+                                    </a>
+                                </h4>
+                                <h5 class="property-card-price">Rp <?= number_format($property['price'], 0, ',', '.') ?></h5>
+                                <p class="property-card-location">
+                                    <?= esc($property['developer_name'] ?? '-') ?> - <?= esc($property['developer_location'] ?? '-') ?>
+                                </p>
+                            </div>
+                            <div class="btn-wrap">
+                                <a href="<?= base_url('property/' . $property['slug']) ?>" class="th-btn style-border2 th-btn-icon">Details</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="btn-wrap">
-                        <a href="<?= base_url('property/' . $property['slug']) ?>" class="th-btn style-border2 th-btn-icon">Details</a>
-                    </div>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
-    <?php endforeach; ?>
+    </div>
 </div>
+
 
 
                 </div>

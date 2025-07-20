@@ -9,12 +9,7 @@ class PropertyFloorPlanModel extends Model
     protected $table            = 'property_floor_plan';
     protected $primaryKey       = 'id';
     protected $allowedFields    = [
-        'property_id',
-        'name',
-        'image',
-        'description',
-        'created_at',
-        'updated_at'
+    'property_id', 'unit_id', 'name', 'image', 'description'
     ];
 
     protected $useTimestamps    = true;

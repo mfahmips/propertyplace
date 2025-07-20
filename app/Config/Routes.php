@@ -64,59 +64,53 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
     // === CRUD Developer ===
     $routes->group('developer', function($routes){
+
         $routes->get('/',              'Dashboard\Developer::index');
         $routes->get('create',         'Dashboard\Developer::create');
         $routes->post('store',         'Dashboard\Developer::store');
         $routes->get('edit/(:segment)',    'Dashboard\Developer::edit/$1');
         $routes->post('update/(:segment)', 'Dashboard\Developer::update/$1');
         $routes->get('delete/(:num)',  'Dashboard\Developer::delete/$1');
+
+        // === Property CRUD khusus filter developer ===
+        $routes->get('(:segment)/property', 'Dashboard\Property::byDeveloper/$1'); // index property by developer
+        $routes->post('(:segment)/property/store', 'Dashboard\Property::storeByDeveloper/$1'); // create property
+        $routes->post('(:segment)/property/(:segment)/update', 'Dashboard\Property::updateByDeveloper/$1/$2'); // update property
+        $routes->get('(:segment)/property/(:segment)/delete', 'Dashboard\Property::deleteByDeveloper/$1/$2'); // delete property
+
+        // Image property
+        $routes->get('(:segment)/property/image/(:num)/delete', 'Dashboard\Property::deleteImageByDeveloper/$1/$2');
+
+        // Detail Property
+        $routes->get('(:segment)/property/(:segment)/detail', 'Dashboard\Property::detailByDeveloper/$1/$2');
+        $routes->post('(:segment)/property/(:segment)/detail/update', 'Dashboard\Property::updateDetailByDeveloper/$1/$2');
+
+        // Floorplan
+        $routes->get('(:segment)/property/(:segment)/floorplan', 'Dashboard\Property::floorPlanByDeveloper/$1/$2');
+        $routes->post('(:segment)/property/(:segment)/floorplan/store', 'Dashboard\Property::storeFloorPlanByDeveloper/$1/$2');
+        $routes->get('(:segment)/property/(:segment)/floorplan/(:num)/delete', 'Dashboard\Property::deleteFloorPlanByDeveloper/$1/$2/$3');
+
+        // Document
+        $routes->get('(:segment)/property/(:segment)/documents', 'Dashboard\Property::documentsByDeveloper/$1/$2');
+        $routes->post('(:segment)/property/(:segment)/documents/store', 'Dashboard\Property::storeDocumentByDeveloper/$1/$2');
+        $routes->get('(:segment)/property/(:segment)/documents/(:num)/delete', 'Dashboard\Property::deleteDocumentByDeveloper/$1/$2/$3');
+
+        // Unit Type
+        $routes->post('(:segment)/property/(:segment)/unit/save', 'Dashboard\Property::saveUnitByDeveloper/$1/$2');
+        $routes->get('(:segment)/property/(:segment)/unit/(:num)/delete', 'Dashboard\Property::deleteUnitByDeveloper/$1/$2/$3');
     });
 
-    // property filtered by developer
-        $routes->get('developer/(:segment)/property', 'Dashboard\Property::byDeveloper/$1'); // index
-        $routes->get('developer/(:segment)/property/create', 'Dashboard\Property::createByDeveloper/$1'); // create form
-        $routes->post('developer/(:segment)/property/store', 'Dashboard\Property::storeByDeveloper/$1'); // store (POST)
-        $routes->get('developer/(:segment)/property/(:segment)/edit', 'Dashboard\Property::editByDeveloper/$1/$2'); // edit
-        $routes->post('developer/(:segment)/property/(:segment)/update', 'Dashboard\Property::updateByDeveloper/$1/$2'); // update
 
     // === PROPERTY ===
+    // Khusus untuk role admin: hanya index, detail unit type, documents, floorplan
     $routes->group('property', function ($routes) {
-        $routes->get('/', 'Dashboard\Property::index');
-        $routes->get('create', 'Dashboard\Property::create');
-        $routes->post('store', 'Dashboard\Property::store');
-        $routes->get('edit/(:segment)', 'Dashboard\Property::edit/$1');
-        $routes->post('update/(:segment)', 'Dashboard\Property::update/$1');
-        $routes->get('delete/(:num)', 'Dashboard\Property::delete/$1');
-        $routes->get('deleteImage/(:num)', 'Dashboard\Property::deleteImage/$1');
+        $routes->get('/', 'Dashboard\Property::index'); // index semua property untuk admin/karyawan/customer (read-only)
         $routes->get('detail/(:segment)', 'Dashboard\Property::detail/$1');
-        $routes->post('detail/update/(:segment)', 'Dashboard\Property::updateDetail/$1');
-
-        // Floor plan routes
-        $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorplan/$1');
-        $routes->post('(:segment)/floorplan/store', 'Dashboard\Property::floorplanStore/$1');
-        $routes->get('(:segment)/floorplan/delete/(:num)', 'Dashboard\Property::floorplanDelete/$1/$2');
-        $routes->post('dashboard/property/(:segment)/add-floorplan', 'Dashboard\Property::storeFloorPlanFromDetail/$1');
-
-
-        // Property Document routes
-        $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
-        $routes->post('(:segment)/documents/store', 'Dashboard\Property::documentsStore/$1');
-        $routes->get('(:segment)/documents/delete/(:num)', 'Dashboard\Property::documentsDelete/$1/$2');
-        $routes->post('dashboard/property/(:segment)/add-document', 'Dashboard\Property::storeDocumentFromDetail/$1');
-
         $routes->get('unit/(:segment)', 'Dashboard\Property::unitTypes/$1');
-        $routes->post('unit/save', 'Dashboard\Property::saveUnit');
-        $routes->get('unit/delete/(:num)', 'Dashboard\Property::deleteUnit/$1');
-
-
-
-
-
-
-
-
-
+        $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorPlan/$1');
+        $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
     });
+
 
         // === BLOG ===
         $routes->group('blog', ['filter' => 'auth'], function ($routes) {

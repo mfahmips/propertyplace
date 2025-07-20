@@ -14,17 +14,32 @@ class Developer extends BaseController
 
     public function index()
     {
+        $developerModel = new \App\Models\DeveloperModel();
+        $propertyModel  = new \App\Models\PropertyModel();
+
+        // Ambil developer dengan pagination (gunakan model bawaan class kalau ada)
+        $devs = $developerModel->orderBy('name', 'ASC')->paginate(5, 'developers');
+
+        // Tambahkan properti ke masing-masing developer
+        foreach ($devs as &$d) {
+            $d['properties'] = $propertyModel
+                ->where('developer_id', $d['id'])
+                ->findAll();
+        }
+
         $data = [
             'title'      => 'Developers',
             'breadcrumb' => [
                 ['label'=>'Dashboard','url'=>base_url('dashboard')],
                 ['label'=>'Developer'],
             ],
-            'devs'  => $this->model->orderBy('name','ASC')->paginate(5, 'developers'), // <= Ganti ini
-            'pager' => $this->model->pager // <= Tambahkan ini
+            'devs'  => $devs,               // Developer beserta property masing-masing
+            'pager' => $developerModel->pager
         ];
+
         return view('admin/developer/index', $data);
     }
+
 
     public function create()
     {
@@ -45,7 +60,6 @@ class Developer extends BaseController
 
         $validationRule = [
             'name'     => 'required|min_length[3]',
-            'location' => 'permit_empty',
             'logo'     => [
                 'label' => 'Developer Logo',
                 'rules' => 'uploaded[logo]'
@@ -80,7 +94,6 @@ class Developer extends BaseController
         $this->model->insert([
             'name'       => $name,
             'slug'       => $slug,
-            'location'   => $this->request->getPost('location'),
             'logo'       => $filename,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
@@ -115,7 +128,6 @@ class Developer extends BaseController
 
         $validationRule = [
             'name'     => 'required|min_length[3]',
-            'location' => 'permit_empty',
             'logo'     => [
                 'label' => 'Developer Logo',
                 'rules' => 'permit_empty'
@@ -141,7 +153,6 @@ class Developer extends BaseController
         $data = [
             'name'       => $name,
             'slug'       => $slug,
-            'location'   => $this->request->getPost('location'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 

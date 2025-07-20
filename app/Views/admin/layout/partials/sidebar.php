@@ -28,14 +28,7 @@
             <!-- Main Menu -->
             <li class="menu-title">Menu</li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="<?= base_url('dashboard/developer') ?>">
-                    <span class="nav-icon">
-                        <iconify-icon icon="solar:buildings-outline"></iconify-icon>
-                    </span>
-                    <span class="nav-text">Developer</span>
-                </a>
-            </li>
+            
 
             <li class="nav-item">
                 <a class="nav-link" href="<?= base_url('dashboard/property') ?>">
@@ -47,6 +40,24 @@
             </li>
 
             <?php if ($role === 'admin'): ?>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= base_url('dashboard/developer') ?>">
+                        <span class="nav-icon">
+                            <iconify-icon icon="solar:buildings-outline"></iconify-icon>
+                        </span>
+                        <span class="nav-text">Developer</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= base_url('dashboard/blog') ?>">
+                        <span class="nav-icon">
+                            <iconify-icon icon="solar:user-outline"></iconify-icon>
+                        </span>
+                        <span class="nav-text">Blog</span>
+                    </a>
+                </li>
                 <!-- Admin Settings -->
                 <li class="menu-title">Settings</li>
 
@@ -60,14 +71,7 @@
                 </li>
 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= base_url('dashboard/blog') ?>">
-                        <span class="nav-icon">
-                            <iconify-icon icon="solar:user-outline"></iconify-icon>
-                        </span>
-                        <span class="nav-text">Blog</span>
-                    </a>
-                </li>
+                
 
                 <li class="nav-item">
                     <a class="nav-link" href="<?= base_url('dashboard/settings') ?>">

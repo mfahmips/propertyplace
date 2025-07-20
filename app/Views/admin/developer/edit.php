@@ -43,16 +43,11 @@
            value="<?= old('name', esc($dev['name'])) ?>" required>
   </div>
   <div class="mb-3">
-    <label class="form-label">Location</label>
-    <input type="text" name="location" class="form-control" 
-           value="<?= old('location', esc($dev['location'])) ?>">
-  </div>
-  <div class="mb-3">
     <label class="form-label">Logo <small>(leave blank to keep current)</small></label>
     <input type="file" name="logo" class="form-control" accept="image/*">
   </div>
   <button type="submit" class="btn btn-primary">Update</button>
-  <a href="<?= base_url('dashboard/developer') ?>" class="btn btn-secondary">Cancel</a>
+  <a href="<?= base_url('dashboard/developer') ?>" class="btn btn-secondary">Kembali</a>
 </form>
 <hr class="my-4">
 

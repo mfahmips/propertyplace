@@ -3,19 +3,28 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\SettingsModel;
 
 class Auth extends BaseController
 {
     protected $userModel;
+    protected $settingsModel;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->settingsModel = new SettingsModel();
     }
 
     public function loginForm()
     {
-        return view('auth/login');
+        // Ambil settings dari tabel settings
+        $settings = $this->settingsModel->getSettings(['site_name', 'site_icon']);
+
+        return view('auth/login', [
+            'site_name' => $settings['site_name'] ?? 'PropertyPlace',
+            'site_icon'    => $settings['site_icon'] ?? 'uploads/settings/default-favicon.png'
+        ]);
     }
 
     public function login()
@@ -37,24 +46,19 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('error', 'Akun Anda tidak aktif.');
         }
 
-        // login manual
+        // Set session login
         session()->set([
-            'id'       => $user['id'],
-            'name'     => $user['name'],
-            'email'    => $user['email'],
-            'slug'     => $user['slug'],
-            'foto'     => $user['foto'],
-            'role'     => $user['role'],
-            'logged_in'=> true, // ← penting
+            'id'        => $user['id'],
+            'name'      => $user['name'],
+            'email'     => $user['email'],
+            'slug'      => $user['slug'],
+            'foto'      => $user['foto'],
+            'role'      => $user['role'],
+            'logged_in' => true
         ]);
-
-
-        // Sementara untuk debugging:
-        // dd(session()->get()); // sudah benar, tidak usah pakai $user di sini
 
         return redirect()->to('/dashboard');
     }
-
 
     public function logout()
     {

@@ -8,6 +8,8 @@ use App\Models\PropertyImageModel;
 use App\Models\DeveloperModel;
 use App\Models\PropertyFloorPlanModel;
 use App\Models\PropertyUnitTypeModel;
+use App\Models\PropertyDetailModel;
+use App\Models\PropertyDocumentModel;
 
 class Property extends BaseController
 {
@@ -22,291 +24,106 @@ class Property extends BaseController
     public function index()
     {
         $perPage = 5;
-
-        // Ambil property + developer
         $properties = $this->propertyModel
             ->select('properties.*, developers.name as developer_name')
             ->join('developers', 'developers.id = properties.developer_id')
             ->paginate($perPage);
 
         $pager = $this->propertyModel->pager;
-
-        // Model tambahan
         $imageModel = new PropertyImageModel();
         $unitModel  = new PropertyUnitTypeModel();
 
         foreach ($properties as &$p) {
-            // Ambil thumbnail
             $img = $imageModel->where('property_id', $p['id'])->first();
-            $p['thumbnail'] = $img
-                ? base_url('uploads/property/' . $img['filename'])
-                : base_url('images/placeholder-80x60.png');
-
-            // Ambil data unit sesuai field tabel Anda
-            $p['units'] = $unitModel
-                ->select('id, name_unit, slug, type_unit, floors, land_area, building_area, bedrooms, bathrooms, carport, elevator')
-                ->where('property_id', $p['id'])
-                ->findAll();
+            $p['thumbnail'] = $img ? base_url('uploads/property/' . $img['filename']) : base_url('images/placeholder-80x60.png');
+            $p['units'] = $unitModel->where('property_id', $p['id'])->findAll();
         }
-        unset($p);
 
         return view('admin/property/index', [
-            'title'      => 'Property Listing',
+            'title' => 'Property Listing',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property'],
+                ['label' => 'Property']
             ],
             'properties' => $properties,
-            'pager'      => $pager,
+            'pager' => $pager,
         ]);
     }
-
-
-
-
-    public function create()
-    {
-        $developers = model(DeveloperModel::class)->findAll();
-
-        return view('admin/property/create', [
-            'title' => 'Add Property',
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property', 'url' => base_url('dashboard/property')],
-                ['label' => 'Add Property']
-            ],
-            'developers' => $developers
-        ]);
-    }
-
-    public function store()
-    {
-        $validationRule = [
-            'images' => [
-                'label' => 'Property Images',
-                'rules' => 'permit_empty'
-                    . '|is_image[images.*]'
-                    . '|mime_in[images.*,image/jpg,image/jpeg,image/png,image/webp]'
-                    . '|max_size[images.*,2048]'
-                    . '|max_files[images,10]',
-            ]
-        ];
-
-        if (!$this->validate($validationRule)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $developerId = $this->request->getPost('developer_id');
-        $title       = $this->request->getPost('title');
-        $slug        = generateUniqueSlug($title, $this->propertyModel);
-        $priceText   = $this->request->getPost('price_text');
-        $priceNumber = (int) str_replace(['.', ','], '', $priceText);
-
-
-        $this->propertyModel->save([
-            'title'        => $title,
-            'slug'         => $slug,
-            'developer_id' => $developerId,
-            'price'        => $priceNumber,
-            'price_text'   => $priceText,
-            'description'  => $this->request->getPost('description'),
-        ]);
-
-        $propertyId = $this->propertyModel->getInsertID();
-
-        $files = $this->request->getFileMultiple('images');
-        foreach ($files as $file) {
-            if ($file->isValid() && !$file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'uploads/property/', $newName);
-
-                (new PropertyImageModel())->save([
-                    'property_id' => $propertyId,
-                    'filename'    => $newName,
-                    'created_at'  => date('Y-m-d H:i:s')
-                ]);
-            }
-        }
-
-        return redirect()->to('/dashboard/property')->with('success', 'Property added successfully.');
-    }
-
-    public function edit($slug)
-    {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-
-        if (!$property) {
-            return redirect()->to('/dashboard/property')->with('errors', ['Property not found.']);
-        }
-
-        $images     = (new PropertyImageModel())->where('property_id', $property['id'])->findAll();
-        $developers = model(DeveloperModel::class)->findAll();
-        $developer  = model(DeveloperModel::class)->find($property['developer_id']);
-
-        return view('admin/property/edit', [
-            'title' => 'Edit: ' . $property['title'],
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property', 'url' => base_url('dashboard/property')],
-                ['label' => 'Edit Property']
-            ],
-            'property'       => $property,
-            'propertyDetail' => $property,
-            'images'         => $images,
-            'developers'     => $developers,
-            'developer'      => $developer,
-        ]);
-    }
-
-
-    public function update($id)
-    {
-        $validationRule = [
-            'images' => [
-                'label' => 'Property Images',
-                'rules' => 'permit_empty'
-                    . '|is_image[images.*]'
-                    . '|mime_in[images.*,image/jpg,image/jpeg,image/png,image/webp]'
-                    . '|max_size[images.*,2048]'
-                    . '|max_files[images,10]',
-            ]
-        ];
-
-        if (!$this->validate($validationRule)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $existing    = $this->propertyModel->find($id);
-        $newTitle    = $this->request->getPost('title');
-        $slug        = $existing['slug'];
-        $developerId = $this->request->getPost('developer_id');
-        $priceText   = $this->request->getPost('price_text');
-        $priceNumber = (int) str_replace(['.', ','], '', $priceText);
-
-
-        if ($newTitle !== $existing['title']) {
-            $slug = generateUniqueSlug($newTitle, $this->propertyModel);
-        }
-
-        $this->propertyModel->update($id, [
-            'title'        => $newTitle,
-            'slug'         => $slug,
-            'developer_id' => $developerId,
-            'price'        => $priceNumber,
-            'price_text'   => $priceText,
-            'description'  => $this->request->getPost('description'),
-        ]);
-
-        $files = $this->request->getFileMultiple('images');
-        foreach ($files as $file) {
-            if ($file->isValid() && !$file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'uploads/property/', $newName);
-
-                (new PropertyImageModel())->save([
-                    'property_id' => $id,
-                    'filename'    => $newName,
-                    'created_at'  => date('Y-m-d H:i:s')
-                ]);
-            }
-        }
-
-        return redirect()->to('/dashboard/property')->with('success', 'Property updated successfully.');
-    }
- 
 
     public function byDeveloper(string $slug)
     {
-        $devModel  = model(DeveloperModel::class);
-        $developer = $devModel->where('slug', $slug)->first();
-
-        if (! $developer) {
+        $developer = (new DeveloperModel())->where('slug', $slug)->first();
+        if (!$developer) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
         }
 
         $perPage = 5;
 
-        $builder = $this->propertyModel
+        $properties = $this->propertyModel
             ->where('developer_id', $developer['id'])
-            ->orderBy('created_at', 'DESC');
+            ->orderBy('created_at', 'DESC')
+            ->paginate($perPage);
 
-        $properties = $builder->paginate($perPage);
-        $pager      = $builder->pager;
-
+        $pager = $this->propertyModel->pager;
         $imageModel = new PropertyImageModel();
-        $unitModel  = new PropertyUnitTypeModel();
+        $unitModel = new PropertyUnitTypeModel();
 
         foreach ($properties as &$p) {
+            // Ambil semua gambar beserta id & filename untuk keperluan delete
             $imgs = $imageModel->where('property_id', $p['id'])->findAll();
-            $urls = array_map(fn($r) => base_url('uploads/property/' . $r['filename']), $imgs);
-            $p['thumbnail'] = $urls[0] ?? base_url('images/placeholder-80x60.png');
-            $p['images']    = $urls;
-            $p['units']     = $unitModel->where('property_id', $p['id'])->findAll();
+
+            $p['images'] = $imgs;
+
+            // Set thumbnail (gambar pertama) atau placeholder jika tidak ada
+            $p['thumbnail'] = isset($imgs[0])
+                ? base_url('uploads/property/' . $imgs[0]['filename'])
+                : base_url('images/placeholder-80x60.png');
+
+            // Ambil unit
+            $p['units'] = $unitModel->where('property_id', $p['id'])->findAll();
         }
-        unset($p);
 
         return view('admin/property/index', [
-            'title'           => 'Properties by ' . $developer['name'],
-            'breadcrumb'      => [
-                ['label'=>'Dashboard', 'url'=>base_url('dashboard')],
-                ['label'=>'Developer', 'url'=>base_url('dashboard/developer')],
-                ['label'=>$developer['name']],
+            'title' => 'Properties by ' . $developer['name'],
+            'breadcrumb' => [
+                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
+                ['label' => 'Developer', 'url' => base_url('dashboard/developer')],
+                ['label' => $developer['name']]
             ],
-            'properties'      => $properties,
-            'pager'           => $pager,
+            'properties' => $properties,
+            'pager' => $pager,
             'filterDeveloper' => $developer,
         ]);
     }
 
-    public function createByDeveloper(string $devSlug)
-    {
-        $devModel   = model(DeveloperModel::class);
-        $developer  = $devModel->where('slug', $devSlug)->first();
-
-        if (! $developer) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
-        }
-
-        return view('admin/property/create_by_developer', [
-            'title'      => 'Add Property for ' . $developer['name'],
-            'breadcrumb' => [
-                ['label'=>'Dashboard','url'=>base_url('dashboard')],
-                ['label'=>'Developer','url'=>base_url('dashboard/developer')],
-                ['label'=>'Property', 'url'=>base_url("dashboard/developer/{$devSlug}/property")],
-                ['label'=>'Create Property'],
-            ],
-            'developer'  => $developer,
-            'validation' => \Config\Services::validation(),
-        ]);
-    }
 
     public function storeByDeveloper(string $devSlug)
     {
         $rules = [
-            'title'       => 'required|min_length[3]',
-            'price'       => 'required|numeric',
-            'price_text'  => 'required|string|max_length[100]',
+            'title' => 'required|min_length[3]',
+            'price' => 'required|numeric',
+            'price_text' => 'required|string|max_length[100]',
+            'location' => 'required|in_list[Jabodetabek,Bekasi,Depok,Bogor,Tangerang,Jakarta]',
             'description' => 'required',
+            'images' => 'permit_empty|is_image[images.*]|mime_in[images.*,image/jpg,image/jpeg,image/png,image/webp]|max_size[images.*,2048]|max_files[images,10]'
         ];
 
+        if (!$this->validate($rules)) return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        if (!$developer) throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
 
-        $devModel  = model(DeveloperModel::class);
-        $developer = $devModel->where('slug', $devSlug)->first();
-
-        $title    = $this->request->getPost('title');
-        $slugProp = generateUniqueSlug($title, $this->propertyModel);
+        $title = $this->request->getPost('title');
+        $slug = generateUniqueSlug($title, $this->propertyModel);
 
         $this->propertyModel->insert([
-            'title'        => $title,
-            'slug'         => $slugProp,
+            'title' => $title,
+            'slug' => $slug,
             'developer_id' => $developer['id'],
-            'price'        => $this->request->getPost('price'),
-            'price_text'   => $this->request->getPost('price_text'),
-            'description'  => $this->request->getPost('description'),
+            'price' => $this->request->getPost('price'),
+            'price_text' => $this->request->getPost('price_text'),
+            'location' => $this->request->getPost('location'),
+            'description' => $this->request->getPost('description'),
         ]);
 
         $propertyId = $this->propertyModel->getInsertID();
@@ -314,450 +131,353 @@ class Property extends BaseController
         $files = $this->request->getFileMultiple('images');
         $imgModel = new PropertyImageModel();
         foreach ($files as $file) {
-            if ($file->isValid() && ! $file->hasMoved()) {
+            if ($file->isValid() && !$file->hasMoved()) {
                 $newName = $file->getRandomName();
                 $file->move(FCPATH.'uploads/property/', $newName);
                 $imgModel->insert([
-                    'property_id'=> $propertyId,
-                    'filename'   => $newName,
+                    'property_id' => $propertyId,
+                    'filename' => $newName,
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             }
         }
 
-        return redirect()
-                        ->to(base_url("dashboard/developer/{$devSlug}/property"))
-                        ->with('success', 'Property added.');
-    }
-
-    public function editByDeveloper(string $devSlug, string $propSlug)
-    {
-        $devModel   = model(DeveloperModel::class);
-        $developer  = $devModel->where('slug', $devSlug)->first();
-
-        if (! $developer) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
-        }
-
-        $property = $this->propertyModel
-            ->where('slug', $propSlug)
-            ->where('developer_id', $developer['id'])
-            ->first();
-
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $imgModel = new PropertyImageModel();
-        $imgs = $imgModel->where('property_id', $property['id'])->orderBy('sort_order', 'ASC')->findAll();
-
-        return view('admin/property/edit_by_developer', [
-            'title'         => 'Edit Property: ' . $property['title'],
-            'breadcrumb'    => [
-                ['label'=>'Dashboard','url'=>base_url('dashboard')],
-                ['label'=>'Developer','url'=>base_url('dashboard/developer')],
-                ['label'=>'Property', 'url'=>base_url("dashboard/developer/{$devSlug}/property")],
-                ['label'=>'Edit Property'],
-            ],
-            'developer'     => $developer,
-            'property'      => $property,
-            'images'        => $imgs,
-            'validation'    => \Config\Services::validation(),
-        ]);
+        return redirect()->to(base_url("dashboard/developer/{$devSlug}/property"))->with('success', 'Property added successfully.');
     }
 
     public function updateByDeveloper(string $devSlug, string $propSlug)
     {
-        helper('form');
+        helper('text'); // pastikan helper slug/text aktif
 
-        // Validasi input text
         $rules = [
-            'title'       => 'required|min_length[3]',
-            'price'       => 'required|numeric',
-            'price_text'  => 'required|string|max_length[100]',
+            'title' => 'required|min_length[3]',
+            'price' => 'required|numeric',
+            'price_text' => 'required|string|max_length[100]',
+            'location' => 'required|in_list[Jabodetabek,Bekasi,Depok,Bogor,Tangerang,Jakarta]',
             'description' => 'required',
+            'images' => 'permit_empty|is_image[images.*]|mime_in[images.*,image/jpg,image/jpeg,image/png,image/webp]|max_size[images.*,2048]|max_files[images,10]'
         ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                             ->withInput()
-                             ->with('validation', $this->validator);
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Cek developer
-        $devModel  = model(DeveloperModel::class);
-        $developer = $devModel->where('slug', $devSlug)->first();
-        if (! $developer) {
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        if (!$developer) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
         }
 
-        // Cek property
         $property = $this->propertyModel
             ->where('slug', $propSlug)
             ->where('developer_id', $developer['id'])
             ->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+
+        if (!$property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found or unauthorized');
         }
 
-        // Update data property
-        $this->propertyModel->update($property['id'], [
-            'title'       => $this->request->getPost('title'),
-            'price'       => $this->request->getPost('price'),
-            'price_text'  => $this->request->getPost('price_text'),
-            'description' => $this->request->getPost('description'),
-            'updated_at'  => date('Y-m-d H:i:s'),
-        ]);
+        $newTitle = $this->request->getPost('title');
+        $slug = ($newTitle !== $property['title'])
+            ? generateUniqueSlug($newTitle, $this->propertyModel)
+            : $property['slug'];
 
-        // Upload Gambar
+        $updateData = [
+            'title' => $newTitle,
+            'slug' => $slug,
+            'price' => $this->request->getPost('price'),
+            'price_text' => $this->request->getPost('price_text'),
+            'location' => $this->request->getPost('location'),
+            'description' => $this->request->getPost('description'),
+        ];
+
+        $this->propertyModel->update($property['id'], $updateData);
+
+        // Handle upload gambar tambahan
         $files = $this->request->getFileMultiple('images');
         $imgModel = new PropertyImageModel();
 
-        if (!empty($files) && is_array($files)) {
-            foreach ($files as $file) {
-                if ($file->isValid() && !$file->hasMoved() && $file->getClientName() != '') {
+        foreach ($files as $file) {
+            if ($file->isValid() && !$file->hasMoved()) {
+                $newName = $file->getRandomName();
+                $file->move(FCPATH . 'uploads/property/', $newName);
 
-                    // Validasi gambar langsung pakai CI built-in
-                    $validationRules = [
-                        'image' => [
-                            'label' => 'Image',
-                            'rules' => 'uploaded[image]'
-                                . '|is_image[image]'
-                                . '|mime_in[image,image/jpg,image/jpeg,image/png,image/webp]'
-                                . '|max_size[image,2048]',
-                        ]
-                    ];
-
-                    // Buat data dummy untuk validator manual
-                    $fileArray = ['image' => $file];
-                    $validation = \Config\Services::validation();
-                    $validation->reset();
-
-                    if (! $validation->setRules($validationRules)->run($fileArray)) {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('validation', $validation);
-                    }
-
-                    // Simpan file
-                    $newName = $file->getRandomName();
-                    $file->move(FCPATH . 'uploads/property/', $newName);
-
-                    // Simpan ke database
-                    $imgModel->insert([
-                        'property_id' => $property['id'],
-                        'filename'    => $newName,
-                        'sort_order'  => 0,
-                    ]);
-                }
+                $imgModel->insert([
+                    'property_id' => $property['id'],
+                    'filename' => $newName,
+                    'sort_order' => 0
+                ]);
             }
         }
 
-        return redirect()
-            ->to(base_url("developer/{$devSlug}/property"))
-            ->with('success', 'Property updated successfully.');
+        return redirect()->to(base_url("dashboard/developer/{$devSlug}/property"))
+                         ->with('success', 'Property updated successfully.');
     }
 
 
-
-
-
-
-    public function delete($id)
+    public function deleteByDeveloper($devSlug, $id)
     {
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        if (!$developer) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer not found');
+        }
+
         $property = $this->propertyModel->find($id);
 
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        if (!$property || $property['developer_id'] != $developer['id']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found or unauthorized');
         }
 
-        $this->propertyModel->delete($id);
+        // Hapus gambar fisik jika ada
+        $imageModel = new \App\Models\PropertyImageModel();
+        $images = $imageModel->where('property_id', $property['id'])->findAll();
 
-        // Ambil redirect slug jika ada
-        $redirectSlug = $this->request->getGet('redirect');
-
-        session()->setFlashdata('success', 'Property berhasil dihapus.');
-
-        if ($redirectSlug) {
-            return redirect()->to(base_url('dashboard/developer/' . $redirectSlug . '/property'));
-        }
-
-        return redirect()->to(base_url('dashboard/property'));
-    }
-
-
-    public function deleteImage($id)
-    {
-        $imageModel = new PropertyImageModel();
-        $image = $imageModel->find($id);
-
-        if ($image) {
-            $path = FCPATH . 'uploads/property/' . $image['filename'];
+        foreach ($images as $img) {
+            $path = FCPATH . 'uploads/property/' . $img['filename'];
             if (file_exists($path)) {
                 unlink($path);
             }
-            $imageModel->delete($id);
         }
+
+        // Hapus gambar dari DB
+        $imageModel->where('property_id', $property['id'])->delete();
+
+        // Hapus property
+        $this->propertyModel->delete($id);
+
+        return redirect()->to(base_url("dashboard/developer/{$devSlug}/property"))
+                         ->with('success', 'Property deleted successfully.');
+    }
+
+
+    public function deleteImageByDeveloper($devSlug, $imageId)
+    {
+        $imageModel = new \App\Models\PropertyImageModel();
+        $image = $imageModel->find($imageId);
+
+        if (!$image) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Image not found');
+        }
+
+        $property = $this->propertyModel->find($image['property_id']);
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+
+        if (!$developer || !$property || $property['developer_id'] != $developer['id']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Unauthorized access');
+        }
+
+        $path = FCPATH . 'uploads/property/' . $image['filename'];
+        if (file_exists($path)) {
+            unlink($path);
+        }
+
+        $imageModel->delete($imageId);
 
         return redirect()->back()->with('success', 'Image deleted successfully.');
     }
 
-    public function floorPlan(string $slug)
+
+
+
+    public function detailByDeveloper($devSlug, $propSlug)
     {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        $property = $this->propertyModel->where('slug', $propSlug)->first();
+
+        if (!$property || !$developer || $property['developer_id'] != $developer['id']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Unauthorized access');
         }
 
-        $floorPlanModel = new PropertyFloorPlanModel();
-        $floorPlans = $floorPlanModel->where('property_id', $property['id'])->findAll();
+        $unitModel = new PropertyUnitTypeModel();
+        $documentModel = new PropertyDocumentModel();
+        $floorplanModel = new PropertyFloorPlanModel();
+        $detailModel = new PropertyDetailModel();
 
-        return view('admin/property/floor_plan', [
-            'title'      => 'Manage Floor Plan - ' . $property['title'],
+        $units = $unitModel->where('property_id', $property['id'])->findAll();
+        $documents = $documentModel->where('property_id', $property['id'])->findAll();
+        $floorplans = $floorplanModel->where('property_id', $property['id'])->findAll();
+        $detail = $detailModel->where('property_id', $property['id'])->first();
+
+        // ⬇️ Tambahkan ini agar tiap unit punya data floor plan
+        foreach ($units as &$unit) {
+            $unit['floor_plan'] = null;
+            foreach ($floorplans as $fp) {
+                if ($fp['unit_id'] == $unit['id']) {
+                    $unit['floor_plan'] = $fp;
+                    break;
+                }
+            }
+        }
+
+        return view('admin/property/detail/index', [
+            'title' => 'Detail Property: ' . $property['title'],
+            'property' => $property,
+            'units' => $units, // ⬅️ Sekarang tiap unit sudah bawa floor plan
+            'documents' => $documents,
+            'floorplans' => $floorplans, // Jika masih mau kirim semua floor plan global
+            'detail' => $detail,
+            'filterDeveloper' => $developer,
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property', 'url' => base_url('dashboard/property')],
-                ['label' => $property['title']],
-                ['label' => 'Floor Plan']
-            ],
-            'property'   => $property,
-            'floorPlans' => $floorPlans
+                ['label' => 'Developer', 'url' => base_url('dashboard/developer')],
+                ['label' => 'Property', 'url' => base_url('dashboard/developer/' . $devSlug . '/property')],
+                ['label' => 'Detail']
+            ]
         ]);
     }
 
 
-    public function deleteFloorPlan(string $slug, int $id)
-    {
-        $planModel = new PropertyFloorPlanModel();
-        $plan = $planModel->find($id);
 
-        if ($plan) {
-            $path = FCPATH . 'uploads/property/floorplan/' . $plan['image'];
+    public function saveUnitByDeveloper($devSlug, $propSlug)
+    {
+        $devModel = new DeveloperModel();
+        $propModel = new PropertyModel();
+        $unitModel = new PropertyUnitTypeModel();
+
+        // Validasi developer
+        $developer = $devModel->where('slug', $devSlug)->first();
+        if (!$developer) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Developer tidak ditemukan');
+        }
+
+        // Validasi property milik developer ini
+        $property = $propModel->where('slug', $propSlug)
+                              ->where('developer_id', $developer['id'])
+                              ->first();
+        if (!$property) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property tidak ditemukan');
+        }
+
+        // Ambil data dari form
+        $data = $this->request->getPost([
+            'id', 'name_unit', 'slug', 'type_unit', 'floors',
+            'land_area', 'building_area', 'bedrooms', 'bathrooms', 'carport', 'elevator'
+        ]);
+
+        $data['property_id'] = $property['id'];
+
+        // Auto generate slug jika kosong
+        if (empty($data['slug'])) {
+            helper('text');
+            $data['slug'] = url_title($data['name_unit'], '-', true);
+        }
+
+        if (!empty($data['id'])) {
+            // Edit Unit
+            $unit = $unitModel->where('id', $data['id'])
+                              ->where('property_id', $property['id'])
+                              ->first();
+
+            if (!$unit) {
+                throw new \CodeIgniter\Exceptions\PageNotFoundException('Unit tidak ditemukan atau bukan milik property ini');
+            }
+
+            $unitModel->update($data['id'], $data);
+            $msg = 'Unit berhasil diupdate.';
+        } else {
+            // Tambah Unit
+            $unitModel->insert($data);
+            $msg = 'Unit berhasil ditambahkan.';
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+
+    public function deleteUnitByDeveloper($devSlug, $propSlug, $id)
+    {
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        $property = $this->propertyModel->where('slug', $propSlug)->first();
+
+        if (!$property || !$developer || $property['developer_id'] != $developer['id']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Unauthorized access');
+        }
+
+        $unitModel = new PropertyUnitTypeModel();
+        $floorPlanModel = new PropertyFloorPlanModel();
+
+        // Cari floorplan yang terkait dengan unit ini
+        $floorPlans = $floorPlanModel->where('unit_id', $id)->findAll();
+
+        // Hapus file gambar floor plan jika ada
+        foreach ($floorPlans as $fp) {
+            $path = FCPATH . 'uploads/property/floorplan/' . $fp['image'];
             if (file_exists($path)) {
                 unlink($path);
             }
-            $planModel->delete($id);
         }
 
-        return redirect()->to(base_url("dashboard/property/{$slug}/floorplan"))->with('success', 'Floor plan deleted.');
-    }
+        // Hapus floor plan di database
+        $floorPlanModel->where('unit_id', $id)->delete();
 
-    public function documents($slug)
-    {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found.');
-        }
+        // Hapus unit
+        $unitModel->delete($id);
 
-        $docModel = new \App\Models\PropertyDocumentModel();
-
-        // Ambil semua dokumen property ini
-        $documents = $docModel->where('property_id', $property['id'])->findAll();
-
-        // Cek apakah sedang edit dokumen tertentu
-        $editId = $this->request->getGet('edit');
-        $document = null;
-        if ($editId) {
-            $document = $docModel->where('id', $editId)
-                                 ->where('property_id', $property['id'])
-                                 ->first();
-        }
-
-        return view('admin/property/documents', [
-            'title'      => 'Documents - ' . $property['title'],
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property', 'url' => base_url('dashboard/property')],
-                ['label' => $property['title']],
-                ['label' => 'Documents']
-            ],
-            'property'   => $property,
-            'documents'  => $documents,
-            'document'   => $document // nullable jika tidak sedang edit
-        ]);
+        return redirect()->back()->with('success', 'Unit dan floor plan terkait berhasil dihapus.');
     }
 
 
-    public function updateDocument(string $slug, int $id)
+
+
+
+    public function storeDocumentByDeveloper($devSlug, $propSlug)
     {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $docModel = new PropertyDocumentModel();
-        $document = $docModel->find($id);
-        if (! $document || $document['property_id'] != $property['id']) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Document not found');
-        }
-
+        $property = $this->propertyModel->where('slug', $propSlug)->first();
         $rules = [
             'title' => 'required|min_length[3]',
-            'type'  => 'required|in_list[pdf,video]',
+            'type' => 'required|in_list[pdf,video]',
             'video_url' => 'permit_empty|valid_url',
-            'file' => 'permit_empty|max_size[file,2048]|ext_in[file,pdf]'
+            'file' => 'permit_empty|uploaded[file]|max_size[file,2048]|ext_in[file,pdf]'
         ];
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
+        if (!$this->validate($rules)) return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
 
+        $docModel = new PropertyDocumentModel();
         $data = [
+            'property_id' => $property['id'],
             'title' => $this->request->getPost('title'),
-            'type'  => $this->request->getPost('type'),
+            'type' => $this->request->getPost('type'),
         ];
 
         if ($data['type'] === 'pdf') {
             $file = $this->request->getFile('file');
-            if ($file && $file->isValid() && ! $file->hasMoved()) {
-                // Delete old file
-                if (! empty($document['file_path'])) {
-                    $oldPath = FCPATH . 'uploads/property/documents/' . $document['file_path'];
-                    if (file_exists($oldPath)) unlink($oldPath);
-                }
-
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'uploads/property/documents/', $newName);
-                $data['file_path'] = $newName;
-                $data['video_url'] = null;
-            }
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/property/documents/', $newName);
+            $data['file_path'] = $newName;
         } else {
             $data['video_url'] = $this->request->getPost('video_url');
-            $data['file_path'] = null;
         }
 
-        $docModel->update($id, $data);
-
-        return redirect()
-            ->to(base_url("dashboard/property/{$slug}/documents"))
-            ->with('success', 'Document updated successfully.');
+        $docModel->insert($data);
+        return redirect()->back()->with('success', 'Document berhasil ditambahkan.');
     }
 
-    public function deleteDocument(string $slug, int $id)
+    public function deleteDocumentByDeveloper($devSlug, $propSlug, $id)
     {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $docModel = new \App\Models\PropertyDocumentModel();
+        $docModel = new PropertyDocumentModel();
         $document = $docModel->find($id);
 
-        if (! $document || $document['property_id'] != $property['id']) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Document not found');
-        }
-
-        // Hapus file jika bertipe pdf
-        if ($document['type'] === 'pdf' && ! empty($document['file_path'])) {
-            $filePath = FCPATH . 'uploads/property/documents/' . $document['file_path'];
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
+        if ($document['type'] === 'pdf' && !empty($document['file_path'])) {
+            $path = FCPATH . 'uploads/property/documents/' . $document['file_path'];
+            if (file_exists($path)) unlink($path);
         }
 
         $docModel->delete($id);
-
-        return redirect()
-            ->to(base_url("dashboard/property/{$slug}/documents"))
-            ->with('success', 'Document deleted successfully.');
+        return redirect()->back()->with('success', 'Document berhasil dihapus.');
     }
 
-    public function detail($slug)
+    public function storeFloorPlanByDeveloper($devSlug, $propSlug)
     {
-        $property = model(\App\Models\PropertyModel::class)
-            ->where('slug', $slug)
-            ->first();
-
-        if (!$property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        // Ambil detail lama (optional)
-        $details = model(\App\Models\PropertyDetailModel::class)
-            ->where('property_id', $property['id'])
-            ->first();
-
-        // Ambil semua unit dari property_unit_type
-        $unitModel = model(\App\Models\PropertyUnitTypeModel::class);
-        $units = $unitModel
-            ->where('property_id', $property['id'])
-            ->orderBy('name_unit', 'ASC')
-            ->findAll();
-
-        return view('admin/property/detail/index', [
-            'title'      => 'Property Detail: ' . $property['title'],
-            'property'   => $property,
-            'details'    => $details, // bisa Anda hapus jika tidak dipakai lagi
-            'units'      => $units,   // kirim data unit
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property', 'url' => base_url('dashboard/property')],
-                ['label' => 'Detail'],
-            ],
-        ]);
-    }
-
-
-
-    public function updateDetail($slug)
-    {
-        $property = model('App\Models\PropertyModel')->where('slug', $slug)->first();
-        if (!$property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
-
-        $detailModel = new \App\Models\PropertyDetailModel();
-
-        $data = [
-            'type'      => $this->request->getPost('type'),
-            'purpose'   => $this->request->getPost('purpose'),
-            'rooms'     => $this->request->getPost('rooms'),
-            'bedrooms'  => $this->request->getPost('bedrooms'),
-            'bathrooms' => $this->request->getPost('bathrooms'),
-            'sqft'      => $this->request->getPost('sqft'),
-            'wifi'      => $this->request->getPost('wifi') ? 1 : 0,
-            'elevator'  => $this->request->getPost('elevator') ? 1 : 0,
-            'parking'   => $this->request->getPost('parking') ? 1 : 0,
-        ];
-
-        $existing = $detailModel->where('property_id', $property['id'])->first();
-
-        if ($existing) {
-            $detailModel->update($existing['id'], $data);
-        } else {
-            $data['property_id'] = $property['id'];
-            $detailModel->insert($data);
-        }
-
-        return redirect()->back()->with('success', 'Detail updated.');
-    }
-
-    public function storeFloorPlanFromDetail(string $slug)
-    {
-        return $this->storeFloorPlan($slug);
-    }
-
-    public function storeDocumentFromDetail(string $slug)
-    {
-        return $this->storeDocument($slug);
-    }
-
-    public function storeFloorPlan(string $slug)
-    {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
+        $developer = (new DeveloperModel())->where('slug', $devSlug)->first();
+        $property = $this->propertyModel->where('slug', $propSlug)
+                                        ->where('developer_id', $developer['id'])
+                                        ->first();
 
         $rules = [
-            'name'        => 'required|min_length[3]',
-            'description' => 'permit_empty',
-            'image'       => 'uploaded[image]|is_image[image]|max_size[image,2048]'
+            'name' => 'required|min_length[3]',
+            'image' => 'uploaded[image]|is_image[image]|max_size[image,2048]'
         ];
 
-        if (! $this->validate($rules)) {
+        if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -765,154 +485,29 @@ class Property extends BaseController
         $newName = $image->getRandomName();
         $image->move(FCPATH . 'uploads/property/floorplan/', $newName);
 
-        $model = new PropertyFloorPlanModel();
-        $model->insert([
+        $floorPlanModel = new PropertyFloorPlanModel();
+        $floorPlanModel->insert([
             'property_id' => $property['id'],
-            'name'        => $this->request->getPost('name'),
+            'unit_id' => $this->request->getPost('unit_id'), // Tambahkan ini
+            'name' => $this->request->getPost('name'),
             'description' => $this->request->getPost('description'),
-            'image'       => $newName
+            'image' => $newName
         ]);
 
-        return redirect()->to(base_url("dashboard/property/{$slug}/floorplan"))->with('success', 'Floor plan added successfully.');
+        return redirect()->back()->with('success', 'Floor plan berhasil ditambahkan.');
     }
 
-    public function storeDocument(string $slug)
+
+
+    public function deleteFloorPlanByDeveloper($devSlug, $propSlug, $id)
     {
-        $property = $this->propertyModel->where('slug', $slug)->first();
-        if (! $property) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Property not found');
-        }
+        $planModel = new PropertyFloorPlanModel();
+        $plan = $planModel->find($id);
 
-        $rules = [
-            'title' => 'required|min_length[3]',
-            'type'  => 'required|in_list[pdf,video]',
-            'video_url' => 'permit_empty|valid_url',
-            'file' => 'permit_empty|uploaded[file]|max_size[file,2048]|ext_in[file,pdf]'
-        ];
+        $path = FCPATH . 'uploads/property/floorplan/' . $plan['image'];
+        if (file_exists($path)) unlink($path);
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
-        $docModel = new PropertyDocumentModel();
-        $data = [
-            'property_id' => $property['id'],
-            'title'       => $this->request->getPost('title'),
-            'type'        => $this->request->getPost('type'),
-        ];
-
-        if ($data['type'] === 'pdf') {
-            $file = $this->request->getFile('file');
-            if ($file && $file->isValid() && ! $file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'uploads/property/documents/', $newName);
-                $data['file_path'] = $newName;
-            }
-        } else {
-            $data['video_url'] = $this->request->getPost('video_url');
-        }
-
-        $docModel->insert($data);
-
-        return redirect()
-            ->to(base_url("dashboard/property/{$slug}/documents"))
-            ->with('success', 'Document added successfully.');
+        $planModel->delete($id);
+        return redirect()->back()->with('success', 'Floor plan berhasil dihapus.');
     }
-
-    public function unitTypes($slug = null)
-    {
-        $unitModel     = new \App\Models\PropertyUnitTypeModel();
-        $propertyModel = new \App\Models\PropertyModel();
-
-        $properties = $propertyModel->findAll();
-        $selectedProperty = null;
-        $units = [];
-
-        if ($slug) {
-            $selectedProperty = $propertyModel->where('slug', $slug)->first();
-            if ($selectedProperty) {
-                $units = $unitModel->where('property_id', $selectedProperty['id'])->findAll();
-            }
-        } else {
-            $units = $unitModel->findAll();
-        }
-
-        return view('admin/property/unit/index', [
-            'title'        => 'Daftar Unit Type',
-            'properties'   => $properties,
-            'units'        => $units,
-            'selectedId'   => $selectedProperty['id'] ?? null,
-            'selectedSlug' => $slug,
-            'breadcrumb'   => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Property',  'url' => base_url('dashboard/property')],
-                ['label' => 'Unit Type']
-            ]
-        ]);
-    }
-
-
-
-
-    public function saveUnit()
-    {
-        $unitModel = new \App\Models\PropertyUnitTypeModel();
-
-        $data = $this->request->getPost([
-            'id', 'property_id', 'name_unit', 'slug', 'type_unit', 'floors',
-            'land_area', 'building_area', 'bedrooms', 'bathrooms',
-            'carport', 'elevator'
-        ]);
-
-        $id = $data['id'] ?? null;
-
-        if (!empty($id)) {
-            // Ambil data lama dari database
-            $existing = $unitModel->find($id);
-
-            // Cek apakah kombinasi yang membentuk slug berubah
-            $oldSlugSource = strtolower(trim($existing['name_unit'] . '-' . $existing['land_area'] . '-' . $existing['building_area']));
-            $newSlugSource = strtolower(trim($data['name_unit'] . '-' . $data['land_area'] . '-' . $data['building_area']));
-
-            if ($oldSlugSource !== $newSlugSource) {
-                // Jika berubah, generate ulang slug
-                $data['slug'] = generateUniqueSlug($newSlugSource, $unitModel);
-            } else {
-                // Jika tidak berubah, pakai slug lama
-                unset($data['slug']);
-            }
-
-            $unitModel->update($id, $data);
-            session()->setFlashdata('success', 'Unit berhasil diperbarui.');
-        } else {
-            // Untuk insert baru, pastikan slug dibuat jika kosong
-            if (empty($data['slug']) && !empty($data['name_unit'])) {
-                $slugSource = $data['name_unit'] . '-' . $data['land_area'] . '-' . $data['building_area'];
-                $data['slug'] = generateUniqueSlug($slugSource, $unitModel);
-            }
-
-            $unitModel->insert($data);
-            session()->setFlashdata('success', 'Unit baru berhasil ditambahkan.');
-        }
-
-        return redirect()->back();
-    }
-
-
-
-
-
-    public function deleteUnit($id)
-    {
-        $unitModel = new \App\Models\PropertyUnitTypeModel();
-        $unitModel->delete($id);
-
-        session()->setFlashdata('success', 'Unit berhasil dihapus.');
-        return redirect()->back();
-    }
-
-
-
 }

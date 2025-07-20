@@ -5,21 +5,23 @@ namespace App\Controllers\Frontend;
 use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\DeveloperModel;
+use App\Models\PropertyImageModel;
 
 class Property extends BaseController
 {
-   public function index()
+    public function index()
     {
         $request = \Config\Services::request();
-        $keyword = $request->getGet('keyword');
-        $city = $request->getGet('city');
+        $keyword   = $request->getGet('keyword');
+        $city      = $request->getGet('city');
         $developer = $request->getGet('developer');
 
-        $propertyModel = new \App\Models\PropertyModel();
+        $propertyModel = new PropertyModel();
+
         $builder = $propertyModel->select('properties.slug as property_slug, properties.*, developers.name as developer_name, developers.slug as developer_slug')
-                         ->join('developers', 'developers.id = properties.developer_id');
+                                 ->join('developers', 'developers.id = properties.developer_id');
 
-
+        // Filter keyword (title & description)
         if ($keyword) {
             $builder = $builder->groupStart()
                 ->like('properties.title', $keyword)
@@ -27,32 +29,39 @@ class Property extends BaseController
                 ->groupEnd();
         }
 
+        // Filter city (sekarang dari properties.location)
         if ($city) {
-            $builder = $builder->where('developers.location', $city);
+            $builder = $builder->where('properties.location', $city);
         }
 
+        // Filter developer
         if ($developer) {
             $builder = $builder->where('properties.developer_id', $developer);
         }
 
         $data['properties'] = $builder->findAll();
 
+        // Filters state (untuk form tetap aktif)
         $data['active_keyword'] = $keyword ?? '';
         $data['active_city'] = $city ?? '';
         $data['active_developer'] = $developer ?? '';
 
-        $data['cities'] = (new DeveloperModel())->distinct()->select('location')->orderBy('location')->findColumn('location');
+        // Cities berdasarkan property (bukan developer lagi)
+        $data['cities'] = $propertyModel->distinct()
+                                        ->select('location')
+                                        ->orderBy('location')
+                                        ->findColumn('location');
+
         $data['developers'] = (new DeveloperModel())->findAll();
 
         return view('frontend/property/index', $data);
     }
 
-
     public function detail($slug)
     {
-        $propertyModel   = new \App\Models\PropertyModel();
-        $imageModel      = new \App\Models\PropertyImageModel();
-        $developerModel  = new \App\Models\DeveloperModel();
+        $propertyModel   = new PropertyModel();
+        $imageModel      = new PropertyImageModel();
+        $developerModel  = new DeveloperModel();
 
         // Cari property berdasarkan slug
         $property = $propertyModel->where('slug', $slug)->first();
@@ -74,7 +83,4 @@ class Property extends BaseController
             'developer' => $developer
         ]);
     }
-
-
-
 }

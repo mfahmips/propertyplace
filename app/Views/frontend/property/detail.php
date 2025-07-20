@@ -8,73 +8,56 @@ Property Page Area
     <section class="space-top space-extra-bottom">
         <div class="container">
             <div class="slider-area property-slider1">
-                <div class="swiper th-slider mb-4" id="propertySlider" data-slider-options='{"effect":"fade","loop":true,"thumbs":{"swiper":".property-thumb-slider"},"autoplayDisableOnInteraction":"true"}'>
+                <div class="swiper th-slider mb-4" id="propertySlider" data-slider-options='{"effect":"fade","loop":true,"thumbs":{"swiper":".property-thumb-slider"}}'>
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_1.jpg' ) ?>" alt="img">
+                        <?php if (!empty($images)): ?>
+                            <?php foreach ($images as $img): ?>
+                                <div class="swiper-slide">
+                                    <div class="property-slider-img">
+                                        <img src="<?= base_url('uploads/property/' . esc($img['filename'])) ?>" alt="<?= esc($property['title']) ?>">
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="swiper-slide">
+                                <div class="property-slider-img">
+                                    <img src="<?= base_url('images/placeholder-800x600.png') ?>" alt="No Image">
+                                </div>
                             </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_2.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_3.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_4.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_5.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_1.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_2.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_3.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_4.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_5.jpg' ) ?>" alt="img">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper th-slider property-thumb-slider" data-slider-options='{"effect":"slide","loop":true,"breakpoints":{"0":{"slidesPerView":2},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"3"},"992":{"slidesPerView":"3"},"1200":{"slidesPerView":"4"}},"autoplayDisableOnInteraction":"true"}'>
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <div class="property-slider-img">
-                                <img src="<?= base_url('assets/frontend/img/property/property_inner_5.jpg' ) ?>" alt="Image">
-                            </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <button data-slider-prev="#propertySlider" class="slider-arrow style3 slider-prev"><img src="<?= base_url('assets/frontend/img/icon/arrow-left.svg' ) ?>" alt="icon"></button>
-                <button data-slider-next="#propertySlider" class="slider-arrow style3 slider-next"><img src="<?= base_url('assets/frontend/img/icon/arrow-right.svg' ) ?>" alt="icon"></button>
+                <!-- Thumbnail Slider -->
+                <div class="swiper th-slider property-thumb-slider" data-slider-options='{"loop":true,"breakpoints":{"0":{"slidesPerView":2},"576":{"slidesPerView":2},"768":{"slidesPerView":3},"992":{"slidesPerView":3},"1200":{"slidesPerView":4}}}'>
+                    <div class="swiper-wrapper">
+                        <?php if (!empty($images)): ?>
+                            <?php foreach ($images as $img): ?>
+                                <div class="swiper-slide">
+                                    <div class="property-slider-img">
+                                        <img src="<?= base_url('uploads/property/' . esc($img['filename'])) ?>" alt="<?= esc($property['title']) ?>">
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="swiper-slide">
+                                <div class="property-slider-img">
+                                    <img src="<?= base_url('images/placeholder-200x150.png') ?>" alt="No Thumbnail">
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Arrows -->
+                <button data-slider-prev="#propertySlider" class="slider-arrow style3 slider-prev">
+                    <img src="<?= base_url('assets/frontend/img/icon/arrow-left.svg') ?>" alt="Prev">
+                </button>
+                <button data-slider-next="#propertySlider" class="slider-arrow style3 slider-next">
+                    <img src="<?= base_url('assets/frontend/img/icon/arrow-right.svg') ?>" alt="Next">
+                </button>
             </div>
+
             <div class="row gx-30">
                 <div class="col-xxl-8 col-lg-7">
                     <div class="property-page-single">
