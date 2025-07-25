@@ -47,6 +47,7 @@ Client Area
     </div>
 
 <?= $this->include('frontend/layout/property') ?>
+<?= $this->include('frontend/layout/instagram_feeds') ?>
 
 <?= $this->endSection() ?>
     

@@ -2,17 +2,18 @@
 <div class="app-sidebar">
     <!-- Sidebar Logo -->
     <div class="logo-box">
-        <a href="<?= base_url('dashboard') ?>" class="logo-dark">
-            <img src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>" style="height:60px;" alt="logo dark">
+        <a href="<?= base_url('dashboard') ?>" class="logo-lg">
+            <img src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>" alt="Logo Besar">
         </a>
-        <a href="<?= base_url('dashboard') ?>" class="logo-light">
-            <img src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>" style="height:60px;" alt="logo light">
+        <a href="<?= base_url('dashboard') ?>" class="logo-sm">
+            <img src="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>" alt="Logo Kecil">
         </a>
     </div>
 
+
     <div class="scrollbar" data-simplebar>
         <?php $role = session('role'); ?>
-        <ul class="navbar-nav" id="navbar-nav">
+        <ul class="navbar-nav" id="navbar-nav" style="margin-top: 20px;">
 
 
 
@@ -107,3 +108,42 @@
     <?php endfor; ?>
 </div>
 <!-- App Menu End -->
+
+<style>
+.logo-box {
+    text-align: center;
+    padding: 60px 0;
+}
+
+.logo-box img {
+    max-width: 30%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Default: tampilkan logo besar */
+.logo-lg {
+    display: block;
+}
+
+.logo-sm {
+    display: none;
+}
+
+/* Jika sidebar minimize */
+.app-sidebar.minimized .logo-lg {
+    display: none;
+}
+
+.app-sidebar.minimized .logo-sm {
+    display: block;
+}
+</style>
+
+
+<script>
+document.querySelector('.menu-toggle').addEventListener('click', function(){
+    document.querySelector('.app-sidebar').classList.toggle('minimized');
+});
+
+</script>

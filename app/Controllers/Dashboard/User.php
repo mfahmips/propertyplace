@@ -4,7 +4,6 @@ namespace App\Controllers\Dashboard;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
-use CodeIgniter\Images\Image;
 
 class User extends BaseController
 {
@@ -15,36 +14,21 @@ class User extends BaseController
         $this->userModel = new UserModel();
     }
 
-    // ✅ INDEX USER
+    // INDEX + modal add/edit
     public function index()
     {
         $data = [
-            'title' => 'Manajemen User',
+            'title'      => 'Manajemen User',
             'breadcrumb' => [['label' => 'Dashboard'], ['label' => 'User']],
-            'users' => $this->userModel->findAll(),
+            'users'      => $this->userModel->findAll(),
+            'roles'      => ['admin', 'karyawan', 'customer'],
+            'errors'     => session()->getFlashdata('validation') ? session()->getFlashdata('validation')->getErrors() : []
         ];
 
         return view('admin/user/index', $data);
     }
 
-    // ✅ FORM TAMBAH
-    public function create()
-    {
-        $data = [
-            'title'      => 'Tambah User',
-            'breadcrumb' => [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'User', 'url' => base_url('dashboard/user')],
-                ['label' => 'Tambah']
-            ],
-            'roles' => ['admin', 'karyawan', 'customer'],
-            'validation' => \Config\Services::validation()
-        ];
-
-        return view('admin/user/create', $data);
-    }
-
-
+    // STORE USER (Tambah)
     public function store()
     {
         $rules = [
@@ -55,7 +39,7 @@ class User extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', \Config\Services::validation());
+            return redirect()->to('/dashboard/user')->withInput()->with('validation', \Config\Services::validation());
         }
 
         $fotoName = null;
@@ -64,14 +48,12 @@ class User extends BaseController
         if ($foto && $foto->isValid() && !$foto->hasMoved()) {
             $fotoName = $foto->getRandomName();
 
-            // Simpan sementara
-            $tempPath = $foto->getTempName();
+            $uploadPath = FCPATH . 'uploads/user/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
 
-            // Crop 1:1 dan simpan
-            \Config\Services::image()
-                ->withFile($tempPath)
-                ->fit(300, 300, 'center')
-                ->save(FCPATH . 'uploads/user/' . $fotoName);
+            $foto->move($uploadPath, $fotoName);
         }
 
         $slug = url_title($this->request->getPost('name'), '-', true);
@@ -82,44 +64,83 @@ class User extends BaseController
             'email'     => $this->request->getPost('email'),
             'password'  => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'role'      => $this->request->getPost('role'),
-            'is_active' => $this->request->getPost('is_active') ?? 1,
+            'is_active' => 1,
             'foto'      => $fotoName
         ]);
 
         return redirect()->to('/dashboard/user')->with('success', 'User berhasil ditambahkan');
     }
 
-
-    public function edit($slug)
+    // UPDATE USER (Edit by ID)
+   public function update($id)
     {
-        // Ambil user berdasarkan slug
-        $user = $this->userModel->where('slug', $slug)->first();
+        $user = $this->userModel->find($id);
 
-        // Jika tidak ditemukan, lempar error 404
         if (!$user) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("User tidak ditemukan.");
         }
 
-        // Cek role user yang sedang login
-        $isAdmin = session()->get('role') === 'admin';
+        // Gunakan validasi custom dari model agar aman untuk update (email unik kecuali milik sendiri)
+        $rules = $this->userModel->getUpdateRules($id);
 
-        // Tentukan breadcrumb berdasarkan role
-        $breadcrumb = $isAdmin
-            ? [
+        if (!$this->validate($rules)) {
+            return redirect()->to('/dashboard/user')->withInput()->with('validation', \Config\Services::validation());
+        }
+
+        $slugBaru = url_title($this->request->getPost('name'), '-', true);
+
+        // DATA yang akan diupdate WAJIB ada 'id' agar save() -> update, bukan insert!
+        $data = [
+            'id'    => $id, // ✅ INI YANG PENTING
+            'name'  => $this->request->getPost('name'),
+            'slug'  => $slugBaru,
+            'email' => $this->request->getPost('email'),
+            'role'  => $this->request->getPost('role'),
+        ];
+
+        // Optional update password
+        if ($this->request->getPost('password')) {
+            $data['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
+        }
+
+        // Upload foto jika ada
+        $foto = $this->request->getFile('foto');
+        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
+            $fotoName = $foto->getRandomName();
+            $foto->move(FCPATH . 'uploads/user', $fotoName);
+
+            // Hapus foto lama jika ada
+            if (!empty($user['foto']) && file_exists(FCPATH . 'uploads/user/' . $user['foto'])) {
+                unlink(FCPATH . 'uploads/user/' . $user['foto']);
+            }
+
+            $data['foto'] = $fotoName;
+        }
+
+        // Pakai save agar update by ID, bukan insert baru
+        $this->userModel->save($data);
+
+        return redirect()->to('/dashboard/user')->with('success', 'User berhasil diupdate');
+}
+
+
+
+    // OPTIONAL: Halaman edit khusus (jika masih dipakai)
+    public function edit($slug)
+    {
+        $user = $this->userModel->where('slug', $slug)->first();
+
+        if (!$user) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("User tidak ditemukan.");
+        }
+
+        $data = [
+            'title'      => 'Edit User',
+            'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'User', 'url' => base_url('dashboard/user')],
                 ['label' => 'Edit']
-            ]
-            : [
-                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-                ['label' => 'Profile', 'url' => base_url('dashboard/user/profile')],
-                ['label' => 'Edit Profile']
-            ];
-
-        // Kirim data ke view
-        $data = [
-            'title'      => $isAdmin ? 'Edit User' : 'Edit Profile',
-            'breadcrumb' => $breadcrumb,
+            ],
             'user'       => $user,
             'roles'      => ['admin', 'karyawan', 'customer'],
             'validation' => \Config\Services::validation()
@@ -128,75 +149,11 @@ class User extends BaseController
         return view('admin/user/edit', $data);
     }
 
-
-
-
-
-    public function update($slug)
+    // PROFILE USER
+    public function profile()
     {
-        $user = $this->userModel->where('slug', $slug)->first();
-        if (!$user) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("User tidak ditemukan.");
-        }
-
-        $id = $user['id'];
-
-        $rules = [
-            'name'     => 'required|min_length[3]',
-            'email'    => "required|valid_email|is_unique[users.email,id,{$id}]",
-            'role'     => 'required|in_list[admin,karyawan,customer]',
-            'password' => 'permit_empty|min_length[6]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', \Config\Services::validation());
-        }
-
-        $slugBaru = url_title($this->request->getPost('name'), '-', true);
-        $fotoName = $user['foto'];
-
-        $foto = $this->request->getFile('foto');
-
-        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
-            // Hapus foto lama
-            if ($fotoName && file_exists(FCPATH . 'uploads/user/' . $fotoName)) {
-                unlink(FCPATH . 'uploads/user/' . $fotoName);
-            }
-
-            $fotoName = $foto->getRandomName();
-            $tempPath = $foto->getTempName();
-
-            \Config\Services::image()
-                ->withFile($tempPath)
-                ->fit(300, 300, 'center')
-                ->save(FCPATH . 'uploads/user/' . $fotoName);
-        }
-
-        $data = [
-            'id'        => $id,
-            'name'      => $this->request->getPost('name'),
-            'slug'      => $slugBaru,
-            'email'     => $this->request->getPost('email'),
-            'role'      => session()->get('role') === 'admin' ? $this->request->getPost('role') : $user['role'],
-            'is_active' => session()->get('role') === 'admin' ? $this->request->getPost('is_active') : $user['is_active'],
-            'foto'      => $fotoName
-        ];
-
-        if ($this->request->getPost('password')) {
-            $data['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
-        }
-
-        $this->userModel->skipValidation(true)->save($data);
-
-        return redirect()->to('/dashboard/user')->with('success', 'User berhasil diperbarui');
-    }
-
-
-   public function profile()
-    {
-        $userId = session()->get('id'); // pastikan ID user disimpan saat login
-
-        $user = $this->userModel->find($userId); // ambil user lengkap dari database
+        $userId = session()->get('id');
+        $user = $this->userModel->find($userId);
 
         if (!$user) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('User tidak ditemukan.');
@@ -215,33 +172,28 @@ class User extends BaseController
         return view('admin/user/profile', $data);
     }
 
-
-
-
-
-    // ✅ HAPUS
+    // DELETE USER
     public function delete($id)
     {
         $user = $this->userModel->find($id);
+
         if (!$user) {
             return redirect()->to('/dashboard/user')->with('error', 'User tidak ditemukan.');
         }
 
-        // Hapus foto
-        if ($user['foto'] && file_exists('uploads/user/' . $user['foto'])) {
-            unlink('uploads/user/' . $user['foto']);
+        if (!empty($user['foto']) && file_exists(FCPATH . 'uploads/user/' . $user['foto'])) {
+            unlink(FCPATH . 'uploads/user/' . $user['foto']);
         }
 
         $this->userModel->delete($id);
+
         return redirect()->to('/dashboard/user')->with('success', 'User berhasil dihapus');
     }
 
+    // DELETE FOTO
     public function deletePhoto($id)
     {
         $user = $this->userModel->find($id);
-        if (!$user) {
-            return redirect()->to('/dashboard/user')->with('error', 'User tidak ditemukan.');
-        }
 
         if (!empty($user['foto']) && file_exists(FCPATH . 'uploads/user/' . $user['foto'])) {
             unlink(FCPATH . 'uploads/user/' . $user['foto']);
@@ -251,5 +203,4 @@ class User extends BaseController
 
         return redirect()->back()->with('success', 'Foto berhasil dihapus.');
     }
-
 }

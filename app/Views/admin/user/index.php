@@ -2,25 +2,19 @@
 <?= $this->section('content') ?>
 
 <div class="container-fluid">
-    <!-- ========== Page Title Start ========== -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
                 <h4 class="mb-0"><?= esc($title) ?></h4>
                 <ol class="breadcrumb mb-0">
                     <?php foreach ($breadcrumb as $item) : ?>
-                        <?php if (isset($item['url'])) : ?>
-                            <li class="breadcrumb-item"><a href="<?= $item['url'] ?>"><?= esc($item['label']) ?></a></li>
-                        <?php else : ?>
-                            <li class="breadcrumb-item active"><?= esc($item['label']) ?></li>
-                        <?php endif ?>
+                        <li class="breadcrumb-item"><?= isset($item['url']) ? '<a href="'.$item['url'].'">'.esc($item['label']).'</a>' : esc($item['label']) ?></li>
                     <?php endforeach ?>
                 </ol>
             </div>
         </div>
     </div>
 
-    <!-- Flash messages -->
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
     <?php endif ?>
@@ -29,12 +23,11 @@
         <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
     <?php endif ?>
 
-    <!-- Start Table -->
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <a href="<?= base_url('dashboard/user/create') ?>" class="btn btn-primary btn-sm">Add New</a>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">Tambah User</button>
                 </div>
 
                 <div class="card-body">
@@ -42,50 +35,35 @@
                         <table class="table table-striped table-borderless table-centered">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">Role</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Action</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($users)) : ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No users found.</td>
-                                    </tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Tidak ada data.</td></tr>
                                 <?php else : ?>
                                     <?php foreach ($users as $user) : ?>
                                         <tr>
                                             <td>
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <?php if (!empty($user['foto'])) : ?>
-                                                        <img src="<?= base_url('uploads/user/' . esc($user['foto'])) ?>" width="50" height="50" class="rounded-circle">
-                                                    <?php else : ?>
-                                                        <img src="https://via.placeholder.com/50x50?text=No+Image" class="rounded-circle">
-                                                    <?php endif ?>
-                                                    <div class="d-block">
-                                                            <h5 class="mb-0"><?= esc($user['name']) ?></h5>
-                                                    </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="<?= !empty($user['foto']) ? base_url('uploads/user/' . esc($user['foto'])) : 'https://via.placeholder.com/50x50?text=No+Image' ?>" width="50" height="50" class="rounded-circle">
+                                                    <div><strong><?= esc($user['name']) ?></strong></div>
                                                 </div>
                                             </td>
                                             <td><?= esc($user['email']) ?></td>
                                             <td><span class="badge bg-info"><?= esc($user['role']) ?></span></td>
                                             <td>
-                                                <?php if ((int) $user['is_active'] === 1) : ?>
-                                                    <span class="badge bg-success">Active</span>
-                                                <?php else : ?>
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                <?php endif ?>
+                                                <span class="badge <?= $user['is_active'] ? 'bg-success' : 'bg-danger' ?>">
+                                                    <?= $user['is_active'] ? 'Active' : 'Inactive' ?>
+                                                </span>
                                             </td>
                                             <td>
-                                                <a href="<?= base_url('dashboard/user/edit/' . esc($user['slug'])) ?>" class="btn btn-warning btn-sm">Edit</a>
-
-                                                <?php if (session()->get('role') === 'admin') : ?>
-                                                    <a href="<?= base_url('dashboard/user/delete/' . $user['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?')">
-                                                        Delete
-                                                    </a>
-                                                <?php endif ?>
+                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal<?= $user['id'] ?>">Edit</button>
+                                                <a href="<?= base_url('dashboard/user/delete/' . $user['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus user ini?')">Delete</a>
                                             </td>
                                         </tr>
                                     <?php endforeach ?>
@@ -93,10 +71,132 @@
                             </tbody>
                         </table>
                     </div>
-                </div> <!-- end card-body -->
-            </div> <!-- end card -->
-        </div> <!-- end col -->
-    </div> <!-- end row -->
-</div> <!-- end container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add User -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="<?= base_url('dashboard/user/store') ?>" method="post" enctype="multipart/form-data" class="modal-content">
+            <?= csrf_field() ?>
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah User Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Nama</label>
+                    <input type="text" name="name" class="form-control" value="<?= old('name') ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="<?= old('email') ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="" disabled <?= old('role') ? '' : 'selected' ?>>-- Pilih Role --</option>
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= $role ?>" <?= old('role') === $role ? 'selected' : '' ?>><?= ucfirst($role) ?></option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Foto</label>
+                    <input type="file" name="foto" id="foto" class="form-control" accept="image/*" onchange="previewImage(event)">
+                    <div class="mt-2">
+                        <img id="preview" src="https://via.placeholder.com/150" class="img-thumbnail" style="max-width:150px; aspect-ratio:1/1; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit User -->
+<?php foreach ($users as $user) : ?>
+<div class="modal fade" id="editUserModal<?= $user['id'] ?>" tabindex="-1" aria-labelledby="editUserModalLabel<?= $user['id'] ?>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="<?= base_url('dashboard/user/update/' . $user['id']) ?>" method="post" enctype="multipart/form-data" class="modal-content">
+            <?= csrf_field() ?>
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Nama</label>
+                    <input type="text" name="name" class="form-control" value="<?= esc($user['name']) ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="<?= esc($user['email']) ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Password (Kosongkan jika tidak diubah)</label>
+                    <input type="password" name="password" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label>Role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="" disabled>-- Pilih Role --</option>
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= $role ?>" <?= $user['role'] === $role ? 'selected' : '' ?>><?= ucfirst($role) ?></option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Foto</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*" onchange="previewEditImage(event, <?= $user['id'] ?>)">
+                    <div class="mt-2">
+                        <img id="previewEdit<?= $user['id'] ?>" src="<?= !empty($user['foto']) ? base_url('uploads/user/' . $user['foto']) : 'https://via.placeholder.com/150' ?>" class="img-thumbnail" style="max-width:150px; aspect-ratio:1/1; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endforeach ?>
+
+<script>
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = () => { document.getElementById('preview').src = reader.result; };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+function previewEditImage(event, id) {
+    const reader = new FileReader();
+    reader.onload = () => { document.getElementById('previewEdit' + id).src = reader.result; };
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
 
 <?= $this->endSection() ?>

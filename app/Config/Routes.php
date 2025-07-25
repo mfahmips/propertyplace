@@ -50,16 +50,15 @@ $routes->get('dashboard', 'Dashboard\Index::index');
 $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
     // === USER ===
-    $routes->group('user', function ($routes) {
+        $routes->group('user', function ($routes) {
         $routes->get('/', 'Dashboard\User::index');
         $routes->get('create', 'Dashboard\User::create');
         $routes->post('store', 'Dashboard\User::store');
         $routes->get('edit/(:segment)', 'Dashboard\User::edit/$1');
-        $routes->post('update/(:segment)', 'Dashboard\User::update/$1');
+        $routes->post('update/(:num)', 'Dashboard\User::update/$1');
         $routes->get('delete/(:num)', 'Dashboard\User::delete/$1');
-        $routes->get('user/deletePhoto/(:num)', 'Dashboard\User::deletePhoto/$1');
+        $routes->get('deletePhoto/(:num)', 'Dashboard\User::deletePhoto/$1'); // ✅ Diperbaiki
         $routes->get('profile', 'Dashboard\User::profile');
-
     });
 
     // === CRUD Developer ===
