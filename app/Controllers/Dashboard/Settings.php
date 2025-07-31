@@ -4,6 +4,8 @@ namespace App\Controllers\Dashboard;
 
 use App\Controllers\BaseController;
 use App\Models\SettingsModel;
+use App\Models\SettingsImageModel;
+
 
 class Settings extends BaseController
 {
@@ -17,16 +19,26 @@ class Settings extends BaseController
     // Dashboard → Settings
     public function index()
     {
+        $settingsModel      = $this->model;
+        $settingsImageModel = new \App\Models\SettingsImageModel();
+
         $data = [
             'title'      => 'Settings',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings'],
             ],
-            'settings'   => $this->model->first(),
+            'settings' => $settingsModel->first(),
+            'banners'  => $settingsImageModel
+                ->whereIn('type', ['home', 'about', 'property', 'blog', 'contact']) // Ambil hanya banner-page
+                ->orderBy('type', 'ASC') // gunakan 'type' bukan 'title'
+                ->findAll(),
         ];
+
         return view('admin/settings/index', $data);
     }
+
+
 
     // Dashboard → Settings → Site Info
     public function siteInfo()
@@ -236,4 +248,81 @@ class Settings extends BaseController
             ->to(base_url('dashboard/settings'))
             ->with('success', 'Maintenance Mode updated.');
     }
+
+    public function banner()
+    {
+        $bannerModel = new SettingsImageModel();
+        $banners = $bannerModel->orderBy('sort_order', 'ASC')->findAll();
+
+        return view('admin/settings/banner', [
+            'title' => 'Banner Image Settings',
+            'breadcrumb' => [
+                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
+                ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
+                ['label' => 'Banner Images']
+            ],
+            'banners' => $banners
+        ]);
+    }
+
+    public function saveBanner()
+{
+    $model = new SettingsImageModel();
+    $id = $this->request->getPost('id');
+
+    $data = [
+        'type'       => $this->request->getPost('type'),
+        'status'     => $this->request->getPost('status'),
+        'sort_order' => $this->request->getPost('sort_order') ?? 0,
+    ];
+
+    // Upload file jika ada
+    $file = $this->request->getFile('filename');
+    if ($file && $file->isValid() && !$file->hasMoved()) {
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'uploads/settings/banner/', $newName);
+        $data['filename'] = $newName;
+
+        // Jika update, hapus file lama
+        if ($id) {
+            $old = $model->find($id);
+            if ($old && !empty($old['filename'])) {
+                $oldPath = FCPATH . 'uploads/settings/banner/' . $old['filename'];
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+        }
+    }
+
+    if ($id) {
+        $model->update($id, $data);
+    } else {
+        $model->insert($data);
+    }
+
+    return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner saved successfully.');
+}
+
+
+    public function deleteBanner($id)
+{
+    $model = new SettingsImageModel();
+    $banner = $model->find($id);
+
+    if ($banner && !empty($banner['filename'])) {
+        $filePath = FCPATH . 'uploads/settings/banner/' . $banner['filename'];
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+    }
+
+    $model->delete($id);
+
+    return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner deleted successfully.');
+}
+
+
+
+
 }

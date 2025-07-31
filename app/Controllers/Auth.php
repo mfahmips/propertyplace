@@ -16,6 +16,9 @@ class Auth extends BaseController
         $this->settingsModel = new SettingsModel();
     }
 
+    // ====================
+    // FORM LOGIN
+    // ====================
     public function loginForm()
     {
         // Ambil settings dari tabel settings
@@ -23,24 +26,37 @@ class Auth extends BaseController
 
         return view('auth/login', [
             'site_name' => $settings['site_name'] ?? 'PropertyPlace',
-            'site_icon'    => $settings['site_icon'] ?? 'uploads/settings/default-favicon.png'
+            'site_icon' => $settings['site_icon'] ?? 'uploads/settings/default-favicon.png'
         ]);
     }
 
+    // ====================
+    // PROSES LOGIN
+    // ====================
     public function login()
     {
-        $email    = $this->request->getPost('email');
-        $password = $this->request->getPost('password');
+        $login    = trim($this->request->getPost('email')); // Bisa berupa email atau username
+        $password = trim($this->request->getPost('password'));
 
-        $user = $this->userModel->where('email', $email)->first();
+        // Deteksi apakah input adalah email
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        // Cari user berdasarkan email atau username
+        $user = $this->userModel->where($field, $login)->first();
 
         if (!$user) {
-            return redirect()->back()->withInput()->with('error', 'Email tidak ditemukan.');
+            return redirect()->back()->withInput()->with('error', ucfirst($field) . ' tidak ditemukan.');
         }
 
         if (!password_verify($password, $user['password'])) {
-            return redirect()->back()->withInput()->with('error', 'Password salah.');
+            dd([
+                'input'       => $password,
+                'hash_in_db'  => $user['password'],
+                'verified'    => password_verify($password, $user['password']),
+                'hash_length' => strlen($user['password']),
+            ]);
         }
+
 
         if ((int) $user['is_active'] !== 1) {
             return redirect()->back()->withInput()->with('error', 'Akun Anda tidak aktif.');
@@ -60,6 +76,9 @@ class Auth extends BaseController
         return redirect()->to('/dashboard');
     }
 
+    // ====================
+    // LOGOUT
+    // ====================
     public function logout()
     {
         session()->destroy();

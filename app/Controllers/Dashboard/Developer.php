@@ -12,33 +12,36 @@ class Developer extends BaseController
         $this->model = new DeveloperModel();
     }
 
-    public function index()
+   public function index()
     {
         $developerModel = new \App\Models\DeveloperModel();
         $propertyModel  = new \App\Models\PropertyModel();
 
-        // Ambil developer dengan pagination (gunakan model bawaan class kalau ada)
+        // Ambil daftar developer dengan pagination
         $devs = $developerModel->orderBy('name', 'ASC')->paginate(5, 'developers');
 
-        // Tambahkan properti ke masing-masing developer
+        // Untuk setiap developer, ambil properti mereka beserta detail-nya
         foreach ($devs as &$d) {
             $d['properties'] = $propertyModel
-                ->where('developer_id', $d['id'])
+                ->select('properties.id, properties.title, property_details.location, property_details.price_text')
+                ->join('property_details', 'property_details.property_id = properties.id', 'left')
+                ->where('properties.developer_id', $d['id'])
                 ->findAll();
         }
 
         $data = [
-            'title'      => 'Developers',
+            'title' => 'Developers',
             'breadcrumb' => [
-                ['label'=>'Dashboard','url'=>base_url('dashboard')],
-                ['label'=>'Developer'],
+                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
+                ['label' => 'Developer'],
             ],
-            'devs'  => $devs,               // Developer beserta property masing-masing
+            'devs'  => $devs,
             'pager' => $developerModel->pager
         ];
 
         return view('admin/developer/index', $data);
     }
+
 
 
     public function create()
@@ -127,15 +130,16 @@ class Developer extends BaseController
         helper('form');
 
         $validationRule = [
-            'name'     => 'required|min_length[3]',
-            'logo'     => [
+            'name' => 'required|min_length[3]',
+            'logo' => [
                 'label' => 'Developer Logo',
                 'rules' => 'permit_empty'
-                         . '|is_image[logo]'
-                         . '|mime_in[logo,image/jpg,image/jpeg,image/png,image/webp]'
-                         . '|max_size[logo,2048]',
+                    . '|is_image[logo]'
+                    . '|mime_in[logo,image/jpg,image/jpeg,image/png,image/webp]'
+                    . '|max_size[logo,2048]',
             ],
         ];
+
         if (! $this->validate($validationRule)) {
             return redirect()->back()->withInput()->with('validation', $this->validator);
         }
@@ -143,7 +147,7 @@ class Developer extends BaseController
         $name = $this->request->getPost('name');
         $slug = url_title($name, '-', true);
 
-        // Pastikan slug unik
+        // Cek slug unik
         $baseSlug = $slug;
         $i = 1;
         while (($dev = $this->model->where('slug', $slug)->first()) && $dev['id'] != $id) {
@@ -156,30 +160,35 @@ class Developer extends BaseController
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        // Cek apakah logo di-upload ulang
+        // Cek apakah file logo baru di-upload
         $file = $this->request->getFile('logo');
-        if ($file && $file->isValid() && ! $file->hasMoved()) {
+        if ($file && $file->isValid() && !$file->hasMoved()) {
             $targetDir = FCPATH . 'uploads/developer/';
-            if (! is_dir($targetDir)) {
+
+            // Buat folder jika belum ada
+            if (!is_dir($targetDir)) {
                 mkdir($targetDir, 0755, true);
             }
 
-            // Hapus logo lama
+            // Ambil logo lama dan hapus jika ada
             $oldLogo = $this->model->find($id)['logo'] ?? null;
             if ($oldLogo && file_exists($targetDir . $oldLogo)) {
                 unlink($targetDir . $oldLogo);
             }
 
+            // Simpan logo baru
             $newName = $file->getRandomName();
             $file->move($targetDir, $newName);
             $data['logo'] = $newName;
         }
 
+        // Update ke database
         $this->model->update($id, $data);
 
         return redirect()->to(base_url('dashboard/developer'))
                          ->with('success', 'Developer updated successfully.');
     }
+
 
     public function delete($id)
     {

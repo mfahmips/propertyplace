@@ -36,7 +36,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Nama</th>
-                                    <th>Email</th>
+                                    <th>Jabatan</th>
                                     <th>Role</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
@@ -54,7 +54,7 @@
                                                     <div><strong><?= esc($user['name']) ?></strong></div>
                                                 </div>
                                             </td>
-                                            <td><?= esc($user['email']) ?></td>
+                                            <td><?= esc($user['position']) ?></td>
                                             <td><span class="badge bg-info"><?= esc($user['role']) ?></span></td>
                                             <td>
                                                 <span class="badge <?= $user['is_active'] ? 'bg-success' : 'bg-danger' ?>">
@@ -62,7 +62,8 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal<?= $user['id'] ?>">Edit</button>
+                                                <a href="<?= base_url('dashboard/user/profile/' . $user['slug']) ?>" class="btn btn-warning btn-sm">Edit</a>
+
                                                 <a href="<?= base_url('dashboard/user/delete/' . $user['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus user ini?')">Delete</a>
                                             </td>
                                         </tr>
@@ -80,123 +81,75 @@
 <!-- Modal Add User -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="<?= base_url('dashboard/user/store') ?>" method="post" enctype="multipart/form-data" class="modal-content">
-            <?= csrf_field() ?>
-            <div class="modal-header">
-                <h5 class="modal-title">Tambah User Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Nama</label>
-                    <input type="text" name="name" class="form-control" value="<?= old('name') ?>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<?= old('email') ?>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Role</label>
-                    <select name="role" class="form-select" required>
-                        <option value="" disabled <?= old('role') ? '' : 'selected' ?>>-- Pilih Role --</option>
-                        <?php foreach ($roles as $role): ?>
-                            <option value="<?= $role ?>" <?= old('role') === $role ? 'selected' : '' ?>><?= ucfirst($role) ?></option>
-                        <?php endforeach ?>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label>Foto</label>
-                    <input type="file" name="foto" id="foto" class="form-control" accept="image/*" onchange="previewImage(event)">
-                    <div class="mt-2">
-                        <img id="preview" src="https://via.placeholder.com/150" class="img-thumbnail" style="max-width:150px; aspect-ratio:1/1; object-fit:cover;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Simpan</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            </div>
-        </form>
+        <form action="<?= base_url('dashboard/user/store') ?>" method="post" class="modal-content">
+    <?= csrf_field() ?>
+    <div class="modal-header">
+        <h5 class="modal-title">Tambah User Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
     </div>
-</div>
 
-<!-- Modal Edit User -->
-<?php foreach ($users as $user) : ?>
-<div class="modal fade" id="editUserModal<?= $user['id'] ?>" tabindex="-1" aria-labelledby="editUserModalLabel<?= $user['id'] ?>" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form action="<?= base_url('dashboard/user/update/' . $user['id']) ?>" method="post" enctype="multipart/form-data" class="modal-content">
-            <?= csrf_field() ?>
-            <div class="modal-header">
-                <h5 class="modal-title">Edit User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">Nama</label>
+                <input type="text" name="name" id="name" class="form-control" value="<?= old('name') ?>" required>
             </div>
-
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Nama</label>
-                    <input type="text" name="name" class="form-control" value="<?= esc($user['name']) ?>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<?= esc($user['email']) ?>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Password (Kosongkan jika tidak diubah)</label>
-                    <input type="password" name="password" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <label>Role</label>
-                    <select name="role" class="form-select" required>
-                        <option value="" disabled>-- Pilih Role --</option>
-                        <?php foreach ($roles as $role): ?>
-                            <option value="<?= $role ?>" <?= $user['role'] === $role ? 'selected' : '' ?>><?= ucfirst($role) ?></option>
-                        <?php endforeach ?>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label>Foto</label>
-                    <input type="file" name="foto" class="form-control" accept="image/*" onchange="previewEditImage(event, <?= $user['id'] ?>)">
-                    <div class="mt-2">
-                        <img id="previewEdit<?= $user['id'] ?>" src="<?= !empty($user['foto']) ? base_url('uploads/user/' . $user['foto']) : 'https://via.placeholder.com/150' ?>" class="img-thumbnail" style="max-width:150px; aspect-ratio:1/1; object-fit:cover;">
-                    </div>
+            <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" id="username" class="form-control" value="<?= old('username') ?>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" name="email" id="email" class="form-control" value="<?= old('email') ?>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="role" class="form-label">Role</label>
+                <select name="role" id="role" class="form-select" required>
+                    <option value="" disabled <?= old('role') ? '' : 'selected' ?>>-- Pilih Role --</option>
+                    <?php foreach ($roles as $role): ?>
+                        <option value="<?= $role ?>" <?= old('role') === $role ? 'selected' : '' ?>>
+                            <?= ucfirst($role) ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-12">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="passwordInput" class="form-control" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="bi bi-eye-slash" id="eyeIcon"></i>
+                    </button>
                 </div>
             </div>
-
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Simpan</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-<?php endforeach ?>
 
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+    </div>
+</form>
+
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Toggle Password Visibility Script -->
 <script>
-function previewImage(event) {
-    const reader = new FileReader();
-    reader.onload = () => { document.getElementById('preview').src = reader.result; };
-    reader.readAsDataURL(event.target.files[0]);
-}
-
-function previewEditImage(event, id) {
-    const reader = new FileReader();
-    reader.onload = () => { document.getElementById('previewEdit' + id).src = reader.result; };
-    reader.readAsDataURL(event.target.files[0]);
-}
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const input = document.getElementById('passwordInput');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    });
 </script>
+
 
 <?= $this->endSection() ?>

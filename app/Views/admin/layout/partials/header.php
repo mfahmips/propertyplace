@@ -56,10 +56,11 @@
                                 Halo, <?= esc(session('name')) ?>!
                             </h6>
 
-                            <a class="dropdown-item" href="<?= base_url('dashboard/user/profile') ?>">
+                            <a class="dropdown-item" href="<?= base_url('dashboard/user/profile/' . session('slug')) ?>">
                                 <iconify-icon icon="solar:user-outline" class="align-middle me-2 fs-18"></iconify-icon>
                                 <span class="align-middle">Profil Saya</span>
                             </a>
+
 
                             <div class="dropdown-divider my-1"></div>
 

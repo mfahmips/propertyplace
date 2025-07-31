@@ -99,7 +99,7 @@
       <form action="<?= base_url('login') ?>" method="post">
         <?= csrf_field() ?>
 
-        <input type="email" name="email" placeholder="Alamat Email" required />
+        <input type="text" name="email" placeholder="Email atau Username" required />
 
         <!-- Password + toggle -->
         <div class="password-wrapper">
@@ -124,8 +124,6 @@
         <div class="social-login">
           <span>Atau masuk dengan</span><br>
           <a href="<?= base_url('auth/google') ?>"><i class="fab fa-google"></i></a>
-          <a href="<?= base_url('auth/facebook') ?>"><i class="fab fa-facebook-f"></i></a>
-          <a href="<?= base_url('auth/github') ?>"><i class="fab fa-github"></i></a>
         </div>
       </form>
     </div>

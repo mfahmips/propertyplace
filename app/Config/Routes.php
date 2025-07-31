@@ -23,19 +23,26 @@ $routes->get('/about', 'Frontend\About::index');
 
 
 
+
 // === DETAIL USER BERDASARKAN SLUG (contoh: /user/john-doe)
 $routes->get('user/(:segment)', 'User::detail/$1');
 
 // Auth routes
-$routes->get('login', 'Auth::loginForm'); // tampilkan form login
-$routes->post('login', 'Auth::login');    // proses login
-$routes->get('logout', 'Auth::logout');   // logout
+$routes->get('login', 'Auth::loginForm');     // tampilkan form login
+$routes->post('login', 'Auth::login');        // proses login
+$routes->get('logout', 'Auth::logout');       // logout
+
+// Register routes
+$routes->get('register', 'Auth::registerForm');  // tampilkan form register
+$routes->post('register', 'Auth::register');     // proses simpan user baru
+
 
 
 $routes->get('auth/google', 'AuthGoogle::redirect');
 $routes->get('auth/google/callback', 'AuthGoogle::callback');
 
 $routes->get('session-test', 'SessionTest::index');
+
 
 
 // ===========================
@@ -58,7 +65,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:num)', 'Dashboard\User::update/$1');
         $routes->get('delete/(:num)', 'Dashboard\User::delete/$1');
         $routes->get('deletePhoto/(:num)', 'Dashboard\User::deletePhoto/$1'); // ✅ Diperbaiki
-        $routes->get('profile', 'Dashboard\User::profile');
+        $routes->get('profile/(:segment)', 'Dashboard\User::profile/$1');
+        $routes->post('autosave', 'Dashboard\User::autosave');
+
     });
 
     // === CRUD Developer ===
@@ -83,20 +92,22 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         // Detail Property
         $routes->get('(:segment)/property/(:segment)/detail', 'Dashboard\Property::detailByDeveloper/$1/$2');
         $routes->post('(:segment)/property/(:segment)/detail/update', 'Dashboard\Property::updateDetailByDeveloper/$1/$2');
+        $routes->post('(:segment)/property/(:segment)/detail/save', 'Dashboard\Property::saveDetailByDeveloper/$1/$2');
 
-        // Floorplan
-        $routes->get('(:segment)/property/(:segment)/floorplan', 'Dashboard\Property::floorPlanByDeveloper/$1/$2');
-        $routes->post('(:segment)/property/(:segment)/floorplan/store', 'Dashboard\Property::storeFloorPlanByDeveloper/$1/$2');
-        $routes->get('(:segment)/property/(:segment)/floorplan/(:num)/delete', 'Dashboard\Property::deleteFloorPlanByDeveloper/$1/$2/$3');
+
+       // === TYPE IMAGES (dulunya floorplan) ===
+        $routes->get('(:segment)/property/(:segment)/typeimages', 'Dashboard\Property::typeImagesByDeveloper/$1/$2');
+        $routes->post('(:segment)/property/(:segment)/typeimages/save', 'Dashboard\Property::storetypeimagesByDeveloper/$1/$2');
+        $routes->get('(:segment)/property/(:segment)/typeimages/(:num)/delete', 'Dashboard\Property::deletetypeimagesByDeveloper/$1/$2/$3');
 
         // Document
         $routes->get('(:segment)/property/(:segment)/documents', 'Dashboard\Property::documentsByDeveloper/$1/$2');
         $routes->post('(:segment)/property/(:segment)/documents/store', 'Dashboard\Property::storeDocumentByDeveloper/$1/$2');
         $routes->get('(:segment)/property/(:segment)/documents/(:num)/delete', 'Dashboard\Property::deleteDocumentByDeveloper/$1/$2/$3');
 
-        // Unit Type
-        $routes->post('(:segment)/property/(:segment)/unit/save', 'Dashboard\Property::saveUnitByDeveloper/$1/$2');
-        $routes->get('(:segment)/property/(:segment)/unit/(:num)/delete', 'Dashboard\Property::deleteUnitByDeveloper/$1/$2/$3');
+        // === PROPERTY TYPE ===
+        $routes->post('(:segment)/property/(:segment)/type/save', 'Dashboard\Property::saveTypeByDeveloper/$1/$2');
+        $routes->get('(:segment)/property/(:segment)/type/(:num)/delete', 'Dashboard\Property::deleteTypeByDeveloper/$1/$2/$3');
     });
 
 

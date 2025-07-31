@@ -8,6 +8,7 @@ use App\Models\UserModel;
 use App\Models\PenjualanModel;
 use App\Models\DeveloperModel;
 use App\Models\NotificationModel;
+use App\Models\SettingsModel;
 
 class Index extends BaseController
 {
@@ -30,16 +31,24 @@ class Index extends BaseController
             return redirect()->to('/login');
         }
 
-        // Ambil nama user dari session
-        $username = session('name') ?? 'Guest';
+        // Ambil user dari session
+        $user = [
+            'id'    => session('id'),
+            'name'  => session('name'),
+            'email' => session('email'),
+            'slug'  => session('slug'),
+            'foto'  => session('foto'),
+            'role'  => session('role'),
+        ];
 
+        // Jika bukan sales (misal admin/management), tampilkan dashboard admin
         $jumlahPenjualan = (int) ($this->penjualanModel->selectSum('total')->first()['total'] ?? 0);
 
         $data = [
             'title'           => 'Dashboard',
             'breadcrumb'      => [['label' => 'Dashboard']],
-            'username'        => $username,
-            'foto'            => session('foto') ?? null, // ganti $userData yang tidak didefinisikan
+            'username'        => $user['name'],
+            'foto'            => $user['foto'],
             'totalProperty'   => $this->propertyModel->countAll(),
             'totalUser'       => $this->userModel->countAll(),
             'totalPenjualan'  => $jumlahPenjualan,
@@ -48,5 +57,4 @@ class Index extends BaseController
 
         return view('admin/index', $data);
     }
-
 }

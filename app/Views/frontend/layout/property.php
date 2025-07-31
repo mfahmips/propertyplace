@@ -28,22 +28,38 @@
                         <div class="swiper-slide">
                             <div class="portfolio-card style4">
                                 <div class="portfolio-img">
-                                    <img src="<?= base_url('uploads/property/' . $property['image']) ?>" alt="<?= esc($property['title']) ?>">
+                                    <?php if (!empty($property['thumbnail']) && file_exists(FCPATH . 'uploads/property/thumbnail/' . $property['thumbnail'])): ?>
+                                        <img src="<?= base_url('uploads/property/thumbnail/' . esc($property['thumbnail'])) ?>" alt="<?= esc($property['title']) ?>">
+                                    <?php else: ?>
+                                        <img src="<?= base_url('images/placeholder-600x400.png') ?>" alt="Thumbnail belum tersedia">
+                                    <?php endif ?>
                                 </div>
+
                                 <div class="portfolio-content">
                                     <h3 class="portfolio-title">
                                         <a href="<?= base_url('property/' . $property['slug']) ?>"><?= esc($property['title']) ?></a>
                                     </h3>
                                     <p class="portfolio-location"><?= esc($property['developer_name']) ?></p>
                                     <div class="property-card-meta">
-                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-1.svg') ?>" alt="Bed">Bed <?= isset($property['bedroom']) ? esc($property['bedroom']) : '-' ?></span>
-                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-2.svg') ?>" alt="Bath">Bath <?= isset($property['bathroom']) ? esc($property['bathroom']) : '-' ?></span>
-                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-3.svg') ?>" alt="Size"><?= isset($property['size']) ? esc($property['size']) . ' sqft' : '-' ?></span>
+                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-1.svg') ?>" alt="Bed"> 
+                                            Bed <?= isset($property['bedroom']) ? esc($property['bedroom']) : '-' ?>
+                                        </span>
+                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-2.svg') ?>" alt="Bath"> 
+                                            Bath <?= isset($property['bathroom']) ? esc($property['bathroom']) : '-' ?>
+                                        </span>
+                                        <span><img src="<?= base_url('assets/frontend/img/icon/property-icon1-3.svg') ?>" alt="Size"> 
+                                            <?= isset($property['size']) ? esc($property['size']) . ' sqft' : '-' ?>
+                                        </span>
                                     </div>
+
                                     <p class="portfolio-text">
-                                        <?= esc(mb_strimwidth(strip_tags($property['description']), 0, 100, '...')) ?>
+                                        <?= esc(mb_strimwidth(strip_tags($property['description'] ?? 'Deskripsi belum tersedia'), 0, 100, '...')) ?>
                                     </p>
-                                    <p class="portfolio-price"><?= esc($property['price_text']) ?></p>
+
+                                    <p class="portfolio-price">Harga Mulai
+                                        <?= esc($property['price_text'] ?? 'Harga tidak tersedia') ?>an
+                                    </p>
+
                                 </div>
                             </div>
                         </div>
