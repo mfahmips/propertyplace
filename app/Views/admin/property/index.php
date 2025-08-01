@@ -21,9 +21,12 @@
     <div class="card-body">
 
       <div class="mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPropertyModal">
-          + Create Property<?= isset($filterDeveloper['name']) ? ' for ' . esc($filterDeveloper['name']) : '' ?>
-        </button>
+        <?php if (session('role') === 'admin') : ?>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPropertyModal">
+                + Create Property<?= isset($filterDeveloper['name']) ? ' for ' . esc($filterDeveloper['name']) : '' ?>
+            </button>
+        <?php endif; ?>
+
       </div>
 
       <div class="table-responsive">

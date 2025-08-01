@@ -50,17 +50,62 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <img src="<?= !empty($user['foto']) ? base_url('uploads/user/' . esc($user['foto'])) : 'https://via.placeholder.com/50x50?text=No+Image' ?>" width="50" height="50" class="rounded-circle">
+                                                    <?php
+                                                        $fotoUser = $user['foto'] ?? null;
+                                                        $gender   = strtolower($user['gender'] ?? '');
+
+                                                        // Pilih avatar default berdasarkan gender
+                                                        if ($gender === 'male' || $gender === 'laki-laki') {
+                                                            $defaultAvatar = 'Laki-laki.jpg';
+                                                        } elseif ($gender === 'female' || $gender === 'perempuan') {
+                                                            $defaultAvatar = 'Perempuan.jpg';
+                                                        } else {
+                                                            $defaultAvatar = 'default.jpg'; // fallback jika gender tidak diketahui
+                                                        }
+
+                                                        // Tentukan URL gambar akhir
+                                                        $imageUrl = !empty($fotoUser)
+                                                            ? base_url('uploads/user/' . esc($fotoUser))
+                                                            : base_url('uploads/user/' . $defaultAvatar);
+                                                    ?>
+                                                    <img src="<?= $imageUrl ?>" width="50" height="50" class="rounded-circle border" alt="User Photo">
                                                     <div><strong><?= esc($user['name']) ?></strong></div>
                                                 </div>
                                             </td>
                                             <td><?= esc($user['position']) ?></td>
-                                            <td><span class="badge bg-info"><?= esc($user['role']) ?></span></td>
+                                            <!-- Role -->
                                             <td>
-                                                <span class="badge <?= $user['is_active'] ? 'bg-success' : 'bg-danger' ?>">
-                                                    <?= $user['is_active'] ? 'Active' : 'Inactive' ?>
-                                                </span>
+                                                <?php if (session('role') === 'admin') : ?>
+                                                    <form action="<?= base_url('dashboard/user/updateRole/' . $user['id']) ?>" method="post">
+                                                        <?= csrf_field() ?>
+                                                        <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                            <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
+                                                            <option value="sales" <?= $user['role'] === 'sales' ? 'selected' : '' ?>>Sales</option>
+                                                            <option value="management" <?= $user['role'] === 'management' ? 'selected' : '' ?>>Management</option>
+                                                        </select>
+                                                    </form>
+                                                <?php else : ?>
+                                                    <span class="badge bg-info"><?= esc($user['role']) ?></span>
+                                                <?php endif; ?>
                                             </td>
+
+                                            <!-- Status Aktivasi -->
+                                            <td>
+                                                <?php if (session('role') === 'admin') : ?>
+                                                    <form action="<?= base_url('dashboard/user/updateStatus/' . $user['id']) ?>" method="post">
+                                                        <?= csrf_field() ?>
+                                                        <select name="is_active" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                            <option value="1" <?= $user['is_active'] ? 'selected' : '' ?>>Active</option>
+                                                            <option value="0" <?= !$user['is_active'] ? 'selected' : '' ?>>Inactive</option>
+                                                        </select>
+                                                    </form>
+                                                <?php else : ?>
+                                                    <span class="badge <?= $user['is_active'] ? 'bg-success' : 'bg-danger' ?>">
+                                                        <?= $user['is_active'] ? 'Active' : 'Inactive' ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+
                                             <td>
                                                 <a href="<?= base_url('dashboard/user/profile/' . $user['slug']) ?>" class="btn btn-warning btn-sm">Edit</a>
 

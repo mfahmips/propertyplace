@@ -59,6 +59,15 @@
                         <span class="nav-text">Blog</span>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= base_url('dashboard/absensi') ?>">
+                        <span class="nav-icon">
+                            <iconify-icon icon="solar:user-outline"></iconify-icon>
+                        </span>
+                        <span class="nav-text">Absensi Sales</span>
+                    </a>
+                </li>
                 <!-- Admin Settings -->
                 <li class="menu-title">Settings</li>
 

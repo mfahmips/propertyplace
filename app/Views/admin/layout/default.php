@@ -28,6 +28,31 @@
 
     <!-- App css -->
     <link href="<?= base_url('assets/admin/css/style.min.css') ?>" rel="stylesheet" type="text/css" />
+    <style>
+      /* Fix: Cegah scroll shift saat modal tampil */
+      body.modal-open {
+          overflow: hidden !important;
+          padding-right: 0 !important;
+      }
+
+      /* Matikan animasi geser default Bootstrap */
+      .modal.fade .modal-dialog {
+          transform: none !important;
+          transition: none !important;
+      }
+
+      /* Tambahan kenyamanan: blur backdrop */
+      .modal-backdrop {
+          backdrop-filter: blur(3px);
+          background-color: rgba(0, 0, 0, 0.6);
+      }
+
+      /* Hindari horizontal scroll tersembunyi */
+      html, body {
+          overflow-x: hidden;
+      }
+    </style>
+
 
     <!-- Theme Config js -->
     <script src="<?= base_url('assets/admin/js/config.js') ?>"></script>
@@ -60,6 +85,23 @@
 
     <!-- Dashboard Js -->
     <script src="<?= base_url('assets/admin/js/pages/dashboard.js') ?>"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('profileReminderModal');
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+
+            // Antisipasi Bootstrap yang kadang tambah padding-right ke <body>
+            document.body.style.paddingRight = '0px';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+    </script>
 
 </body>
 </html>

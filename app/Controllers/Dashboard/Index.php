@@ -26,35 +26,38 @@ class Index extends BaseController
     }
 
     public function index()
-    {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
-
-        // Ambil user dari session
-        $user = [
-            'id'    => session('id'),
-            'name'  => session('name'),
-            'email' => session('email'),
-            'slug'  => session('slug'),
-            'foto'  => session('foto'),
-            'role'  => session('role'),
-        ];
-
-        // Jika bukan sales (misal admin/management), tampilkan dashboard admin
-        $jumlahPenjualan = (int) ($this->penjualanModel->selectSum('total')->first()['total'] ?? 0);
-
-        $data = [
-            'title'           => 'Dashboard',
-            'breadcrumb'      => [['label' => 'Dashboard']],
-            'username'        => $user['name'],
-            'foto'            => $user['foto'],
-            'totalProperty'   => $this->propertyModel->countAll(),
-            'totalUser'       => $this->userModel->countAll(),
-            'totalPenjualan'  => $jumlahPenjualan,
-            'totalDeveloper'  => $this->developerModel->countAll(),
-        ];
-
-        return view('admin/index', $data);
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to('/login');
     }
+
+    // Ambil user lengkap dari database
+    $user = $this->userModel->find(session('id'));
+
+    // Cek field yang wajib diisi
+    $profileIncomplete =
+        trim($user['place_of_birth'] ?? '') === '' ||
+        trim($user['date_of_birth'] ?? '') === '' ||
+        trim($user['gender'] ?? '') === '' ||
+        trim($user['address'] ?? '') === '';
+
+    $jumlahPenjualan = (int) ($this->penjualanModel->selectSum('total')->first()['total'] ?? 0);
+
+    $data = [
+        'title'            => 'Dashboard',
+        'breadcrumb'       => [['label' => 'Dashboard']],
+        'username'         => $user['name'],
+        'foto'             => $user['foto'],
+        'totalProperty'    => $this->propertyModel->countAll(),
+        'totalUser'        => $this->userModel->countAll(),
+        'totalPenjualan'   => $jumlahPenjualan,
+        'totalDeveloper'   => $this->developerModel->countAll(),
+        'profileIncomplete'=> $profileIncomplete,
+        'user'             => $user, // kirim ke view jika butuh
+    ];
+
+    return view('admin/index', $data);
+}
+
+
 }

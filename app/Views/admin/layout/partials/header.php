@@ -1,3 +1,6 @@
+
+
+
 <!-- START Wrapper -->
 <div class="app-wrapper">
 
@@ -37,19 +40,36 @@
 
                     <!-- User Dropdown -->
                     <div class="dropdown topbar-item">
-                        <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">
+                        <a type="button" class="topbar-button" id="page-header-user-dropdown"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                            <?php
+                            // Ambil gender dari session
+                            $gender = strtolower(trim(session('gender') ?? ''));
+
+                            // Tentukan nama foto berdasarkan gender
+                            if ($gender === 'laki-laki') {
+                                $foto = 'Laki-laki.jpg';
+                            } elseif ($gender === 'perempuan') {
+                                $foto = 'Perempuan.jpg';
+                            } else {
+                                $foto = 'Laki-laki.jpg'; // fallback jika gender tidak dikenali
+                            }
+
+                            // Buat URL gambar
+                            $avatarUrl = base_url('uploads/user/' . $foto);
+                            ?>
+
                             <span class="d-flex align-items-center">
-                                <img class="rounded-circle" width="32" height="32"
-                                src="<?= base_url(!empty(session('foto')) ? 'uploads/user/' . session('foto') : 'assets/images/default-avatar.png') ?>"
-                                alt="avatar"
-                                onerror="this.onerror=null;this.src='<?= base_url('assets/images/default-avatar.png') ?>';"
-                                style="object-fit: cover;">
-
-
+                                <img src="<?= $avatarUrl ?>" alt="User Avatar"
+                                     width="32" height="32"
+                                     class="rounded-circle border"
+                                     style="object-fit: cover;"
+                                     onerror="this.onerror=null;this.src='<?= base_url('uploads/user/Laki-laki.jpg') ?>';">
                             </span>
 
                         </a>
+
 
                         <div class="dropdown-menu dropdown-menu-end">
                             <h6 class="dropdown-header">

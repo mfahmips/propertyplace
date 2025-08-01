@@ -31,27 +31,35 @@
                                 <div class="tab-pane fade show active" id="info">
                                     <div class="row align-items-center mb-4">
                                         <div class="col-md-4 text-center">
-                                            <?php if (!empty($user['foto'])): ?>
-                                                <img src="<?= base_url('uploads/user/' . $user['foto']) ?>" class="rounded-circle mb-2" width="100" height="100" style="object-fit: cover;">
-                                            <?php else: ?>
-                                                <div class="rounded-circle bg-secondary" style="width:100px;height:100px;"></div>
-                                            <?php endif; ?>
+                                            <?php
+                                                $foto = $user['foto'] ?? '';
+                                                $gender = strtolower($user['gender'] ?? '');
+
+                                                if (empty($foto)) {
+                                                    if ($gender === 'laki-laki') {
+                                                        $foto = 'Laki-laki.jpg';
+                                                    } elseif ($gender === 'perempuan') {
+                                                        $foto = 'Perempuan.jpg';
+                                                    } else {
+                                                        $foto = 'default-avatar.png'; // fallback
+                                                    }
+                                                }
+
+                                                $fotoUrl = base_url('uploads/user/' . $foto);
+                                            ?>
+                                            <img src="<?= $fotoUrl ?>" class="rounded-circle mb-2" width="100" height="100" style="object-fit: cover;">
                                         </div>
+
                                         <div class="col-md-8">
                                             <label class="form-label">Foto</label>
                                             <form action="<?= base_url('dashboard/user/update/' . session('id')) ?>" method="post" enctype="multipart/form-data">
                                                 <?= csrf_field() ?>
                                                 <input type="hidden" id="user_id" value="<?= $user['id'] ?>">
-                                                <input type="file" class="form-control mb-2" name="foto">
-                                                <div class="d-flex gap-2 mt-2">
-                                                    <button type="submit" class="btn btn-sm" style="background-color:#B86C3A;color:#fff;">Ganti Foto</button>
-                                                    <?php if (!empty($user['foto'])): ?>
-                                                        <a href="<?= base_url('dashboard/user/deletePhoto/' . $user['id']) ?>" class="btn btn-outline-danger btn-sm">Hapus Foto</a>
-                                                    <?php endif; ?>
-                                                </div>
+                                                <input type="file" class="form-control mb-2" name="foto" accept="image/*">
                                             </form>
                                         </div>
                                     </div>
+
 
                                     <div class="row g-3">
                                         <div class="col-md-6">
@@ -191,8 +199,9 @@
     </div>
 </div>
 
-<!-- Script Autosave -->
+<!-- JQuery CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 function postAutosave(field, value) {
     const userId = $('#user_id').val();
@@ -203,24 +212,17 @@ function postAutosave(field, value) {
     });
 }
 
-
+// Autosave umum
 $('.auto-save').on('change', function () {
-    let field = $(this).data('field');
-    let value = $(this).val();
-    postAutosave(field, value);
+    postAutosave($(this).data('field'), $(this).val());
 });
 
+// Autosave Sosial Media
 $('.sosmed-input').on('input', function () {
-    let field = $(this).attr('name');
-    let value = $(this).val(); // ini bisa kosong
-
-    $.post("<?= base_url('dashboard/user/autosave') ?>", {
-        field: field,
-        value: value
-    });
+    postAutosave($(this).attr('name'), $(this).val());
 });
 
-
+// Autosave Alamat
 $('.address-input').on('change keyup', function () {
     saveAddress();
 });
@@ -228,10 +230,10 @@ $('.address-input').on('change keyup', function () {
 function saveAddress() {
     let address = [
         $('#street').val(),
-        $('#village option:selected').val(),
-        $('#district option:selected').val(),
-        $('#regency option:selected').val(),
-        $('#province option:selected').val(),
+        $('#village option:selected').text(),
+        $('#district option:selected').text(),
+        $('#regency option:selected').text(),
+        $('#province option:selected').text(),
         $('#zip').val()
     ].filter(Boolean).join(', ');
 
@@ -244,60 +246,29 @@ function loadOptions(url, selector, placeholder, selected = '', callback = null)
         $(selector).empty().append(`<option value="">${placeholder}</option>`);
         data.forEach(item => {
             const isSelected = selected && item.name.trim().toLowerCase() === selected.trim().toLowerCase();
-            $(selector).append(`<option value="${item.name}" ${isSelected ? 'selected' : ''}>${item.name}</option>`);
+            $(selector).append(`<option value="${item.id}" ${isSelected ? 'selected' : ''}>${item.name}</option>`);
         });
-        if (callback) callback(data); // kirim data jika perlu ID lanjutan
+        if (callback) callback(data);
     });
 }
 
-
-// Load Provinsi awal
-loadOptions('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json', '#province', 'Pilih Provinsi', "<?= $province ?? '' ?>");
-
-// Event: Provinsi dipilih
-$('#province').on('change', function () {
-    let id = $('#province option:selected').data('id');
-    loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${id}.json`, '#regency', 'Pilih Kota/Kabupaten');
-    $('#district, #village').empty();
-    saveAddress();
-});
-
-// Event: Kota/Kabupaten dipilih
-$('#regency').on('change', function () {
-    let id = $('#regency option:selected').data('id');
-    loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${id}.json`, '#district', 'Pilih Kecamatan');
-    $('#village').empty();
-    saveAddress();
-});
-
-// Event: Kecamatan dipilih
-$('#district').on('change', function () {
-    let id = $('#district option:selected').data('id');
-    loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${id}.json`, '#village', 'Pilih Desa/Kelurahan');
-    saveAddress();
-});
-
-// Event: Desa/Kelurahan dipilih
-$('#village').on('change', function () {
-    saveAddress();
-});
-
+// Initial load saat halaman dibuka
 $(document).ready(function () {
-    let selectedProvince = "<?= esc($province ?? '') ?>";
-    let selectedRegency  = "<?= esc($regency ?? '') ?>";
-    let selectedDistrict = "<?= esc($district ?? '') ?>";
-    let selectedVillage  = "<?= esc($village ?? '') ?>";
+    const selectedProvince = "<?= esc($province ?? '') ?>";
+    const selectedRegency  = "<?= esc($regency ?? '') ?>";
+    const selectedDistrict = "<?= esc($district ?? '') ?>";
+    const selectedVillage  = "<?= esc($village ?? '') ?>";
 
     loadOptions('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json', '#province', 'Pilih Provinsi', selectedProvince, function(provinces) {
-        let selectedProvinceObj = provinces.find(p => p.name.trim().toLowerCase() === selectedProvince.trim().toLowerCase());
-        if (selectedProvinceObj) {
-            loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvinceObj.id}.json`, '#regency', 'Pilih Kota/Kabupaten', selectedRegency, function(regencies) {
-                let selectedRegencyObj = regencies.find(r => r.name.trim().toLowerCase() === selectedRegency.trim().toLowerCase());
-                if (selectedRegencyObj) {
-                    loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${selectedRegencyObj.id}.json`, '#district', 'Pilih Kecamatan', selectedDistrict, function(districts) {
-                        let selectedDistrictObj = districts.find(d => d.name.trim().toLowerCase() === selectedDistrict.trim().toLowerCase());
-                        if (selectedDistrictObj) {
-                            loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${selectedDistrictObj.id}.json`, '#village', 'Pilih Desa/Kelurahan', selectedVillage);
+        const province = provinces.find(p => p.name.toLowerCase() === selectedProvince.toLowerCase());
+        if (province) {
+            loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${province.id}.json`, '#regency', 'Pilih Kota/Kabupaten', selectedRegency, function(regencies) {
+                const regency = regencies.find(r => r.name.toLowerCase() === selectedRegency.toLowerCase());
+                if (regency) {
+                    loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regency.id}.json`, '#district', 'Pilih Kecamatan', selectedDistrict, function(districts) {
+                        const district = districts.find(d => d.name.toLowerCase() === selectedDistrict.toLowerCase());
+                        if (district) {
+                            loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${district.id}.json`, '#village', 'Pilih Desa/Kelurahan', selectedVillage);
                         }
                     });
                 }
@@ -306,14 +277,45 @@ $(document).ready(function () {
     });
 });
 
+// Chain events
+$('#province').on('change', function () {
+    const provinceId = $(this).val();
+    if (provinceId) {
+        loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`, '#regency', 'Pilih Kota/Kabupaten');
+        $('#district, #village').empty().append('<option value="">-</option>');
+        saveAddress();
+    }
+});
+
+$('#regency').on('change', function () {
+    const regencyId = $(this).val();
+    if (regencyId) {
+        loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`, '#district', 'Pilih Kecamatan');
+        $('#village').empty().append('<option value="">-</option>');
+        saveAddress();
+    }
+});
+
+$('#district').on('change', function () {
+    const districtId = $(this).val();
+    if (districtId) {
+        loadOptions(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`, '#village', 'Pilih Desa/Kelurahan');
+        saveAddress();
+    }
+});
+
+$('#village').on('change', function () {
+    saveAddress();
+});
 </script>
 
+<!-- Uppercase Otomatis untuk Nama Jalan -->
 <script>
     $('#street').on('input', function () {
-        let upper = $(this).val().toUpperCase();
-        $(this).val(upper);
+        $(this).val($(this).val().toUpperCase());
     });
 </script>
+
 
 
 

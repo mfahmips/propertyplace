@@ -231,6 +231,31 @@ class User extends BaseController
         return redirect()->back()->with('success', 'Password berhasil diperbarui.');
     }
 
+    public function updateRole($id)
+    {
+        if (session('role') !== 'admin') {
+            return redirect()->back()->with('error', 'Akses ditolak');
+        }
+
+        $role = $this->request->getPost('role');
+        $this->userModel->update($id, ['role' => $role]);
+
+        return redirect()->back()->with('success', 'Role berhasil diperbarui');
+    }
+
+    public function updateStatus($id)
+    {
+        if (session('role') !== 'admin') {
+            return redirect()->back()->with('error', 'Akses ditolak');
+        }
+
+        $status = $this->request->getPost('is_active') == 1 ? 1 : 0;
+        $this->userModel->update($id, ['is_active' => $status]);
+
+        return redirect()->back()->with('success', 'Status user diperbarui');
+    }
+
+
 
 
     public function delete($id)

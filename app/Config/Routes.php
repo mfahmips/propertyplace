@@ -51,6 +51,9 @@ $routes->get('session-test', 'SessionTest::index');
 $routes->get('dashboard', 'Dashboard\Index::index');
 
 
+
+
+
 // ===========================
 // ✅ Route-group: Dashboard (dengan prefix /dashboard)
 // ===========================
@@ -67,6 +70,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('deletePhoto/(:num)', 'Dashboard\User::deletePhoto/$1'); // ✅ Diperbaiki
         $routes->get('profile/(:segment)', 'Dashboard\User::profile/$1');
         $routes->post('autosave', 'Dashboard\User::autosave');
+        $routes->post('updateRole/(:num)', 'Dashboard\User::updateRole/$1');
+        $routes->post('updateStatus/(:num)', 'Dashboard\User::updateStatus/$1');
+
 
     });
 
@@ -148,9 +154,11 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('maintenance', 'Dashboard\Settings::saveMaintenance');
     });
 
-
-
-
+        $routes->group('absensi', ['filter' => 'auth'], function ($routes) {
+        $routes->get('/', 'Dashboard\Absensi::index');
+        $routes->post('masuk', 'Dashboard\Absensi::absenMasuk');
+        $routes->post('pulang', 'Dashboard\Absensi::absenPulang');
+    });
 
 
 
