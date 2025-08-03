@@ -23,41 +23,78 @@ class Property extends BaseController
 
    public function index()
 {
-    $perPage = 5;
+    $perPage     = 8;
+    $search      = $this->request->getGet('search');
+    $developerId = $this->request->getGet('developer_id');
+    $city        = $this->request->getGet('city');
 
-    $properties = $this->propertyModel
-        ->select('properties.*, developers.name as developer_name, property_details.location, property_details.price, property_details.price_text, property_details.description')
+    $propertyQuery = clone $this->propertyModel;
+
+    $propertyQuery
+        ->select('properties.*, developers.name AS developer_name, property_details.location, property_details.price, property_details.price_text, property_details.description')
         ->join('developers', 'developers.id = properties.developer_id')
         ->join('property_details', 'property_details.property_id = properties.id', 'left')
-        ->orderBy('properties.title', 'ASC')
-        ->paginate($perPage);
+        ->orderBy('properties.title', 'ASC');
 
-    $pager = $this->propertyModel->pager;
-    $typeModel = new PropertyTypeModel();
+    if (!empty($search)) {
+        $propertyQuery->like('properties.title', $search);
+    }
+
+    if (!empty($developerId)) {
+        $propertyQuery->where('properties.developer_id', $developerId);
+    }
+
+    if (!empty($city)) {
+        $propertyQuery->like('property_details.location', $city);
+    }
+
+    $properties = $propertyQuery->paginate($perPage, 'property');
+    $pager = $propertyQuery->pager;
+
+    // Load models
+    $typeModel = new \App\Models\PropertyTypeModel();
+    $typeImageModel = new \App\Models\PropertyTypeImagesModel();
 
     foreach ($properties as &$p) {
         $p['thumbnail_url'] = !empty($p['thumbnail'])
             ? base_url('uploads/property/thumbnail/' . $p['thumbnail'])
             : base_url('images/placeholder-80x60.png');
 
-        $p['Types'] = $typeModel
+        // Ambil semua type untuk properti ini
+        $types = $typeModel
             ->where('property_id', $p['id'])
-            ->select('id, name, slug')
+            ->select('id, name, slug, type_unit')
             ->findAll();
+
+        // Tambahkan gambar ke masing-masing type
+        foreach ($types as &$type) {
+            $type['images'] = $typeImageModel
+                ->where('property_id', $p['id'])
+                ->where('type_id', $type['id'])
+                ->findAll();
+        }
+
+        $p['Types'] = $types;
     }
 
+    // Developer
+    $developerModel = new \App\Models\DeveloperModel();
+
     return view('admin/property/index', [
-        'title' => 'Property Listing',
-        'breadcrumb' => [
+        'title'           => 'Property Listing',
+        'breadcrumb'      => [
             ['label' => 'Dashboard', 'url' => base_url('dashboard')],
             ['label' => 'Property']
         ],
-        'properties' => $properties,
-        'pager' => $pager,
-        'filterDeveloper' => null,
+        'properties'      => $properties,
+        'pager'           => $pager,
+        'developers'      => $developerModel->findAll(),
+        'search'          => $search,
+        'developerId'     => $developerId,
+        'city'            => $city,
+        'filterDeveloper' => !empty($developerId) ? $developerModel->find($developerId) : null,
     ]);
 }
-
 
 
 

@@ -9,22 +9,14 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <div class="d-flex align-items-center gap-2">
-                    <!-- Menu Toggle Button -->
-                    <div class="topbar-item">
-                        <button type="button" class="button-toggle-menu topbar-button">
-                            <iconify-icon icon="solar:hamburger-menu-outline"
-                                class="fs-24 align-middle"></iconify-icon>
-                        </button>
-                    </div>
+                
+                <!-- Menu Toggle Button -->
+                <div class="topbar-item d-md-none">
+                    <button type="button" class="button-toggle-menu topbar-button">
+                        <iconify-icon icon="solar:hamburger-menu-outline" class="fs-24 align-middle"></iconify-icon>
+                    </button>
+                </div>
 
-                    <!-- App Search-->
-                    <form class="app-search d-none d-md-block me-auto">
-                        <div class="position-relative">
-                            <input type="search" class="form-control" placeholder="cari apa saja..."
-                                autocomplete="off" value="">
-                            <iconify-icon icon="solar:magnifer-outline" class="search-widget-icon"></iconify-icon>
-                        </div>
-                    </form>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
@@ -44,16 +36,20 @@
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
                             <?php
-                            // Ambil gender dari session
+                            // Ambil data dari session
                             $gender = strtolower(trim(session('gender') ?? ''));
+                            $fotoDB = trim(session('foto') ?? ''); // ambil nama file foto dari database (session)
 
-                            // Tentukan nama foto berdasarkan gender
-                            if ($gender === 'laki-laki') {
-                                $foto = 'Laki-laki.jpg';
-                            } elseif ($gender === 'perempuan') {
-                                $foto = 'Perempuan.jpg';
+                            // Cek apakah foto dari database tersedia
+                            if (!empty($fotoDB) && file_exists(FCPATH . 'uploads/user/' . $fotoDB)) {
+                                $foto = $fotoDB;
                             } else {
-                                $foto = 'Laki-laki.jpg'; // fallback jika gender tidak dikenali
+                                // Default berdasarkan gender
+                                if ($gender === 'perempuan') {
+                                    $foto = 'Perempuan.jpg';
+                                } else {
+                                    $foto = 'Laki-laki.jpg';
+                                }
                             }
 
                             // Buat URL gambar
@@ -70,7 +66,6 @@
 
                         </a>
 
-
                         <div class="dropdown-menu dropdown-menu-end">
                             <h6 class="dropdown-header">
                                 Halo, <?= esc(session('name')) ?>!
@@ -81,7 +76,6 @@
                                 <span class="align-middle">Profil Saya</span>
                             </a>
 
-
                             <div class="dropdown-divider my-1"></div>
 
                             <a class="dropdown-item text-danger" href="<?= site_url('logout') ?>">
@@ -90,6 +84,7 @@
                             </a>
                         </div>
                     </div>
+
 
                 </div>
             </div>

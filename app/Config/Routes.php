@@ -154,12 +154,31 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('maintenance', 'Dashboard\Settings::saveMaintenance');
     });
 
-        $routes->group('absensi', ['filter' => 'auth'], function ($routes) {
-        $routes->get('/', 'Dashboard\Absensi::index');
-        $routes->post('masuk', 'Dashboard\Absensi::absenMasuk');
-        $routes->post('pulang', 'Dashboard\Absensi::absenPulang');
+        $routes->group('SalesActivity', ['filter' => 'auth'], function ($routes) {
+        // Halaman utama
+        $routes->get('absensi', 'Dashboard\SalesActivity::absensi');
+        $routes->get('pameran', 'Dashboard\SalesActivity::pameran');
+        $routes->get('komisi', 'Dashboard\SalesActivity::komisi');
+
+        // CRUD untuk absensi
+        $routes->post('absensi/masuk', 'Dashboard\SalesActivity::absenMasuk');
+        $routes->post('absensi/pulang', 'Dashboard\SalesActivity::absenPulang');
+
+        // CRUD untuk pameran
+        $routes->post('pameran/save', 'Dashboard\SalesActivity::savePameran');
+        $routes->post('pameran/delete', 'Dashboard\SalesActivity::deletePameran');
+        $routes->post('pameran/update', 'Dashboard\SalesActivity::updatePameran');
+
+        // CRUD untuk komisi (jika ada pengajuan atau update status)
+        $routes->post('komisi/save', 'Dashboard\SalesActivity::saveKomisi');
+        $routes->post('komisi/update', 'Dashboard\SalesActivity::updateKomisi');
     });
 
+
+        $routes->group('KPRCalculator', ['filter' => 'auth'], function ($routes) {
+        $routes->get('/', 'Dashboard\KPRCalculator::index');
+        $routes->post('kpr-calculate', 'Dashboard\KPRCalculator::calculate');
+    });
 
 
 });

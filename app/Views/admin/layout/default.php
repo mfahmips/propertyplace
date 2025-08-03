@@ -25,6 +25,9 @@
 
     <!-- Icons css -->
     <link href="<?= base_url('assets/admin/css/icons.min.css') ?>" rel="stylesheet" type="text/css" />
+    <!-- Font Awesome v6 via CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
     <!-- App css -->
     <link href="<?= base_url('assets/admin/css/style.min.css') ?>" rel="stylesheet" type="text/css" />
@@ -59,6 +62,142 @@
 </head>
 
 <body>
+
+    <div class="preloader">
+    <div id="preloader" class="preloader-inner text-center">
+        <!-- Kutipan -->
+        <div class="quote-text" id="quoteText">Loading quotes...</div>
+
+        <!-- Loading Bar -->
+        <div class="preloader-bar mt-4">
+            <div class="preloader-bar-fill" id="preloaderProgress"></div>
+        </div>
+
+        <!-- Loading Text per huruf -->
+        <div class="loading-letter-group mt-3" id="loadingLetters">
+            <!-- huruf-huruf akan dimasukkan lewat JS -->
+        </div>
+    </div>
+</div>
+
+
+<style>
+ .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background-color: #0f0f1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preloader-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 80%;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+}
+
+.quote-text {
+    font-size: 16px;
+    color: #dad3c5;
+    font-weight: 500;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 10px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.preloader-bar {
+    width: 100%;
+    max-width: 240px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.preloader-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #B86C3A, #DAD3C5);
+    transition: width 0.3s ease;
+}
+
+.loading-letter-group {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 16px;
+}
+
+.loading-letter {
+    font-size: 14px;
+    color: #dad3c5;
+    opacity: 0;
+    animation: fadeInLetter 0.4s forwards;
+}
+
+@keyframes fadeInLetter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+</style>
+
+<script>
+    const quotes = [
+        "Jualan properti itu bukan soal harga, tapi soal nilai yang Anda bawa.",
+        "Kepercayaan adalah komisi terbaik dalam setiap penjualan rumah.",
+        "Bukan hanya menjual rumah, Anda sedang membangun mimpi orang lain.",
+        "Sukses menjual properti dimulai dari keyakinan pada diri sendiri.",
+        "Lokasi bisa jadi segalanya, tapi integritas adalah segalanya juga.",
+        "Jangan jual rumah—jual gaya hidup yang menyertainya.",
+        "Setiap properti punya cerita. Ceritakan dengan penuh semangat.",
+        "Menjadi agen properti sukses itu bukan bakat, tapi konsistensi.",
+        "Koneksi membangun jaringan, pelayanan membangun karier.",
+        "Percaya diri adalah fondasi pertama dari penjualan apa pun."
+    ];
+
+    const quoteEl = document.getElementById("quoteText");
+    const loadingBar = document.getElementById("preloaderProgress");
+    const loadingLetters = document.getElementById("loadingLetters");
+
+    // Set kutipan acak
+    quoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
+    // Isi huruf loading per span
+    const loadingText = "Loading...";
+    loadingText.split("").forEach((char, i) => {
+        const span = document.createElement("span");
+        span.classList.add("loading-letter");
+        span.textContent = char;
+        span.style.animationDelay = `${i * 0.1}s`;
+        loadingLetters.appendChild(span);
+    });
+
+    // Bar progresif
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 10) + 5;
+        if (progress > 100) progress = 100;
+
+        loadingBar.style.width = progress + "%";
+
+        if (progress === 100) {
+            setTimeout(() => {
+                document.querySelector(".preloader").style.display = "none";
+            }, 700);
+            clearInterval(interval);
+        }
+    }, 300);
+</script>
+
+
     <!-- Header -->
     <?= $this->include('admin/layout/partials/header') ?>
 

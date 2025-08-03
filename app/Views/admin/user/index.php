@@ -78,7 +78,7 @@
                                                 <?php if (session('role') === 'admin') : ?>
                                                     <form action="<?= base_url('dashboard/user/updateRole/' . $user['id']) ?>" method="post">
                                                         <?= csrf_field() ?>
-                                                        <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                        <select name="role" class="form-select form-select-sm border-0" onchange="this.form.submit()">
                                                             <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
                                                             <option value="sales" <?= $user['role'] === 'sales' ? 'selected' : '' ?>>Sales</option>
                                                             <option value="management" <?= $user['role'] === 'management' ? 'selected' : '' ?>>Management</option>
@@ -94,7 +94,7 @@
                                                 <?php if (session('role') === 'admin') : ?>
                                                     <form action="<?= base_url('dashboard/user/updateStatus/' . $user['id']) ?>" method="post">
                                                         <?= csrf_field() ?>
-                                                        <select name="is_active" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                        <select name="is_active" class="form-select form-select-sm border-0" onchange="this.form.submit()">
                                                             <option value="1" <?= $user['is_active'] ? 'selected' : '' ?>>Active</option>
                                                             <option value="0" <?= !$user['is_active'] ? 'selected' : '' ?>>Inactive</option>
                                                         </select>
