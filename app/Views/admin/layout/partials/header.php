@@ -67,16 +67,16 @@
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-end">
-                            <h6 class="dropdown-header">
+                            <h5 class="dropdown-header">
                                 Halo, <?= esc(session('name')) ?>!
-                            </h6>
-
-                            <a class="dropdown-item" href="<?= base_url('dashboard/user/profile/' . session('slug')) ?>">
+                            </h5>
+                            <div class="dropdown-divider my-1"></div>
+                            <a class="dropdown-item" href="<?= base_url('dashboard/profile/' . session('slug')) ?>">
                                 <iconify-icon icon="solar:user-outline" class="align-middle me-2 fs-18"></iconify-icon>
                                 <span class="align-middle">Profil Saya</span>
                             </a>
 
-                            <div class="dropdown-divider my-1"></div>
+                            
 
                             <a class="dropdown-item text-danger" href="<?= site_url('logout') ?>">
                                 <iconify-icon icon="solar:logout-3-outline" class="align-middle me-2 fs-18"></iconify-icon>

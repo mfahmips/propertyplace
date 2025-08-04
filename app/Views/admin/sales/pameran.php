@@ -17,7 +17,7 @@
       <?php endforeach ?>
     </ol>
   </div>
-<div class="card w-75">
+<div class="card">
     <div class="card-body">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <button class="btn btn-primary" onclick="resetForm(); new bootstrap.Modal(document.getElementById('modalPameran')).show();">
@@ -43,9 +43,11 @@
                                 </span>
                             </td>
                             <td>
+                                <div class="d-flex flex-wrap flex-sm-nowrap gap-2">
                                 <button class="btn btn-sm btn-warning" onclick='editPameran(<?= json_encode($p) ?>)'>Edit</button>
                                 <a href="<?= base_url('dashboard/SalesActivity/pameran/delete/' . $p['id']) ?>" class="btn btn-sm btn-danger"
                                    onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach ?>

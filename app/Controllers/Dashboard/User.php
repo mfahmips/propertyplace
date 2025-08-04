@@ -58,10 +58,6 @@ class User extends BaseController
 }
 
 
-
-
-
-
     public function update($id)
 {
     $user = $this->userModel->find($id);
@@ -165,7 +161,6 @@ class User extends BaseController
         'title'      => 'Profil ' . esc($user['name']),
         'breadcrumb' => [
             ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-            ['label' => 'User', 'url' => base_url('dashboard/user')],
             ['label' => 'Profil'],
         ],
         'user'       => (array) $user,

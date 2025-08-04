@@ -3,35 +3,32 @@
 
 <div class="container-fluid">
   <div class="page-title-box">
-    <h4 class="mb-0"><?= isset($title) ? esc($title) : 'Daftar Properti' ?></h4>
+    <h4 class="mb-0"><?= esc($title ?? 'Property Listing') ?></h4><br>
     <ol class="breadcrumb mb-0">
-      <?php foreach ($breadcrumb as $item): ?>
-        <li class="breadcrumb-item<?= isset($item['url']) ? '' : ' active' ?>">
-          <?php if (isset($item['url'])): ?>
-            <a href="<?= esc($item['url']) ?>"><?= esc($item['label']) ?></a>
-          <?php else: ?>
-            <?= esc($item['label']) ?>
-          <?php endif ?>
-        </li>
-      <?php endforeach ?>
+      <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Dashboard</a></li>
+      <li class="breadcrumb-item active">Property Listing</li>
     </ol>
   </div>
 
   <?php $role = session('role'); ?>
 
-  <?php if (in_array($role, ['sales', 'management'])): ?>
-    <div class="row g-4">
+  <?php if (in_array($role, ['sales'])): ?>
+  <div class="row g-4">
 
 
-  <div class="d-flex justify-content-center px-2">
+  <div class="d-flex justify-content-center">
   <form method="get"
         class="filter-wrapper d-flex flex-wrap align-items-center gap-2 p-2 px-3 rounded"
         style="max-width: 700px; width: 100%;">
     
     <!-- Input Search -->
-    <input type="text" name="search" class="form-control border-0"
-           placeholder="Cari Properti ..." value="<?= esc($search ?? '') ?>"
-           style="flex: 1 1">
+    <div class="input-group" style="flex: 1 1">
+            <span class="input-group-text bg-transparent border-0">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" name="search" class="form-control border-0"
+                   placeholder="Search ..." value="<?= esc($search ?? '') ?>">
+          </div>
 
     <!-- Dropdown Developer -->
     <select name="developer_id" class="form-select border-0"

@@ -3,8 +3,29 @@
 
 <div class="container-fluid">
     <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="mb-0"><?= esc($title) ?></h4>
+                <ol class="breadcrumb mb-0">
+                    <?php foreach ($breadcrumb as $item) : ?>
+                        <li class="breadcrumb-item"><?= isset($item['url']) ? '<a href="'.$item['url'].'">'.esc($item['label']).'</a>' : esc($item['label']) ?></li>
+                    <?php endforeach ?>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
+    <?php endif ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
+    <?php endif ?>
+
+    <div class="row">
         <div class="col-lg-9">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-header bg-transparent d-flex align-items-center">
                     <?php if (!empty($user['foto'])): ?>
                         <img src="<?= base_url('uploads/user/' . $user['foto']) ?>" alt="Foto" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
@@ -17,9 +38,13 @@
                         <div class="col-sm-3 mb-3 mb-sm-0">
                             <div class="nav flex-column nav-pills" id="profile-tab" role="tablist">
                                 <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#info">Informasi Akun</button>
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#sosmed">Media Sosial</button>
                                 <button class="nav-link" data-bs-toggle="pill" data-bs-target="#address">Alamat</button>
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#password">Ubah Password</button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#sosmed">Media Sosial</button>
+                                
+                                <?php if (session('role') === 'admin'): ?>
+                                  <button class="nav-link" data-bs-toggle="pill" data-bs-target="#password">Ubah Password</button>
+                                <?php endif; ?>
+
                             </div>
                         </div>
 
@@ -104,6 +129,40 @@
                                     </div>
                                 </div>
 
+                                <!-- Alamat -->
+                                <div class="tab-pane fade" id="address">
+                                    <form id="form-address" class="needs-validation" novalidate>
+                                        <?= csrf_field() ?>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="street">Jalan</label>
+                                                <input type="text" class="form-control address-input" id="street" value="<?= esc($street ?? '') ?>">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="province">Provinsi</label>
+                                                <select class="form-select address-input" id="province"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="regency">Kota/Kabupaten</label>
+                                                <select class="form-select address-input" id="regency"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="district">Kecamatan</label>
+                                                <select class="form-select address-input" id="district"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="village">Desa/Kelurahan</label>
+                                                <select class="form-select address-input" id="village"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="zip">Kode Pos</label>
+                                                <input type="text" class="form-control address-input" id="zip" value="<?= esc($zip ?? '') ?>">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+
                                 <!-- Media Sosial -->
                                 <div class="tab-pane fade" id="sosmed">
                                     <div class="row g-3">
@@ -132,38 +191,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Alamat -->
-<div class="tab-pane fade" id="address">
-    <form id="form-address" class="needs-validation" novalidate>
-        <?= csrf_field() ?>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="street">Jalan</label>
-                <input type="text" class="form-control address-input" id="street" value="<?= esc($street ?? '') ?>">
-            </div>
-            <div class="col-md-6">
-                <label for="province">Provinsi</label>
-                <select class="form-select address-input" id="province"></select>
-            </div>
-            <div class="col-md-6">
-                <label for="regency">Kota/Kabupaten</label>
-                <select class="form-select address-input" id="regency"></select>
-            </div>
-            <div class="col-md-6">
-                <label for="district">Kecamatan</label>
-                <select class="form-select address-input" id="district"></select>
-            </div>
-            <div class="col-md-6">
-                <label for="village">Desa/Kelurahan</label>
-                <select class="form-select address-input" id="village"></select>
-            </div>
-            <div class="col-md-6">
-                <label for="zip">Kode Pos</label>
-                <input type="text" class="form-control address-input" id="zip" value="<?= esc($zip ?? '') ?>">
-            </div>
-        </div>
-    </form>
-</div>
+                                
 
 
                                 <!-- Password -->

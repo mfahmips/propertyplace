@@ -3,17 +3,10 @@
 
 <div class="container-fluid">
   <div class="page-title-box">
-    <h4 class="mb-0"><?= esc($title) ?></h4>
+    <h4 class="mb-0"><?= esc($title ?? 'Pengajuan Komisi') ?></h4><br>
     <ol class="breadcrumb mb-0">
-      <?php foreach ($breadcrumb as $item): ?>
-        <li class="breadcrumb-item<?= isset($item['url']) ? '' : ' active' ?>">
-          <?php if (isset($item['url'])): ?>
-            <a href="<?= esc($item['url']) ?>"><?= esc($item['label']) ?></a>
-          <?php else: ?>
-            <?= esc($item['label']) ?>
-          <?php endif ?>
-        </li>
-      <?php endforeach ?>
+      <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Dashboard</a></li>
+      <li class="breadcrumb-item active">Kalkulator KPR</li>
     </ol>
   </div>
 

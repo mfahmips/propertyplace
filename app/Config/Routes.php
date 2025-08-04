@@ -59,6 +59,7 @@ $routes->get('dashboard', 'Dashboard\Index::index');
 // ===========================
 $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
+        $routes->get('profile/(:segment)', 'Dashboard\User::profile/$1');
     // === USER ===
         $routes->group('user', function ($routes) {
         $routes->get('/', 'Dashboard\User::index');
@@ -68,7 +69,6 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:num)', 'Dashboard\User::update/$1');
         $routes->get('delete/(:num)', 'Dashboard\User::delete/$1');
         $routes->get('deletePhoto/(:num)', 'Dashboard\User::deletePhoto/$1'); // ✅ Diperbaiki
-        $routes->get('profile/(:segment)', 'Dashboard\User::profile/$1');
         $routes->post('autosave', 'Dashboard\User::autosave');
         $routes->post('updateRole/(:num)', 'Dashboard\User::updateRole/$1');
         $routes->post('updateStatus/(:num)', 'Dashboard\User::updateStatus/$1');
