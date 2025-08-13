@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 03 Agu 2025 pada 17.58
+-- Waktu pembuatan: 13 Agu 2025 pada 17.31
 -- Versi server: 8.0.30
 -- Versi PHP: 8.1.10
 
@@ -71,6 +71,42 @@ CREATE TABLE `blogs` (
 
 INSERT INTO `blogs` (`id`, `title`, `slug`, `content`, `cover_image`, `created_at`, `updated_at`) VALUES
 (1, 'Identity Blog', 'identity-blog', 'Logo kami menggambarkan 3 hal utama:\r\n🏡 Rumah = simbol kenyamanan\r\n💛 Warna ceria = semangat dan optimisme\r\n🔄 Bentuk seimbang = kepercayaan & transparansi\r\n\r\nKami ingin jadi partner properti yang nggak ribet, nggak menipu, dan dekat dengan kamu.\r\n#BrandMeaning #MaknaLogo #AgencyProperti', '1752390076_9b4af8248e8efca575c2.jpg', '2025-07-13 07:01:16', '2025-07-13 08:10:13');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `bookings`
+--
+
+CREATE TABLE `bookings` (
+  `id` int NOT NULL,
+  `developer_id` int UNSIGNED NOT NULL,
+  `property_id` int NOT NULL,
+  `type_id` int NOT NULL,
+  `unit_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `buyer_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `buyer_phone` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `buyer_email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` bigint DEFAULT NULL,
+  `payment_plan` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deposit_amount` bigint DEFAULT NULL,
+  `deposit_receipt` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','reserved','confirmed','cancelled','expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `reserved_by_user_id` int DEFAULT NULL,
+  `reserved_at` datetime DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `bookings`
+--
+
+INSERT INTO `bookings` (`id`, `developer_id`, `property_id`, `type_id`, `unit_number`, `buyer_name`, `buyer_phone`, `buyer_email`, `price`, `payment_plan`, `deposit_amount`, `deposit_receipt`, `status`, `reserved_by_user_id`, `reserved_at`, `expires_at`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 1, 'A1', 'Dewi Lestari', '081234567890', 'dewi@gmail.com', 950000000, 'Cash Bertahap', 15000000, 'uploads/receipt_a1.jpg', 'pending', 6, '2025-08-13 23:27:49', NULL, 'Pembeli serius, bayar tunai.', '2025-08-13 23:27:49', '2025-08-13 23:27:49'),
+(2, 1, 1, 2, 'A2', 'Budi Santoso', '081298765432', 'budi@gmail.com', 1200000000, 'KPR Bank BSI', 20000000, 'uploads/receipt_a2.jpg', 'reserved', 6, '2025-08-13 23:27:49', NULL, 'Akan booking minggu depan.', '2025-08-13 23:27:49', '2025-08-13 23:27:49');
 
 -- --------------------------------------------------------
 
@@ -434,7 +470,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `name`, `username`, `slug`, `email`, `phone`, `password`, `foto`, `gender`, `place_of_birth`, `date_of_birth`, `address`, `facebook`, `instagram`, `tiktok`, `role`, `position`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 'Muhamad Fahmi PS', 'mfahmips', 'muhamad-fahmi-ps', 'fahmi@propertyplace.id', '08123456789', '$2y$10$KjP7ZxAM6cycuo9PDdN4jOva/kgGcLqhq0pDMjKABlRD7BMGE7vwe', '1752170761_7e62da6707fe75eb19a6.jpg', 'Laki-laki', 'Bogor', '1998-03-13', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', NULL, 'mfahmips', 'mfahmips', 'admin', 'Digital Marketing', 1, '2025-07-05 06:30:18', '2025-07-31 16:46:05', NULL),
 (2, 'Maulidina Fadzri', 'maulidinafzr', 'maulidina-fadzri', 'maulidina@propertyplace.id', NULL, '$2y$10$9vzcjgw09eqZiWxQlPD1O6.L7aN8pwoHajkGwWk6LC843KndFr1FDS', '1752170842_190de76ecd37e540440d.jpg', 'Perempuan', 'Bogor', '1998-07-17', NULL, NULL, NULL, NULL, 'admin', 'Public Relation', 1, '2025-07-05 10:00:21', '2025-07-31 16:46:44', NULL),
-(6, 'Muhamad Wildan', 'wildan123', 'wildan123', 'wildan@propertyplace.id', '0856123456789', '$2y$10$zzZcJ/bIrU9wJzOurA3wouSIh2x27/uro6oVhU2jRnTy.FN9PZq2q', NULL, 'Laki-laki', 'Bogor', '2005-05-10', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'wildan', 'wildan', 'wildan', 'sales', 'Sales Executive', 1, '2025-07-31 17:53:07', '2025-08-01 17:32:29', NULL),
+(6, 'Muhamad Wildan', 'wildan123', 'wildan123', 'wildan@propertyplace.id', '0856123456789', '$2y$10$zzZcJ/bIrU9wJzOurA3wouSIh2x27/uro6oVhU2jRnTy.FN9PZq2q', NULL, 'Laki-laki', 'Bogor', '2005-05-10', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'wildan', 'wildan', 'wildan', 'sales', 'Sales Executive', 1, '2025-07-31 17:53:07', '2025-08-04 22:39:15', NULL),
 (7, 'Admin Satu', 'admin1', 'admin1', 'admin1@propertyplace.com', '081234567891', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', 'Laki-laki.jpg', 'Laki-laki', 'Jakarta', '1990-01-01', 'Jl. Admin 1', 'admin.fb', 'admin.ig', 'admin.tt', 'sales', 'Administrator', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:05', NULL),
 (8, 'Sales Dua', 'sales2', 'sales2', 'sales2@propertyplace.com', '082222222222', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', 'Perempuan.jpg', 'Perempuan', 'Bandung', '1995-02-02', 'Jl. Sales 2', 'sales.fb', 'sales.ig', 'sales.tt', 'sales', 'Sales Executive', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:04', NULL),
 (9, 'Manajer Tiga', 'manager3', 'manager3', 'manager3@propertyplace.com', '083333333333', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', NULL, 'Laki-laki', 'Surabaya', '1985-03-03', 'Jl. Manager 3', 'manager.fb', 'manager.ig', 'manager.tt', 'management', 'Manajer Umum', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:03', NULL);
@@ -456,6 +492,17 @@ ALTER TABLE `absensi_sales`
 ALTER TABLE `blogs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`);
+
+--
+-- Indeks untuk tabel `bookings`
+--
+ALTER TABLE `bookings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_bookings_type` (`type_id`),
+  ADD KEY `fk_bookings_user` (`reserved_by_user_id`),
+  ADD KEY `idx_booking_unit_status` (`property_id`,`type_id`,`unit_number`,`status`),
+  ADD KEY `idx_booking_expired` (`status`,`expires_at`),
+  ADD KEY `idx_booking_dev_created` (`developer_id`,`created_at`);
 
 --
 -- Indeks untuk tabel `customers`
@@ -575,6 +622,12 @@ ALTER TABLE `blogs`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT untuk tabel `bookings`
+--
+ALTER TABLE `bookings`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
 -- AUTO_INCREMENT untuk tabel `customers`
 --
 ALTER TABLE `customers`
@@ -673,6 +726,15 @@ ALTER TABLE `users`
 --
 ALTER TABLE `absensi_sales`
   ADD CONSTRAINT `absensi_sales_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Ketidakleluasaan untuk tabel `bookings`
+--
+ALTER TABLE `bookings`
+  ADD CONSTRAINT `fk_bookings_developer` FOREIGN KEY (`developer_id`) REFERENCES `developers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_bookings_property` FOREIGN KEY (`property_id`) REFERENCES `properties` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_bookings_type` FOREIGN KEY (`type_id`) REFERENCES `property_type` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_bookings_user` FOREIGN KEY (`reserved_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `properties`
