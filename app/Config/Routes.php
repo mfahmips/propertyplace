@@ -159,6 +159,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('absensi', 'Dashboard\SalesActivity::absensi');
         $routes->get('pameran', 'Dashboard\SalesActivity::pameran');
         $routes->get('komisi', 'Dashboard\SalesActivity::komisi');
+        $routes->get('bookings', 'Dashboard\SalesActivity::bookings');
 
         // CRUD untuk absensi
         $routes->post('absensi/masuk', 'Dashboard\SalesActivity::absenMasuk');
@@ -172,6 +173,13 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         // CRUD untuk komisi (jika ada pengajuan atau update status)
         $routes->post('komisi/save', 'Dashboard\SalesActivity::saveKomisi');
         $routes->post('komisi/update', 'Dashboard\SalesActivity::updateKomisi');
+
+         // Booking
+        $routes->post('bookings/save', 'Dashboard\SalesActivity::saveBooking');
+        $routes->post('bookings/update', 'Dashboard\SalesActivity::updateBooking');
+        $routes->get('getTypesByProperty/(:num)', 'Dashboard\SalesActivity::getTypesByProperty/$1');
+
+
     });
 
 

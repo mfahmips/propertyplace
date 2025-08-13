@@ -86,6 +86,14 @@
                                     Komisi
                                 </a>
                             </li>
+
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="<?= base_url('dashboard/SalesActivity/bookings') ?>">
+                                    <iconify-icon icon="fa-solid:coins" class="me-1"></iconify-icon>
+                                    Booking Unit
+                                </a>
+                            </li>
+
                             <?php if ($role === 'admin'): ?>
                             <li class="sub-nav-item">
                                 <a class="sub-nav-link" href="<?= base_url('dashboard/SalesActivity/pameran') ?>">

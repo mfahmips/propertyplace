@@ -35,7 +35,7 @@
   <!-- Modal Ajukan Komisi -->
   <div class="modal fade" id="modalAjukanKomisi" tabindex="-1" aria-labelledby="modalAjukanKomisiLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form action="<?= base_url('salesactivity/komisi/save') ?>" method="post" enctype="multipart/form-data" class="modal-content">
+      <form action="<?= base_url('dashboard/SalesActivity/komisi/save') ?>" method="post" enctype="multipart/form-data" class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalAjukanKomisiLabel">Form Pengajuan Komisi</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
