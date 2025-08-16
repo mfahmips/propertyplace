@@ -327,7 +327,7 @@ document.getElementById('status_kehadiran').addEventListener('change', function 
                                         <p><strong>Waktu Masuk:</strong> <?= esc($row['waktu_masuk']) ?></p>
                                         
                                         <?php if (!empty($row['foto_masuk'])): ?>
-                                          <img src="<?= base_url('uploads/user/absensi/' . $row['foto_masuk']) ?>" 
+                                          <img src="<?= base_url('uploads/user/absensi/checkin/' . $row['foto_masuk']) ?>" 
                                                alt="Foto Masuk" 
                                                class="img-thumbnail rounded mb-2" 
                                                style="max-width: 200px; height: auto;">
@@ -360,7 +360,7 @@ document.getElementById('status_kehadiran').addEventListener('change', function 
                                         <p><strong>Database Pameran:</strong> <?= esc($row['database_pameran']) ?: '-' ?></p>
 
                                         <?php if (!empty($row['foto_pulang'])): ?>
-                                          <img src="<?= base_url('uploads/user/absensi/' . $row['foto_pulang']) ?>" 
+                                          <img src="<?= base_url('uploads/user/absensi/checkout/' . $row['foto_pulang']) ?>" 
                                                alt="Foto Pulang" 
                                                class="img-thumbnail rounded mb-2" 
                                                style="max-width: 200px; height: auto;">

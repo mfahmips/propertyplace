@@ -25,6 +25,7 @@
     "ext-intl": "*",
     "ext-mbstring": "*",
     "codeigniter4/settings": "^2.2",
+    "dompdf/dompdf": "2.0",
     "laminas/laminas-escaper": "^2.17",
     "league/oauth2-google": "^4.0",
     "psr/log": "^3.0"

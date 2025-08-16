@@ -173,6 +173,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         // CRUD untuk komisi (jika ada pengajuan atau update status)
         $routes->post('komisi/save', 'Dashboard\SalesActivity::saveKomisi');
         $routes->post('komisi/update', 'Dashboard\SalesActivity::updateKomisi');
+        $routes->get('komisi/cetak/(:num)', 'Dashboard\SalesActivity::cetakKomisi/$1');
+        $routes->get('komisi/preview/(:num)', 'Dashboard\SalesActivity::cetakKomisiPreview/$1');
+
+
 
          // Booking
         $routes->post('bookings/save', 'Dashboard\SalesActivity::saveBooking');

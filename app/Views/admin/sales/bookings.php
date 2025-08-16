@@ -27,7 +27,7 @@
   <?php if ($isSales): ?>
   <div class="card">
     <div class="card-body d-flex flex-column align-items-center gap-3">
-      <button class="btn btn-primary w-50" data-bs-toggle="modal" data-bs-target="#modalBooking">Booking Unit Baru</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBooking">Booking Unit Baru</button>
     </div>
   </div>
 

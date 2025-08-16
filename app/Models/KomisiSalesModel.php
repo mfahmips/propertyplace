@@ -6,24 +6,19 @@ use CodeIgniter\Model;
 
 class KomisiSalesModel extends Model
 {
-    protected $table      = 'komisi_sales';
-    protected $primaryKey = 'id';
-
-    protected $allowedFields = [
+    protected $table            = 'komisi_sales';
+    protected $primaryKey       = 'id';
+    protected $useTimestamps    = true; // agar created_at & updated_at otomatis
+    protected $allowedFields    = [
+        'booking_id',
         'user_id',
-        'property_id',
-        'developer_id',
-        'harga',
-        'komisi',
+        'komisi_persen',
+        'komisi_nominal',
         'status',
-        'keterangan',
-        'file_bukti',
-        'tanggal_pengajuan',
+        'tanggal_ajuan',
+        'tanggal_acc',
+        'catatan',
         'created_at',
         'updated_at',
     ];
-
-    protected $useTimestamps = true;
-    protected $createdField  = 'tanggal_pengajuan';
-    protected $updatedField  = 'updated_at';
 }
