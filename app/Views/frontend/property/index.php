@@ -112,17 +112,22 @@
                         <div class="property-card-details">
                             <div class="media-left">
                                 <h4 class="property-card-title">
-                                    <a href="<?= base_url('property/' . $property['slug']) ?>">
+                                    <a href="<?= base_url('property/' . $property['property_slug']) ?>">
                                         <?= esc($property['title']) ?>
                                     </a>
                                 </h4>
-                                <h5 class="property-card-price">Rp <?= number_format($property['price'], 0, ',', '.') ?></h5>
+                                <h5 class="property-card-price">
+                                    <?= !empty($property['price']) 
+                                        ? 'Rp ' . number_format($property['price'], 0, ',', '.') 
+                                        : esc($property['price_text'] ?? 'Harga tidak tersedia') ?>
+                                </h5>
+
                                 <p class="property-card-location">
                                     <?= esc($property['developer_name'] ?? '-') ?> - <?= esc($property['developer_location'] ?? '-') ?>
                                 </p>
                             </div>
                             <div class="btn-wrap">
-                                <a href="<?= base_url('property/' . $property['slug']) ?>" class="th-btn style-border2 th-btn-icon">Details</a>
+                                <a href="<?= base_url('property/' . $property['property_slug']) ?>" class="th-btn style-border2 th-btn-icon">Details</a>
                             </div>
                         </div>
                     </div>

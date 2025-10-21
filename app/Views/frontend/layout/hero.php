@@ -1,6 +1,4 @@
-
- 
- <!--==============================
+<!--==============================
 Hero Area
 ==============================-->
     <div class="th-hero-wrapper hero-4" id="hero" style="background-color: #DAD3C5;">

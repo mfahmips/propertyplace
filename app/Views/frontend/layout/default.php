@@ -184,6 +184,7 @@
     <?= $this->include('frontend/layout/partials/sidebar') ?>
 
     <?= $this->include('frontend/layout/partials/header') ?>
+    
 
     <?= $this->renderSection('content') ?>
 

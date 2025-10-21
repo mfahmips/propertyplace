@@ -6,53 +6,79 @@ use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\DeveloperModel;
 use App\Models\PropertyImageModel;
+use App\Models\PropertyDetailModel;
+use App\Models\PropertyTypeModel;
 
 class Property extends BaseController
 {
     public function index()
     {
         $request = \Config\Services::request();
+
+        // Ambil parameter GET
         $keyword   = $request->getGet('keyword');
         $city      = $request->getGet('city');
         $developer = $request->getGet('developer');
 
         $propertyModel = new PropertyModel();
 
-        $builder = $propertyModel->select('properties.slug as property_slug, properties.*, developers.name as developer_name, developers.slug as developer_slug')
-                                 ->join('developers', 'developers.id = properties.developer_id');
+        // === Query dasar ===
+        $builder = $propertyModel
+            ->select('
+                properties.id,
+                properties.title,
+                properties.slug AS property_slug,
+                developers.name AS developer_name,
+                developers.slug AS developer_slug,
+                property_details.location,
+                property_details.price,
+                property_details.price_text
+            ')
+            ->join('developers', 'developers.id = properties.developer_id', 'left')
+            ->join('property_details', 'property_details.property_id = properties.id', 'left');
 
-        // Filter keyword (title & description)
-        if ($keyword) {
-            $builder = $builder->groupStart()
+        // === Filter pencarian ===
+        if (!empty($keyword)) {
+            $builder->groupStart()
                 ->like('properties.title', $keyword)
-                ->orLike('properties.description', $keyword)
+                ->orLike('property_details.location', $keyword)
                 ->groupEnd();
         }
 
-        // Filter city (sekarang dari properties.location)
-        if ($city) {
-            $builder = $builder->where('properties.location', $city);
+        if (!empty($city)) {
+            $builder->where('property_details.location', $city);
         }
 
-        // Filter developer
-        if ($developer) {
-            $builder = $builder->where('properties.developer_id', $developer);
+        if (!empty($developer)) {
+            $builder->where('properties.developer_id', $developer);
         }
 
-        $data['properties'] = $builder->findAll();
+        // === Ambil hasil ===
+        $properties = $builder->orderBy('properties.title', 'ASC')->findAll();
 
-        // Filters state (untuk form tetap aktif)
-        $data['active_keyword'] = $keyword ?? '';
-        $data['active_city'] = $city ?? '';
-        $data['active_developer'] = $developer ?? '';
+        // === Lengkapi data gambar utama ===
+        $imageModel = new PropertyImageModel();
+        foreach ($properties as &$property) {
+            $image = $imageModel
+                ->where('property_id', $property['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->first();
 
-        // Cities berdasarkan property (bukan developer lagi)
-        $data['cities'] = $propertyModel->distinct()
-                                        ->select('location')
-                                        ->orderBy('location')
-                                        ->findColumn('location');
+            $property['image'] = $image['filename'] ?? 'default.png';
+        }
 
-        $data['developers'] = (new DeveloperModel())->findAll();
+        // === Data dropdown untuk filter ===
+        $propertyDetailModel = new PropertyDetailModel();
+        $developerModel = new DeveloperModel();
+
+        $data = [
+            'properties'       => $properties,
+            'active_keyword'   => $keyword ?? '',
+            'active_city'      => $city ?? '',
+            'active_developer' => $developer ?? '',
+            'cities'           => $propertyDetailModel->distinct()->select('location')->orderBy('location', 'ASC')->findColumn('location'),
+            'developers'       => $developerModel->orderBy('name', 'ASC')->findAll(),
+        ];
 
         return view('frontend/property/index', $data);
     }
@@ -62,25 +88,46 @@ class Property extends BaseController
         $propertyModel   = new PropertyModel();
         $imageModel      = new PropertyImageModel();
         $developerModel  = new DeveloperModel();
+        $detailModel     = new PropertyDetailModel();
+        $typeModel       = new PropertyTypeModel(); // 🟢 Tambahkan model tipe properti
 
-        // Cari property berdasarkan slug
-        $property = $propertyModel->where('slug', $slug)->first();
+        // Cari properti berdasarkan slug
+        $property = $propertyModel
+            ->select('
+                properties.*,
+                developers.name AS developer_name,
+                developers.slug AS developer_slug,
+                property_details.location,
+                property_details.price,
+                property_details.price_text,
+                property_details.description
+            ')
+            ->join('developers', 'developers.id = properties.developer_id', 'left')
+            ->join('property_details', 'property_details.property_id = properties.id', 'left')
+            ->where('properties.slug', $slug)
+            ->first();
 
-        if (! $property) {
+        if (!$property) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Properti tidak ditemukan.");
         }
 
-        // Ambil developer dari relasi
-        $developer = $developerModel->find($property['developer_id']);
+        // Ambil semua gambar properti
+        $images = $imageModel
+            ->where('property_id', $property['id'])
+            ->orderBy('sort_order', 'ASC')
+            ->findAll();
 
-        // Ambil semua gambar
-        $images = $imageModel->where('property_id', $property['id'])->findAll();
+        // 🟢 Ambil semua tipe unit properti
+        $propertyTypes = $typeModel
+            ->where('property_id', $property['id'])
+            ->orderBy('building_area', 'ASC')
+            ->findAll();
 
         // Kirim data ke view
         return view('frontend/property/detail', [
             'property'  => $property,
             'images'    => $images,
-            'developer' => $developer
+            'types'     => $propertyTypes, // 🟢 kirim data tipe properti
         ]);
     }
 }

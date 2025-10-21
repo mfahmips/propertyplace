@@ -21,71 +21,95 @@ class Home extends BaseController
         $settingsModel       = new SettingsModel();
         $developerModel      = new DeveloperModel();
 
+        // === Ambil filter dari form (GET request) ===
+        $propertyId  = $this->request->getGet('property');
+        $developerId = $this->request->getGet('developer');
+        $location    = $this->request->getGet('location');
+
+        // === Redirect otomatis ke /property/slug jika property dipilih ===
+        if (!empty($propertyId)) {
+            $property = $propertyModel->select('slug')->find($propertyId);
+            if ($property && !empty($property['slug'])) {
+                return redirect()->to(base_url('property/' . $property['slug']));
+            }
+        }
+
+        // === Query dasar ===
+        $propertyModel->select('properties.*');
+
+        if (!empty($developerId)) {
+            $propertyModel->where('developer_id', $developerId);
+        }
+
+        if (!empty($location)) {
+            $propertyModel->join('property_details', 'property_details.property_id = properties.id', 'left');
+            $propertyModel->where('property_details.location', $location);
+        }
+
         $featured = $propertyModel->findAll();
 
+        // === Format setiap properti ===
         foreach ($featured as &$property) {
-            // Gambar slider: ke-2 jika ada, fallback ke pertama, lalu default
             $images = $propertyImageModel
-                        ->where('property_id', $property['id'])
-                        ->orderBy('sort_order', 'ASC')
-                        ->findAll();
+                ->where('property_id', $property['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->findAll();
 
-            if (isset($images[1])) {
-                $property['image'] = $images[1]['filename'];
-            } elseif (isset($images[0])) {
-                $property['image'] = $images[0]['filename'];
-            } else {
-                $property['image'] = 'default.png';
-            }
+            $property['image'] = $images[1]['filename']
+                ?? $images[0]['filename']
+                ?? 'default.png';
 
-            // Nama developer
             $developer = $developerModel->find($property['developer_id']);
-            $property['developer_name'] = $developer ? $developer['name'] : '-';
+            $property['developer_name'] = $developer['name'] ?? '-';
 
-            // Unit dengan building_area terbesar
             $unit = $propertyTypeModel
-                        ->where('property_id', $property['id'])
-                        ->orderBy('building_area', 'DESC')
-                        ->first();
+                ->where('property_id', $property['id'])
+                ->orderBy('building_area', 'DESC')
+                ->first();
 
             $property['bedroom']  = $unit['bedrooms']  ?? '-';
             $property['bathroom'] = $unit['bathrooms'] ?? '-';
             $property['size']     = $unit['building_area'] ?? '-';
 
-            // Detail: price, price_text, location, description
             $detail = $propertyDetailModel
-                        ->where('property_id', $property['id'])
-                        ->first();
+                ->where('property_id', $property['id'])
+                ->first();
 
             $property['description'] = $detail['description'] ?? 'Deskripsi belum tersedia';
             $property['price_text']  = $detail['price_text'] ?? 'Harga tidak tersedia';
             $property['price']       = $detail['price'] ?? 0;
+            $property['location']    = $detail['location'] ?? '-';
         }
 
+        // === Dropdown Data ===
+        $developers = $developerModel
+            ->select('id, name')
+            ->orderBy('name', 'ASC')
+            ->findAll();
+
+        $properties = $propertyModel
+            ->select('id, title, slug')
+            ->orderBy('title', 'ASC')
+            ->findAll();
+
+        $locations = $propertyDetailModel
+            ->select('DISTINCT(location)')
+            ->where('location !=', '')
+            ->orderBy('location', 'ASC')
+            ->findAll();
+
+        // === Data untuk View ===
         $data = [
-            'featured'   => $featured,
-            'properties' => $featured,
-            'settings'   => $settingsModel->first(),
-            'developers' => $developerModel->orderBy('name', 'ASC')->findAll(),
+            'featured'          => $featured,
+            'properties'        => $properties,
+            'settings'          => $settingsModel->first(),
+            'developers'        => $developers,
+            'locations'         => $locations,
+            'filter_property'   => $propertyId,
+            'filter_developer'  => $developerId,
+            'filter_location'   => $location,
         ];
 
         return view('frontend/home', $data);
-    }
-
-
-    public function contact()
-    {
-        return view('frontend/contact');
-    }
-
-    public function sendContact()
-    {
-        $data = $this->request->getPost();
-
-        if (!$data['name'] || !$data['email'] || !$data['message']) {
-            return redirect()->back()->with('error', 'Semua field harus diisi.');
-        }
-
-        return redirect()->back()->with('success', 'Pesan Anda berhasil dikirim.');
     }
 }
