@@ -10,7 +10,7 @@
     <meta name="robots" content="INDEX,FOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-   <!-- Favicon -->
+    <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="57x57" href="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>">
     <link rel="apple-touch-icon" sizes="60x60" href="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>">
     <link rel="apple-touch-icon" sizes="72x72" href="<?= base_url('uploads/' . ($settings['site_icon'] ?? 'default-icon.png')) ?>">
@@ -138,6 +138,13 @@
 </head>
 
 <body>
+
+<?php if (session()->getFlashdata('error')): ?>
+<div class="alert alert-warning text-center">
+    <?= session()->getFlashdata('error') ?>
+</div>
+<?php endif; ?>
+
 <!--==============================
 Hero Area
 ==============================-->
@@ -150,44 +157,70 @@ Hero Area
 
     <form class="property-search-form" method="get" action="<?= base_url('/') ?>">
     <label style="background: linear-gradient(to bottom left, #c4552e, #2a0f0b);">Property Search</label>
-    <div class="form-group" style="margin-left: 40px;">
-        <i class="far fa-search"></i>
-        <input class="form-control" type="text" name="keyword" placeholder="Search ..." value="<?= esc($_GET['keyword'] ?? '') ?>">
-    </div>
+    <!-- ✅ Dropdown Developer -->
+  <select class="form-select custom-select" name="developer" id="developerSelect">
+    <option value="">Developer</option>
+    <?php foreach ($developers as $dev): ?>
+      <option value="<?= esc($dev['id']) ?>" <?= ($filter_developer == $dev['id']) ? 'selected' : '' ?>>
+        <?= esc($dev['name']) ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
 
-    <select class="form-select" name="property" id="propertySelect">
+  <!-- ✅ Dropdown Property -->
+  <select class="form-select custom-select" name="property" id="propertySelect">
     <option value="">Property</option>
     <?php foreach ($properties as $prop): ?>
-        <option value="<?= esc($prop['slug']) ?>" <?= ($filter_property == $prop['id']) ? 'selected' : '' ?>>
-            <?= esc($prop['title']) ?>
-        </option>
+      <option value="<?= esc($prop['id']) ?>" <?= ($filter_property == $prop['id']) ? 'selected' : '' ?>>
+        <?= esc($prop['title']) ?>
+      </option>
     <?php endforeach; ?>
-</select>
+  </select>
 
-
-    <select class="form-select" name="location">
-        <option value="">Location</option>
-        <?php foreach ($locations as $loc): ?>
-            <option value="<?= esc($loc['location']) ?>" <?= ($filter_location == $loc['location']) ? 'selected' : '' ?>>
-                <?= esc($loc['location']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-
-    <button class="th-btn" type="submit"><i class="far fa-search"></i> Search</button>
+  <button class="th-btn mt-3" type="submit">
+    <i class="far fa-search"></i> Search
+  </button>
 </form>
 
   </div>
 </div>
 
 <script>
-document.getElementById('propertySelect').addEventListener('change', function() {
-    const slug = this.value;
-    if (slug) {
-        window.location.href = "<?= base_url('property/') ?>" + slug;
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('.property-search-form');
+
+  form.addEventListener('submit', function(e) {
+    const keywordField  = form.querySelector('input[name="keyword"]');
+    const propertyField = form.querySelector('select[name="property"]');
+    const locationField = form.querySelector('select[name="location"]'); // optional
+
+    const keyword  = keywordField ? keywordField.value.trim() : '';
+    const property = propertyField ? propertyField.value.trim() : '';
+    const location = locationField ? locationField.value.trim() : '';
+
+    // Jika semua kosong
+    if (!keyword && !property && !location) {
+      e.preventDefault(); // hentikan form agar tidak dikirim (tidak reload / redirect)
+
+      // Jika alert belum ada, buat baru
+      if (!document.querySelector('.search-alert')) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-warning text-center search-alert';
+        alert.style.marginTop = '15px';
+        alert.innerText = 'Silakan isi kata kunci atau pilih properti';
+
+        // Tampilkan setelah form
+        form.insertAdjacentElement('afterend', alert);
+
+        // Hilangkan pesan otomatis setelah 3 detik
+        setTimeout(() => alert.remove(), 3000);
+      }
     }
+  });
 });
 </script>
+
+
 
 <!-- JS -->
 <script src="<?= base_url('assets/frontend/js/vendor/jquery-3.7.1.min.js') ?>"></script>

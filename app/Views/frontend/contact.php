@@ -4,16 +4,12 @@
 <!--==============================
     Breadcumb
 ============================== -->
-    <div class="breadcumb-wrapper " data-bg-src="assets/img/bg/breadcumb-bg.jpg">
+    <div class="breadcumb-wrapper " data-bg-src="assets/img/bg/breadcumb-bg.jpg" style="padding-top: 50px; padding-bottom: 50px;">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xl-9">
                     <div class="breadcumb-content">
                         <h1 class="breadcumb-title">Contact</h1>
-                        <ul class="breadcumb-menu">
-                            <li><a href="index.html">Home</a></li>
-                            <li>Contact</li>
-                        </ul>
                     </div>
                 </div>
             </div>
@@ -21,7 +17,7 @@
     </div><!--==============================
 Contact Area  
 ==============================-->
-    <div class="space">
+    <div class="space" style="padding-top: 50px; padding-bottom: 50px;">
         <div class="container">
             <div class="title-area text-center">
                 <span class="sub-title">Get In Touch</span>

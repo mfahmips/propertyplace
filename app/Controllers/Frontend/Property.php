@@ -84,50 +84,51 @@ class Property extends BaseController
     }
 
     public function detail($slug)
-    {
-        $propertyModel   = new PropertyModel();
-        $imageModel      = new PropertyImageModel();
-        $developerModel  = new DeveloperModel();
-        $detailModel     = new PropertyDetailModel();
-        $typeModel       = new PropertyTypeModel(); // 🟢 Tambahkan model tipe properti
+{
+    $propertyModel   = new PropertyModel();
+    $imageModel      = new PropertyImageModel();
+    $developerModel  = new DeveloperModel();
+    $detailModel     = new PropertyDetailModel();
+    $typeModel       = new PropertyTypeModel();
 
-        // Cari properti berdasarkan slug
-        $property = $propertyModel
-            ->select('
-                properties.*,
-                developers.name AS developer_name,
-                developers.slug AS developer_slug,
-                property_details.location,
-                property_details.price,
-                property_details.price_text,
-                property_details.description
-            ')
-            ->join('developers', 'developers.id = properties.developer_id', 'left')
-            ->join('property_details', 'property_details.property_id = properties.id', 'left')
-            ->where('properties.slug', $slug)
-            ->first();
+    $property = $propertyModel
+        ->select('
+            properties.*,
+            developers.name AS developer_name,
+            developers.slug AS developer_slug,
+            property_details.location,
+            property_details.price,
+            property_details.price_text,
+            property_details.description
+        ')
+        ->join('developers', 'developers.id = properties.developer_id', 'left')
+        ->join('property_details', 'property_details.property_id = properties.id', 'left')
+        ->where('properties.slug', $slug)
+        ->first();
 
-        if (!$property) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Properti tidak ditemukan.");
-        }
-
-        // Ambil semua gambar properti
-        $images = $imageModel
-            ->where('property_id', $property['id'])
-            ->orderBy('sort_order', 'ASC')
-            ->findAll();
-
-        // 🟢 Ambil semua tipe unit properti
-        $propertyTypes = $typeModel
-            ->where('property_id', $property['id'])
-            ->orderBy('building_area', 'ASC')
-            ->findAll();
-
-        // Kirim data ke view
-        return view('frontend/property/detail', [
-            'property'  => $property,
-            'images'    => $images,
-            'types'     => $propertyTypes, // 🟢 kirim data tipe properti
-        ]);
+    if (!$property) {
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Properti tidak ditemukan.");
     }
+
+    $images = $imageModel
+        ->where('property_id', $property['id'])
+        ->orderBy('sort_order', 'ASC')
+        ->findAll();
+
+    $propertyTypes = $typeModel
+        ->where('property_id', $property['id'])
+        ->orderBy('building_area', 'ASC')
+        ->findAll();
+
+    // 🔹 Tambahkan ini kalau view butuh semua developer:
+    $developers = $developerModel->findAll();
+
+    return view('frontend/property/detail', [
+        'property'   => $property,
+        'images'     => $images,
+        'types'      => $propertyTypes,
+        'developers' => $developers, // 🔹 tambahkan variabel ini
+    ]);
+}
+
 }
