@@ -155,26 +155,23 @@ Hero Area
 
     <h1>Experience The Harmonious<br>Blend Of Luxury</h1>
 
-    <form class="property-search-form" method="get" action="<?= base_url('/') ?>">
+    <form class="property-search-form" style="border: 0;" method="get" action="<?= base_url('/') ?>">
     <label style="background: linear-gradient(to bottom left, #c4552e, #2a0f0b);">Property Search</label>
     <!-- ✅ Dropdown Developer -->
   <select class="form-select custom-select" name="developer" id="developerSelect">
-    <option value="">Developer</option>
-    <?php foreach ($developers as $dev): ?>
-      <option value="<?= esc($dev['id']) ?>" <?= ($filter_developer == $dev['id']) ? 'selected' : '' ?>>
-        <?= esc($dev['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
+  <option value="">Developer</option>
+  <?php foreach ($developers as $dev): ?>
+    <option value="<?= esc($dev['slug']) ?>" <?= ($filter_developer == $dev['slug']) ? 'selected' : '' ?>>
+      <?= esc($dev['name']) ?>
+    </option>
+  <?php endforeach; ?>
+</select>
+
+
 
   <!-- ✅ Dropdown Property -->
-  <select class="form-select custom-select" name="property" id="propertySelect">
+  <select class="form-select custom-select" name="property" id="propertySelect" disabled>
     <option value="">Property</option>
-    <?php foreach ($properties as $prop): ?>
-      <option value="<?= esc($prop['id']) ?>" <?= ($filter_property == $prop['id']) ? 'selected' : '' ?>>
-        <?= esc($prop['title']) ?>
-      </option>
-    <?php endforeach; ?>
   </select>
 
   <button class="th-btn mt-3" type="submit">
@@ -188,7 +185,55 @@ Hero Area
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('.property-search-form');
+  const developerSelect = document.getElementById('developerSelect');
+  const propertySelect  = document.getElementById('propertySelect');
 
+  const baseUrl = "<?= base_url() ?>"; // pastikan ini dievaluasi oleh PHP
+
+  // 1️⃣ DISABLE PROPERTY DROPDOWN SAAT DEVELOPER BELUM DIPILIH
+  propertySelect.disabled = true;
+
+  // 2️⃣ KETIKA DEVELOPER DIPILIH, LOAD PROPERTY DENGAN AJAX
+  developerSelect.addEventListener('change', async function() {
+    const slug = this.value;
+
+    if (!slug) {
+      propertySelect.innerHTML = '<option value="">Property</option>';
+      propertySelect.disabled = true;
+      return;
+    }
+
+    // Loading state
+    propertySelect.innerHTML = '<option value="">Memuat data properti...</option>';
+    propertySelect.disabled = true;
+
+    try {
+      const response = await fetch(`${baseUrl}properties/by-developer/${slug}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      propertySelect.innerHTML = '<option value="">Pilih Properti</option>';
+
+      if (Array.isArray(data) && data.length > 0) {
+        data.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.title;
+          propertySelect.appendChild(opt);
+        });
+      } else {
+        propertySelect.innerHTML = '<option value="">Tidak tersedia</option>';
+      }
+
+      propertySelect.disabled = false;
+    } catch (err) {
+      console.error('Fetch error:', err);
+      propertySelect.innerHTML = '<option value="">Gagal memuat data</option>';
+      propertySelect.disabled = true;
+    }
+  });
+
+  // 3️⃣ VALIDASI FORM SEBELUM SUBMIT
   form.addEventListener('submit', function(e) {
     const keywordField  = form.querySelector('input[name="keyword"]');
     const propertyField = form.querySelector('select[name="property"]');
@@ -198,21 +243,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const property = propertyField ? propertyField.value.trim() : '';
     const location = locationField ? locationField.value.trim() : '';
 
-    // Jika semua kosong
     if (!keyword && !property && !location) {
-      e.preventDefault(); // hentikan form agar tidak dikirim (tidak reload / redirect)
+      e.preventDefault();
 
-      // Jika alert belum ada, buat baru
       if (!document.querySelector('.search-alert')) {
         const alert = document.createElement('div');
         alert.className = 'alert alert-warning text-center search-alert';
         alert.style.marginTop = '15px';
-        alert.innerText = 'Silakan isi kata kunci atau pilih properti';
-
-        // Tampilkan setelah form
+        alert.innerText = 'Silakan pilih property tersedia';
         form.insertAdjacentElement('afterend', alert);
-
-        // Hilangkan pesan otomatis setelah 3 detik
         setTimeout(() => alert.remove(), 3000);
       }
     }

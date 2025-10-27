@@ -101,7 +101,7 @@
             <div class="container">
                 <div class="row gy-3 align-items-center justify-content-center">
                     <div class="col-lg-12">
-                        <p class="copyright-text" style="color: #202429; margin: 0;">
+                        <p class="copyright-text" style="color: black; margin: 0;">
                             Copyright <i class="fal fa-copyright"></i> 
                             <?= date('Y') ?> <?= esc($settings['site_name'] ?? 'PropertyPlace') ?>, All rights reserved.
                         </p>

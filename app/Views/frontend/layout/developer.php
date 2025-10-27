@@ -1,4 +1,4 @@
-<section class="space overflow-hidden position-relative award-area-1" style="background: #dad3c5; padding-bottom: 0; padding-top: 0;">
+<section class="space overflow-hidden position-relative award-area-1" style="background: #DAD3C5; padding-bottom: 0; padding-top: 0;">
         <div class="container">
 
     <!--==============================
