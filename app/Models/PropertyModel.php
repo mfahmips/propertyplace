@@ -9,7 +9,6 @@ class PropertyModel extends Model
     protected $table = 'properties';
     protected $primaryKey = 'id';
 
-    // Sesuai kolom dalam tabel properties
     protected $allowedFields = [
         'title',
         'slug',
@@ -18,17 +17,40 @@ class PropertyModel extends Model
         'created_at'
     ];
 
-    // Aktifkan hanya created_at karena kolom updated_at tidak tersedia
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
-    protected $updatedField  = ''; // Tidak digunakan karena tidak ada di DB
+    protected $updatedField  = '';
+    protected $useSoftDeletes = false;
 
     /**
-     * Join developer data untuk listing
+     * Join developer info
      */
     public function withDeveloper()
     {
-        return $this->select('properties.*, developers.name AS dev_name, developers.logo AS dev_logo, developers.location AS dev_location')
-                    ->join('developers', 'developers.id = properties.developer_id', 'left');
+        return $this->select('
+                properties.id,
+                properties.title,
+                properties.slug,
+                properties.thumbnail,
+                developers.name AS developer_name,
+                developers.logo AS developer_logo,
+                developers.location AS developer_location
+            ')
+            ->join('developers', 'developers.id = properties.developer_id', 'left');
+    }
+
+    /**
+     * Join property details
+     */
+    public function withDetails()
+    {
+        return $this->select('
+                properties.*,
+                property_details.price_text,
+                property_details.location,
+                property_details.type,
+                property_details.purpose
+            ')
+            ->join('property_details', 'property_details.property_id = properties.id', 'left');
     }
 }

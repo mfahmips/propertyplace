@@ -17,8 +17,9 @@ $routes->setAutoRoute(false); // tetap disarankan disable untuk keamanan
 $routes->group('', ['namespace' => 'App\Controllers\Frontend'], static function($routes) {
     $routes->get('/', 'Home::index');
     $routes->get('developer/(:segment)', 'Home::developer/$1');
+    $routes->get('properties/by-developer/(:segment)', 'Home::getPropertiesByDeveloper/$1');
+    $routes->get('property/(:segment)', 'Home::property/$1');
     $routes->get('property', 'Property::index');
-    $routes->get('property/(:segment)', 'Property::detail/$1');
     $routes->get('contact', 'Contact::index');
     $routes->post('contact/submit', 'Contact::submit');
     $routes->get('about', 'About::index');

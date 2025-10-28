@@ -4,175 +4,190 @@ namespace App\Controllers\Frontend;
 
 use App\Controllers\BaseController;
 use App\Models\PropertyModel;
-use App\Models\PropertyImageModel;
-use App\Models\PropertyTypeModel;
-use App\Models\SettingsModel;
-use App\Models\DeveloperModel;
 use App\Models\PropertyDetailModel;
+use App\Models\DeveloperModel;
+use App\Models\PropertyTypeModel;
 
 class Home extends BaseController
 {
     public function index()
     {
-        $propertyModel       = new PropertyModel();
-        $propertyImageModel  = new PropertyImageModel();
-        $propertyTypeModel   = new PropertyTypeModel();
+        $developerModel = new DeveloperModel();
+        $propertyModel = new PropertyModel();
         $propertyDetailModel = new PropertyDetailModel();
-        $settingsModel       = new SettingsModel();
-        $developerModel      = new DeveloperModel();
 
-        // === Ambil filter dari form (GET request) ===
-        $propertyId   = $this->request->getGet('property');
-        $developerKey = $this->request->getGet('developer'); // bisa slug atau id tergantung input
-        $location     = $this->request->getGet('location');
-
-        // === Redirect otomatis ke /property/slug jika property dipilih ===
-        if (!empty($propertyId)) {
-            $property = $propertyModel->select('slug')->find($propertyId);
-            if ($property && !empty($property['slug'])) {
-                return redirect()->to(base_url('property/' . $property['slug']));
-            }
-        }
-
-        // === Query dasar ===
-        $propertyModel->select('properties.*');
-
-        // 🔹 Filter developer (bisa id atau slug)
-        if (!empty($developerKey)) {
-            // Cek apakah input adalah slug
-            $developer = $developerModel
-                ->select('id')
-                ->groupStart()
-                    ->where('id', $developerKey)
-                    ->orWhere('slug', $developerKey)
-                ->groupEnd()
-                ->first();
-
-            if ($developer) {
-                $propertyModel->where('developer_id', $developer['id']);
-            }
-        }
-
-        // 🔹 Filter lokasi (optional)
-        if (!empty($location)) {
-            $propertyModel
-                ->join('property_details', 'property_details.property_id = properties.id', 'left')
-                ->where('property_details.location', $location);
-        }
-
-        $featured = $propertyModel->findAll();
-
-        // === Format setiap properti ===
-        foreach ($featured as &$property) {
-            // Ambil gambar properti
-            $images = $propertyImageModel
-                ->where('property_id', $property['id'])
-                ->orderBy('sort_order', 'ASC')
-                ->findAll();
-
-            $property['image'] = $images[1]['filename']
-                ?? $images[0]['filename']
-                ?? 'default.png';
-
-            // Ambil nama developer
-            $developer = $developerModel->find($property['developer_id']);
-            $property['developer_name'] = $developer['name'] ?? '-';
-
-            // Ambil unit (type)
-            $unit = $propertyTypeModel
-                ->where('property_id', $property['id'])
-                ->orderBy('building_area', 'DESC')
-                ->first();
-
-            $property['bedroom']  = $unit['bedrooms']  ?? '-';
-            $property['bathroom'] = $unit['bathrooms'] ?? '-';
-            $property['size']     = $unit['building_area'] ?? '-';
-
-            // Ambil detail properti
-            $detail = $propertyDetailModel
-                ->where('property_id', $property['id'])
-                ->first();
-
-            $property['description'] = $detail['description'] ?? 'Deskripsi belum tersedia';
-            $property['price_text']  = $detail['price_text'] ?? 'Harga tidak tersedia';
-            $property['price']       = $detail['price'] ?? 0;
-            $property['location']    = $detail['location'] ?? '-';
-        }
-
-        // === Dropdown Data ===
-        $developers = $developerModel
-            ->select('id, name, slug') // 🟢 tambahkan slug agar tidak undefined
-            ->orderBy('name', 'ASC')
-            ->findAll();
+        $developers = $developerModel->findAll();
 
         $properties = $propertyModel
-            ->select('id, title, slug')
-            ->orderBy('title', 'ASC')
+            ->select('properties.*, property_details.price_text, property_details.location')
+            ->join('property_details', 'property_details.property_id = properties.id', 'left')
+            ->orderBy('properties.created_at', 'DESC')
             ->findAll();
 
-        $locations = $propertyDetailModel
-            ->select('DISTINCT(location)')
-            ->where('location !=', '')
-            ->orderBy('location', 'ASC')
-            ->findAll();
-
-        // === Data untuk View ===
-        $data = [
-            'featured'          => $featured,
-            'properties'        => $properties,
-            'settings'          => $settingsModel->first(),
-            'developers'        => $developers,
-            'locations'         => $locations,
-            'filter_property'   => $propertyId,
-            'filter_developer'  => $developerKey,
-            'filter_location'   => $location,
-        ];
-
-        return view('frontend/home', $data);
+        return view('frontend/home', [
+            'developers' => $developers,
+            'properties' => $properties,
+            'active_developer' => '',
+            'active_keyword' => ''
+        ]);
     }
 
-public function developer($slug)
+    public function developer($slug)
+    {
+        $developerModel = new DeveloperModel();
+        $propertyModel = new PropertyModel();
+
+        $developer = $developerModel->where('slug', $slug)->first();
+        if (!$developer) {
+            return view('errors/html/error_404', ['message' => 'Developer tidak ditemukan']);
+        }
+
+        $properties = $propertyModel
+            ->select('
+                properties.id,
+                properties.title,
+                properties.slug,
+                properties.thumbnail,
+                property_details.price_text,
+                property_details.location,
+                property_details.type,
+                property_details.purpose,
+                property_type.floors,
+                property_type.land_area,
+                property_type.building_area,
+                property_type.bedrooms,
+                property_type.bathrooms
+            ')
+            ->join('property_details', 'property_details.property_id = properties.id', 'left')
+            ->join('property_type', 'property_type.property_id = properties.id', 'left')
+            ->where('properties.developer_id', $developer['id'])
+            ->orderBy('properties.created_at', 'DESC')
+            ->findAll();
+
+        return view('frontend/developer', [
+            'developer'  => $developer,
+            'properties' => $properties,
+            'title'      => $developer['name'] . ' Properties | PropertyPlace'
+        ]);
+    }
+
+    public function getPropertiesByDeveloper($slug)
 {
+    $propertyModel = new \App\Models\PropertyModel();
+    $propertyDetailModel = new \App\Models\PropertyDetailModel();
     $developerModel = new \App\Models\DeveloperModel();
-    $propertyModel  = new \App\Models\PropertyModel();
 
-    // Ambil developer berdasarkan slug
     $developer = $developerModel->where('slug', $slug)->first();
+
     if (!$developer) {
-        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Developer tidak ditemukan');
+        log_message('debug', '❌ Developer tidak ditemukan: ' . $slug);
+        return $this->response->setJSON(['error' => 'Developer not found']);
     }
 
-    // JOIN ke tabel detail dan tipe
+    // Tes apakah developer ditemukan
+    log_message('debug', '✅ Developer ditemukan: ' . json_encode($developer));
+
+    // Jalankan query properti
     $properties = $propertyModel
-        ->select('
-            properties.id,
-            properties.title,
-            properties.slug,
-            properties.thumbnail,
+        ->select('properties.id, properties.title, properties.slug, properties.thumbnail, property_details.price_text')
+        ->join('property_details', 'property_details.property_id = properties.id', 'left')
+        ->where('properties.developer_id', $developer['id'])
+        ->orderBy('properties.id', 'DESC')
+        ->findAll();
+
+    // Log hasil
+    log_message('debug', '📦 Properties ditemukan: ' . count($properties));
+    log_message('debug', '🧩 Data: ' . json_encode($properties));
+
+    return $this->response->setJSON($properties);
+}
+
+public function property($slug)
+{
+    $propertyModel = new \App\Models\PropertyModel();
+    $developerModel = new \App\Models\DeveloperModel();
+
+    // 🔹 Ambil data properti utama
+    $property = $propertyModel
+        ->select("
+            properties.*,
+            developers.name AS developer_name,
+            developers.slug AS developer_slug,
+            developers.logo AS developer_logo,
             property_details.price,
             property_details.price_text,
             property_details.location,
             property_details.type,
             property_details.purpose,
-            property_type.floors,
-            property_type.land_area,
-            property_type.building_area,
-            property_type.bedrooms,
-            property_type.bathrooms
-        ')
+            property_details.description,
+            pt.max_floors AS floors,
+            pt.max_land_area AS land_area,
+            pt.max_building_area AS building_area,
+            pt.max_bedrooms AS bedrooms,
+            pt.max_bathrooms AS bathrooms,
+            pt.max_carport AS carport
+        ")
+        ->join('developers', 'developers.id = properties.developer_id', 'left')
         ->join('property_details', 'property_details.property_id = properties.id', 'left')
-        ->join('property_type', 'property_type.property_id = properties.id', 'left')
-        ->where('properties.developer_id', $developer['id'])
-        ->orderBy('properties.created_at', 'DESC')
+        ->join('(
+            SELECT 
+                property_id,
+                MAX(floors) AS max_floors,
+                MAX(land_area) AS max_land_area,
+                MAX(building_area) AS max_building_area,
+                MAX(bedrooms) AS max_bedrooms,
+                MAX(bathrooms) AS max_bathrooms,
+                MAX(carport) AS max_carport
+            FROM property_type
+            GROUP BY property_id
+        ) AS pt', 'pt.property_id = properties.id', 'left')
+        ->where('properties.slug', $slug)
+        ->first();
+
+    if (!$property) {
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Properti tidak ditemukan');
+    }
+
+    // 🔹 Ambil developer yang sama
+    $developer = $developerModel->find($property['developer_id']);
+
+    // 🔹 Ambil properti lain milik developer yang sama
+    $relatedProperties = $propertyModel
+        ->select("
+            properties.id,
+            properties.title,
+            properties.slug,
+            properties.thumbnail,
+            property_details.price_text,
+            property_details.location,
+            pt.max_bedrooms AS bedrooms,
+            pt.max_bathrooms AS bathrooms,
+            pt.max_land_area AS land_area
+        ")
+        ->join('property_details', 'property_details.property_id = properties.id', 'left')
+        ->join('(
+            SELECT 
+                property_id,
+                MAX(bedrooms) AS max_bedrooms,
+                MAX(bathrooms) AS max_bathrooms,
+                MAX(land_area) AS max_land_area
+            FROM property_type
+            GROUP BY property_id
+        ) AS pt', 'pt.property_id = properties.id', 'left')
+        ->where('properties.developer_id', $property['developer_id'])
+        ->where('properties.slug !=', $slug)
+        ->orderBy('properties.id', 'DESC')
         ->findAll();
 
-    return view('frontend/developer', [
-        'developer'  => $developer,
-        'properties' => $properties,
-        'title'      => $developer['name'] . ' Properties | PropertyPlace'
+    $developers = $developerModel->findAll();
+
+    return view('frontend/property/detail', [
+        'property' => $property,
+        'relatedProperties' => $relatedProperties,
+        'title' => $property['title'] . ' | ' . ($property['developer_name'] ?? 'PropertyPlace'),
+        'developers' => $developers
     ]);
 }
-
 
 
 
