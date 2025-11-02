@@ -50,6 +50,21 @@
           background-color: rgba(0, 0, 0, 0.6);
       }
 
+      .global-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            min-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.25);
+            animation: fadeSlide 0.4s ease;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
       /* Hindari horizontal scroll tersembunyi */
       html, body {
           overflow-x: hidden;
@@ -297,6 +312,21 @@ if (loadingLetters) {
     <!-- Sidebar -->
     <?= $this->include('admin/layout/partials/sidebar') ?>
 
+    <!-- 🌟 GLOBAL ALERT SECTION -->
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="alert alert-success alert-dismissible fade show global-alert" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="alert alert-danger alert-dismissible fade show global-alert" role="alert">
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <!-- Content -->
     <div class="content">
         <div class="page-content">
@@ -335,7 +365,15 @@ if (loadingLetters) {
             document.body.style.paddingRight = '0px';
             document.body.style.overflow = 'hidden';
         }
-    });
+
+        // Auto hide alert setelah 4 detik
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 4000);
+});
     </script>
 
 </body>

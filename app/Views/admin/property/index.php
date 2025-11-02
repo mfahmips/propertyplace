@@ -178,10 +178,63 @@
   <div class="card">
     <div class="card-body">
 
-      <div class="mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPropertyModal">
-          + Create Property<?= isset($filterDeveloper['name']) ? ' for ' . esc($filterDeveloper['name']) : '' ?>
+      <div class="mb-3 d-flex justify-content-between align-items-center">
+      <!-- Tombol Create Property -->
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPropertyModal">
+        + Create Property<?= isset($filterDeveloper['name']) ? ' for ' . esc($filterDeveloper['name']) : '' ?>
+      </button>
+
+      <!-- Tombol kanan: Export & Import -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- Export -->
+        <a href="<?= base_url('dashboard/property/exportProperties') ?>" class="btn btn-success">
+          <i class="bi bi-download"></i> Export Data
+        </a>
+
+        <!-- Import (pakai modal) -->
+        <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#importPropertyModal">
+          <i class="bi bi-upload"></i> Import Data
         </button>
+      </div>
+    </div>
+
+
+        <!-- Modal Import Data Properti -->
+      <div class="modal fade" id="importPropertyModal" tabindex="-1" aria-labelledby="importPropertyLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+              <h5 class="modal-title" id="importPropertyLabel">
+                <i class="bi bi-upload me-2"></i> Import Data Properti
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="<?= base_url('dashboard/property/importProperties') ?>" method="post" enctype="multipart/form-data">
+              <?= csrf_field() ?>
+              <div class="modal-body">
+                <div class="alert alert-info small">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Pastikan file berformat <strong>.xlsx</strong> dan mengikuti template export sebelumnya.
+                </div>
+
+                <div class="mb-3">
+                  <label for="file" class="form-label fw-semibold">Pilih File Excel</label>
+                  <input type="file" name="file" id="file" class="form-control" accept=".xlsx" required>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  <i class="bi bi-x-circle"></i> Batal
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-cloud-upload"></i> Import Sekarang
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
       <div class="table-responsive">

@@ -160,7 +160,7 @@
         <?php endif ?>
 
           <div class="mt-4">
-            <p>Catatan Admin : <strong><?= $item['catatan'] ?: '<i class="text-muted">-</i>' ?></strong></p>
+            <p>Catatan Admin : <strong><?= $item['keterangan'] ?: '<i class="text-muted">-</i>' ?></strong></p>
           </div>
         </div>
       </div>

@@ -24,12 +24,9 @@
     <?php endif ?>
 
     <div class="row">
-        <div class="col-lg-9">
+        <div class="col-lg-12">
             <div class="card">
                 <div class="card-header bg-transparent d-flex align-items-center">
-                    <?php if (!empty($user['foto'])): ?>
-                        <img src="<?= base_url('uploads/user/' . $user['foto']) ?>" alt="Foto" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
-                    <?php endif; ?>
                     <h5 class="card-title mb-0">Profil Saya</h5>
                 </div>
                 <div class="card-body">
@@ -166,32 +163,78 @@
                                 <!-- Media Sosial -->
                                 <div class="tab-pane fade" id="sosmed">
                                     <div class="row g-3">
+
+                                        <!-- Facebook -->
                                         <div class="col-md-4">
-                                            <label for="facebook" class="form-label">Facebook Username</label>
-                                            <input type="text" class="form-control sosmed-input" id="facebook" name="facebook" value="<?= esc($user['facebook']) ?>">
-                                            <?php if (!empty($user['facebook'])): ?>
-                                                <a href="https://facebook.com/<?= esc($user['facebook']) ?>" target="_blank" class="small text-info d-block mt-1">Lihat Profil</a>
-                                            <?php endif; ?>
+                                            <label for="facebook" class="form-label">Facebook</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="text" 
+                                                    class="form-control sosmed-input" 
+                                                    id="facebook" 
+                                                    name="facebook" 
+                                                    value="<?= esc($user['facebook']) ?>" 
+                                                    placeholder="Username"
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary open-social" 
+                                                    type="button" 
+                                                    data-platform="facebook" 
+                                                    title="Lihat profil Facebook"
+                                                >
+                                                    <i class="bi bi-link-45deg"></i>
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        <!-- Instagram -->
                                         <div class="col-md-4">
-                                            <label for="instagram" class="form-label">Instagram Username</label>
-                                            <input type="text" class="form-control sosmed-input" id="instagram" name="instagram" value="<?= esc($user['instagram']) ?>">
-                                            <?php if (!empty($user['instagram'])): ?>
-                                                <a href="https://instagram.com/<?= esc($user['instagram']) ?>" target="_blank" class="small text-info d-block mt-1">Lihat Profil</a>
-                                            <?php endif; ?>
+                                            <label for="instagram" class="form-label">Instagram</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="text" 
+                                                    class="form-control sosmed-input" 
+                                                    id="instagram" 
+                                                    name="instagram" 
+                                                    value="<?= esc($user['instagram']) ?>" 
+                                                    placeholder="Username"
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary open-social" 
+                                                    type="button" 
+                                                    data-platform="instagram" 
+                                                    title="Lihat profil Instagram"
+                                                >
+                                                    <i class="bi bi-link-45deg"></i>
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        <!-- TikTok -->
                                         <div class="col-md-4">
-                                            <label for="tiktok" class="form-label">TikTok Username</label>
-                                            <input type="text" class="form-control sosmed-input" id="tiktok" name="tiktok" value="<?= esc($user['tiktok']) ?>">
-                                            <?php if (!empty($user['tiktok'])): ?>
-                                                <a href="https://tiktok.com/@<?= esc($user['tiktok']) ?>" target="_blank" class="small text-info d-block mt-1">Lihat Profil</a>
-                                            <?php endif; ?>
+                                            <label for="tiktok" class="form-label">TikTok</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="text" 
+                                                    class="form-control sosmed-input" 
+                                                    id="tiktok" 
+                                                    name="tiktok" 
+                                                    value="<?= esc($user['tiktok']) ?>" 
+                                                    placeholder="Username"
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary open-social" 
+                                                    type="button" 
+                                                    data-platform="tiktok" 
+                                                    title="Lihat profil TikTok"
+                                                >
+                                                    <i class="bi bi-link-45deg"></i>
+                                                </button>
+                                            </div>
                                         </div>
 
                                     </div>
                                 </div>
-
-                                
 
 
                                 <!-- Password -->
@@ -199,24 +242,82 @@
                                     <?= form_open('profile/updatePassword', ['class' => 'needs-validation', 'novalidate' => true]) ?>
                                     <?= csrf_field() ?>
                                     <div class="row g-3">
+
+                                        <!-- Password Saat Ini -->
                                         <div class="col-md-12">
-                                            <label>Password Saat Ini</label>
-                                            <input type="password" class="form-control" name="current_password" required>
+                                            <label for="current_password">Password Saat Ini</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="password" 
+                                                    class="form-control" 
+                                                    name="current_password" 
+                                                    id="current_password" 
+                                                    required
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary toggle-password" 
+                                                    type="button" 
+                                                    data-target="current_password"
+                                                    title="Lihat / Sembunyikan Password"
+                                                >
+                                                    <i class="bi bi-eye-slash"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label>Password Baru</label>
-                                            <input type="password" class="form-control" name="new_password" required>
+
+                                        <!-- Password Baru -->
+                                        <div class="col-md-12">
+                                            <label for="new_password">Password Baru</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="password" 
+                                                    class="form-control" 
+                                                    name="new_password" 
+                                                    id="new_password" 
+                                                    required
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary toggle-password" 
+                                                    type="button" 
+                                                    data-target="new_password"
+                                                    title="Lihat / Sembunyikan Password"
+                                                >
+                                                    <i class="bi bi-eye-slash"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label>Ulang Password Baru</label>
-                                            <input type="password" class="form-control" name="confirm_password" required>
+
+                                        <!-- Ulang Password Baru -->
+                                        <div class="col-md-12">
+                                            <label for="confirm_password">Ulang Password Baru</label>
+                                            <div class="input-group">
+                                                <input 
+                                                    type="password" 
+                                                    class="form-control" 
+                                                    name="confirm_password" 
+                                                    id="confirm_password" 
+                                                    required
+                                                >
+                                                <button 
+                                                    class="btn btn-outline-secondary toggle-password" 
+                                                    type="button" 
+                                                    data-target="confirm_password"
+                                                    title="Lihat / Sembunyikan Password"
+                                                >
+                                                    <i class="bi bi-eye-slash"></i>
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        <!-- Tombol Simpan -->
                                         <div class="col-12 text-end">
                                             <button type="submit" class="btn" style="background-color:#B86C3A;color:#fff;">Simpan</button>
                                         </div>
+
                                     </div>
                                     <?= form_close() ?>
                                 </div>
+
 
                             </div>
                         </div>
@@ -229,6 +330,63 @@
 
 <!-- JQuery CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+<script>
+document.querySelectorAll('.open-social').forEach(button => {
+    button.addEventListener('click', () => {
+        const platform = button.getAttribute('data-platform');
+        const input = document.getElementById(platform);
+        const username = input.value.trim();
+
+        if (!username) {
+            input.classList.add('is-invalid');
+            setTimeout(() => input.classList.remove('is-invalid'), 800);
+            return;
+        }
+
+        let url = '';
+        switch (platform) {
+            case 'facebook':
+                url = `https://facebook.com/${username}`;
+                break;
+            case 'instagram':
+                url = `https://instagram.com/${username}`;
+                break;
+            case 'tiktok':
+                url = `https://tiktok.com/@${username}`;
+                break;
+        }
+
+        window.open(url, '_blank');
+    });
+});
+</script>
+
+
+<!-- Toggle Password Visibility Script -->
+<script>
+document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const inputId = btn.getAttribute('data-target');
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    });
+});
+</script>
+
+
 
 <script>
 function postAutosave(field, value) {

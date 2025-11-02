@@ -3,6 +3,9 @@
 namespace App\Controllers\Dashboard;
 
 use App\Controllers\BaseController;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
 use App\Models\DeveloperModel;
@@ -651,5 +654,112 @@ public function saveDetailByDeveloper($devSlug, $propSlug)
 
         return redirect()->back()->with('success', 'Floor plan berhasil dihapus.');
     }
+
+    /**
+ * EXPORT seluruh data properti (multi-sheet Excel)
+ */
+public function exportProperties()
+{
+    $models = [
+        'properties'           => new PropertyModel(),
+        'property_details'     => new PropertyDetailModel(),
+        'property_documents'   => new PropertyDocumentModel(),
+        'property_images'      => new PropertyImageModel(),
+        'property_type'        => new PropertyTypeModel(),
+        'property_type_images' => new PropertyTypeImagesModel(), // ✅ pakai "s"
+    ];
+
+    $spreadsheet = new Spreadsheet();
+    $isFirst = true;
+
+    foreach ($models as $sheetName => $model) {
+        $data = $model->findAll();
+        if (empty($data)) continue;
+
+        // Buat sheet baru
+        $sheet = $isFirst ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
+        $sheet->setTitle($sheetName);
+        $isFirst = false;
+
+        // Header kolom
+        $headers = array_keys($data[0]);
+        $sheet->fromArray([$headers], null, 'A1');
+
+        // Isi data mulai dari baris ke-2
+        $sheet->fromArray($data, null, 'A2');
+    }
+
+    // Nama file hasil export
+    $fileName = 'data_property_' . date('Ymd_His') . '.xlsx';
+    $writer = new Xlsx($spreadsheet);
+
+    // Kirim file ke browser untuk diunduh
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header("Content-Disposition: attachment; filename=\"$fileName\"");
+    $writer->save('php://output');
+    exit;
+}
+
+
+/**
+ * IMPORT seluruh data properti dari file Excel (multi-sheet)
+ */
+public function importProperties()
+{
+    $file = $this->request->getFile('file');
+    if (!$file->isValid()) {
+        return redirect()->back()->with('error', 'File tidak valid atau gagal diupload.');
+    }
+
+    // Load file Excel
+    $spreadsheet = IOFactory::load($file->getTempName());
+
+    $models = [
+        'properties'           => new PropertyModel(),
+        'property_details'     => new PropertyDetailModel(),
+        'property_documents'   => new PropertyDocumentModel(),
+        'property_images'      => new PropertyImageModel(),
+        'property_type'        => new PropertyTypeModel(),
+        'property_type_images' => new PropertyTypeImagesModel(), // ✅ pakai "s"
+    ];
+
+    foreach ($spreadsheet->getAllSheets() as $sheet) {
+        $sheetName = $sheet->getTitle();
+
+        if (!isset($models[$sheetName])) {
+            continue; // lewati jika sheet tidak ada model-nya
+        }
+
+        $rows = $sheet->toArray(null, true, true, true);
+        if (count($rows) < 2) continue; // sheet kosong
+
+        // Baris pertama = header
+        $headers = array_values($rows[1]);
+        unset($rows[1]);
+
+        $data = [];
+        foreach ($rows as $row) {
+            $item = [];
+            foreach ($headers as $index => $field) {
+                $colLetter = chr(65 + $index); // Kolom A, B, C, dst
+                if (!empty($field) && isset($row[$colLetter])) {
+                    $item[$field] = $row[$colLetter];
+                }
+            }
+            if (!empty($item)) {
+                $data[] = $item;
+            }
+        }
+
+        // Import data (hapus data lama dulu agar rapi)
+        if (!empty($data)) {
+            $models[$sheetName]->truncate();
+            $models[$sheetName]->insertBatch($data);
+        }
+    }
+
+    return redirect()->back()->with('success', 'Data properti berhasil diimport.');
+}
+
 
 }

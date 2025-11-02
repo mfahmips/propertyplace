@@ -15,14 +15,6 @@
         </div>
     </div>
 
-    <?php if (session()->getFlashdata('success')) : ?>
-        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-    <?php endif ?>
-
-    <?php if (session()->getFlashdata('error')) : ?>
-        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-    <?php endif ?>
-
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -107,9 +99,16 @@
                                             </td>
 
                                             <td>
-                                                <a href="<?= base_url('dashboard/user/profile/' . $user['slug']) ?>" class="btn btn-warning btn-sm">Edit</a>
+                                                <a href="<?= base_url('dashboard/profile/' . $user['slug']) ?>" class="btn btn-warning btn-xs">Edit</a>
 
-                                                <a href="<?= base_url('dashboard/user/delete/' . $user['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus user ini?')">Delete</a>
+                                                <button 
+                                                    class="btn btn-danger btn-xs btn-delete-user" 
+                                                    data-id="<?= $user['id'] ?>" 
+                                                    data-name="<?= esc($user['name']) ?>" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteUserModal">Delete
+                                                </button>
+
                                             </td>
                                         </tr>
                                     <?php endforeach ?>
@@ -122,6 +121,28 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Delete User -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteUserModalLabel">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Konfirmasi Hapus
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah Anda yakin ingin menghapus user <strong id="deleteUserName"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a href="<?= base_url('dashboard/user/delete/' . $user['id']) ?>" class="btn btn-danger" id="confirmDeleteUser">Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- Modal Add User -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
@@ -172,7 +193,6 @@
 
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary">Simpan</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
     </div>
 </form>
 

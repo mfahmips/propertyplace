@@ -128,6 +128,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('unit/(:segment)', 'Dashboard\Property::unitTypes/$1');
         $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorPlan/$1');
         $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
+        $routes->get('exportProperties', 'Dashboard\Property::exportProperties');
+        $routes->post('importProperties', 'Dashboard\Property::importProperties');
+
     });
 
 

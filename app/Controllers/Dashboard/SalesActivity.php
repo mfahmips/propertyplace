@@ -189,229 +189,235 @@ public function deletePameran($id)
 
 
 public function komisi()
-{
-    $propertyModel = new PropertyModel();
-    $properties = $propertyModel->findAll();
+    {
+        $propertyModel = new PropertyModel();
+        $properties = $propertyModel->findAll();
 
-    $userRole = session('role');
-    $userId   = session('id');
+        $userRole = session('role');
+        $userId   = session('id');
 
-    // Data pengajuan komisi
-    if ($userRole === 'admin') {
-        $pengajuan = $this->komisiModel
+        // 🔹 Data pengajuan komisi
+        if ($userRole === 'admin') {
+            $pengajuan = $this->komisiModel
+                ->select("
+                    komisi_sales.*,
+                    users.name AS user_name,
+                    bookings.id AS booking_code,
+                    bookings.buyer_name,
+                    bookings.unit_number,
+                    bookings.price,
+                    properties.title AS property_title,
+                    property_type.name AS type_name
+                ")
+                ->join('users', 'users.id = komisi_sales.user_id')
+                ->join('bookings', 'bookings.id = komisi_sales.booking_id', 'left')
+                ->join('properties', 'properties.id = bookings.property_id', 'left')
+                ->join('property_type', 'property_type.id = bookings.type_id', 'left')
+                ->orderBy('komisi_sales.tanggal_pengajuan', 'DESC')
+                ->findAll();
+        } else {
+            $pengajuan = $this->komisiModel
+                ->select("
+                    komisi_sales.*,
+                    bookings.id AS booking_code,
+                    bookings.buyer_name,
+                    bookings.unit_number,
+                    bookings.price,
+                    properties.title AS property_title,
+                    property_type.name AS type_name
+                ")
+                ->join('bookings', 'bookings.id = komisi_sales.booking_id', 'left')
+                ->join('properties', 'properties.id = bookings.property_id', 'left')
+                ->join('property_type', 'property_type.id = bookings.type_id', 'left')
+                ->where('komisi_sales.user_id', $userId)
+                ->orderBy('komisi_sales.tanggal_pengajuan', 'DESC')
+                ->findAll();
+        }
+
+        // 🔹 Dropdown booking untuk sales (belum diajukan)
+        $bookings = [];
+        if ($userRole !== 'admin') {
+            $bookingModel = new BookingModel();
+            $bookings = $bookingModel
+                ->select('bookings.*, property_type.name as type_name, properties.title as property_title')
+                ->join('property_type', 'property_type.id = bookings.type_id', 'left')
+                ->join('properties', 'properties.id = bookings.property_id', 'left')
+                ->where('bookings.reserved_by_user_id', $userId)
+                ->where('bookings.status', 'confirmed')
+                ->whereNotIn('bookings.id', function ($builder) {
+                    return $builder->select('booking_id')->from('komisi_sales');
+                })
+                ->orderBy('bookings.created_at', 'DESC')
+                ->findAll();
+        }
+
+        return view('admin/sales/komisi', [
+            'title'         => 'Pengajuan Komisi',
+            'breadcrumb'    => [
+                ['label' => 'Dashboard', 'url' => base_url('dashboard')],
+                ['label' => 'Sales Activity'],
+                ['label' => 'Komisi']
+            ],
+            'properties'     => $properties,
+            'pengajuan'      => $pengajuan,
+            'bookings'       => $bookings,
+            'isAdmin'        => $userRole === 'admin',
+        ]);
+    }
+
+    /**
+     * 💾 Simpan pengajuan komisi baru (Sales)
+     */
+    public function saveKomisi()
+    {
+        $bookingId = (int) $this->request->getPost('booking_id');
+        $userId    = session('id');
+
+        $bookingModel = new BookingModel();
+        $booking = $bookingModel
+            ->where('id', $bookingId)
+            ->where('reserved_by_user_id', $userId)
+            ->where('status', 'confirmed')
+            ->first();
+
+        if (!$booking) {
+            return redirect()->back()->with('error', 'Booking tidak valid atau belum dikonfirmasi.');
+        }
+
+        // Cegah pengajuan ganda
+        $sudahAda = $this->komisiModel->where('booking_id', $bookingId)->first();
+        if ($sudahAda) {
+            return redirect()->back()->with('error', 'Komisi untuk booking ini sudah diajukan.');
+        }
+
+        $this->komisiModel->insert([
+            'booking_id'        => $bookingId,
+            'user_id'           => $userId,
+            'status'            => 'diajukan',
+            'tanggal_pengajuan' => date('Y-m-d H:i:s'),
+            'created_at'        => date('Y-m-d H:i:s'),
+            'updated_at'        => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->back()->with('success', 'Pengajuan komisi berhasil dikirim.');
+    }
+
+    /**
+     * 🧰 Update status & data komisi (Admin)
+     */
+    public function updateKomisi()
+    {
+        $id             = $this->request->getPost('id');
+        $status         = $this->request->getPost('status');
+        $komisiPersen   = $this->request->getPost('komisi_persen');
+        $komisiNominal  = $this->request->getPost('komisi_nominal');
+        $catatan        = $this->request->getPost('catatan');
+
+        if (!$id || !$status) {
+            return redirect()->back()->with('error', 'Data tidak lengkap.');
+        }
+
+        $data = [
+            'status'          => $status,
+            'komisi_persen'   => $komisiPersen,
+            'komisi_nominal'  => $komisiNominal,
+            'catatan'         => $catatan,
+            'tanggal_acc'     => date('Y-m-d H:i:s'),
+            'updated_at'      => date('Y-m-d H:i:s'),
+        ];
+
+        $this->komisiModel->update($id, $data);
+
+        return redirect()->back()->with('success', 'Status komisi berhasil diperbarui.');
+    }
+
+    /**
+     * 🧾 Generate PDF Komisi
+     */
+    public function cetakKomisi($id)
+    {
+        $komisi = $this->komisiModel
             ->select("
-                komisi_sales.*,
-                users.name AS user_name,
-                bookings.id   AS booking_code,
+                komisi_sales.id,
+                komisi_sales.booking_id,
+                komisi_sales.user_id,
+                komisi_sales.komisi_persen,
+                komisi_sales.komisi_nominal,
+                komisi_sales.status,
+                komisi_sales.tanggal_pengajuan,
+                komisi_sales.catatan,
+                bookings.id AS booking_code,
                 bookings.buyer_name,
                 bookings.unit_number,
                 bookings.price,
+                bookings.created_at AS booking_date,
                 properties.title AS property_title,
-                property_type.name AS type_name
+                property_type.name AS type_name,
+                users.name AS sales_name,
+                users.username AS sales_username
             ")
-            ->join('users', 'users.id = komisi_sales.user_id')
             ->join('bookings', 'bookings.id = komisi_sales.booking_id')
             ->join('properties', 'properties.id = bookings.property_id', 'left')
             ->join('property_type', 'property_type.id = bookings.type_id', 'left')
-            ->orderBy('komisi_sales.tanggal_ajuan', 'DESC')
-            ->findAll();
-    } else {
-        $pengajuan = $this->komisiModel
-            ->where('user_id', $userId)
-            ->orderBy('tanggal_ajuan', 'DESC')
-            ->findAll();
-    }
+            ->join('users', 'users.id = komisi_sales.user_id', 'left')
+            ->where('komisi_sales.id', (int) $id)
+            ->first();
 
-    // Dropdown: hanya booking milik sales yang sudah confirmed
-    $bookings = [];
-    if ($userRole !== 'admin') {
-        $bookingModel = new \App\Models\BookingModel();
-        $bookings = $bookingModel
-        ->select('bookings.*, property_type.name as type_name, properties.title as property_title')
-        ->join('property_type', 'property_type.id = bookings.type_id', 'left')
-        ->join('properties', 'properties.id = bookings.property_id', 'left')
-        ->where('bookings.reserved_by_user_id', $userId)
-        ->where('bookings.status', 'confirmed')
-        ->whereNotIn('bookings.id', function ($builder) {
-            return $builder->select('booking_id')->from('komisi_sales');
-        })
-        ->orderBy('bookings.created_at', 'DESC')
-        ->findAll();
-
+        if (!$komisi) {
+            throw PageNotFoundException::forPageNotFound('Data pengajuan komisi tidak ditemukan.');
         }
 
-    return view('admin/sales/komisi', [
-        'title'         => 'Pengajuan Komisi',
-        'breadcrumb'    => [
-            ['label' => 'Dashboard', 'url' => base_url('dashboard')],
-            ['label' => 'Sales Activity'],
-            ['label' => 'Komisi']
-        ],
-        'developers'     => [],
-        'selectedDevId'  => null,
-        'properties'     => $properties,
-        'pengajuan'      => $pengajuan,
-        'bookings'       => $bookings,
-        'isAdmin'        => $userRole === 'admin',
-    ]);
-}
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
 
+        $dompdf = new Dompdf($options);
+        $html = view('admin/sales/komisi_pdf', [
+            'komisi' => $komisi,
+            'admin'  => session('name') ?? 'Admin'
+        ]);
 
-public function saveKomisi()
-{
-    $bookingId = (int) $this->request->getPost('booking_id');
-    $userId    = session('id');
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
 
-    // Pastikan booking milik user & sudah confirmed
-    $bookingModel = new \App\Models\BookingModel();
-    $booking = $bookingModel
-        ->where('id', $bookingId)
-        ->where('reserved_by_user_id', $userId)
-        ->where('status', 'confirmed')
-        ->first();
-
-    if (!$booking) {
-        return redirect()->back()->with('error', 'Booking tidak valid atau belum dikonfirmasi.');
+        $filename = 'pengajuan_komisi_' . $komisi['booking_code'] . '.pdf';
+        return $this->response
+            ->setContentType('application/pdf')
+            ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+            ->setBody($dompdf->output());
     }
 
-    // Cegah pengajuan ganda untuk booking yang sama
-    $sudahAda = $this->komisiModel->where('booking_id', $bookingId)->first();
-    if ($sudahAda) {
-        return redirect()->back()->with('error', 'Komisi untuk booking ini sudah diajukan.');
+    /**
+     * 👁️ Preview Komisi (tanpa download)
+     */
+    public function cetakKomisiPreview($id)
+    {
+        helper('text');
+
+        $komisi = $this->komisiModel
+            ->select('komisi_sales.*, bookings.*, bookings.id as booking_code, users.name as sales_name, users.username as sales_username, property_type.name as type_name, properties.title as property_title')
+            ->join('bookings', 'bookings.id = komisi_sales.booking_id')
+            ->join('users', 'users.id = komisi_sales.user_id')
+            ->join('properties', 'properties.id = bookings.property_id', 'left')
+            ->join('property_type', 'property_type.id = bookings.type_id', 'left')
+            ->where('komisi_sales.id', $id)
+            ->first();
+
+        if (!$komisi) {
+            return redirect()->back()->with('error', 'Data pengajuan tidak ditemukan.');
+        }
+
+        $settingsModel = new SettingsModel();
+        $settings = $settingsModel->first();
+
+        return view('admin/sales/komisi_pdf', [
+            'komisi'       => $komisi,
+            'admin'        => session('name'),
+            'settings'     => $settings,
+            'preview_mode' => true
+        ]);
     }
-
-    $this->komisiModel->insert([
-        'booking_id'    => $bookingId,
-        'user_id'       => $userId,
-        'status'        => 'menunggu',
-        'tanggal_ajuan' => date('Y-m-d H:i:s'),
-        'created_at'    => date('Y-m-d H:i:s'),
-        'updated_at'    => date('Y-m-d H:i:s'),
-    ]);
-
-    return redirect()->back()->with('success', 'Pengajuan komisi berhasil dikirim.');
-}
-
-
-public function updateKomisi()
-{
-    $id             = $this->request->getPost('id');
-    $status         = $this->request->getPost('status');
-    $komisiPersen   = $this->request->getPost('komisi_persen');
-    $komisiNominal  = $this->request->getPost('komisi_nominal');
-    $catatan        = $this->request->getPost('catatan');
-
-    if (!$id || !$status) {
-        return redirect()->back()->with('error', 'Data tidak lengkap.');
-    }
-
-    $data = [
-        'status'          => $status,
-        'komisi_persen'   => $komisiPersen,
-        'komisi_nominal'  => $komisiNominal,
-        'catatan'         => $catatan,
-        'tanggal_acc'     => date('Y-m-d H:i:s'),
-        'updated_at'      => date('Y-m-d H:i:s'),
-    ];
-
-    $this->komisiModel->update($id, $data);
-
-    return redirect()->back()->with('success', 'Komisi berhasil diperbarui oleh admin.');
-}
-
-public function cetakKomisi($id)
-{
-    // Ambil 1 record komisi + detail booking + user + properti/tipe
-    $komisi = $this->komisiModel
-        ->select("
-            komisi_sales.id,
-            komisi_sales.booking_id,
-            komisi_sales.user_id,
-            komisi_sales.komisi_persen,
-            komisi_sales.komisi_nominal,
-            komisi_sales.status,
-            komisi_sales.tanggal_ajuan,
-            komisi_sales.catatan,
-
-            bookings.id            AS booking_code,
-            bookings.buyer_name,
-            bookings.unit_number,
-            bookings.price,
-            bookings.created_at    AS booking_date,
-
-            properties.title       AS property_title,
-            property_type.name     AS type_name,
-
-            users.name             AS sales_name,
-            users.username         AS sales_username
-        ")
-        ->join('bookings', 'bookings.id = komisi_sales.booking_id')
-        ->join('properties', 'properties.id = bookings.property_id', 'left')
-        ->join('property_type', 'property_type.id = bookings.type_id', 'left')
-        ->join('users', 'users.id = komisi_sales.user_id', 'left')
-        ->where('komisi_sales.id', (int) $id)
-        ->first();
-
-    if (!$komisi) {
-        throw PageNotFoundException::forPageNotFound('Data pengajuan komisi tidak ditemukan.');
-    }
-
-    // Siapkan Dompdf
-    $options = new Options();
-    $options->set('isHtml5ParserEnabled', true);
-    $options->set('isRemoteEnabled', true); // allow load asset eksternal jika perlu
-    $dompdf = new Dompdf($options);
-
-    // Render view ke HTML
-    $html = view('admin/sales/komisi_pdf', [
-        'komisi' => $komisi,
-        'admin'  => session('name') ?? 'Admin'
-    ]);
-
-    // Generate PDF
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-
-    // Output inline (buka di tab); ubah Attachment=>true jika ingin auto-download
-    $filename = 'pengajuan_komisi_'.$komisi['booking_code'].'.pdf';
-    return $this->response
-        ->setContentType('application/pdf')
-        ->setHeader('Content-Disposition', 'inline; filename="'.$filename.'"')
-        ->setBody($dompdf->output());
-}
-
-
-public function cetakKomisiPreview($id)
-{
-    helper('text');
-
-    // Ambil data komisi + relasi
-    $komisi = $this->komisiModel 
-        ->select('komisi_sales.*, bookings.*, bookings.id as booking_code, users.name as sales_name, users.username as sales_username, property_type.name as type_name, properties.title as property_title')
-        ->join('bookings', 'bookings.id = komisi_sales.booking_id')
-        ->join('users', 'users.id = komisi_sales.user_id')
-        ->join('properties', 'properties.id = bookings.property_id', 'left')
-        ->join('property_type', 'property_type.id = bookings.type_id', 'left')
-        ->where('komisi_sales.id', $id)
-        ->first();
-
-    if (!$komisi) {
-        return redirect()->back()->with('error', 'Data pengajuan tidak ditemukan.');
-    }
-
-    // Ambil data settings
-    $settingsModel = new \App\Models\SettingsModel();
-    $settings = $settingsModel->first();
-
-    // Kirim ke view
-    return view('admin/sales/komisi_pdf', [
-        'komisi'       => $komisi,
-        'admin'        => session('name'),
-        'settings'     => $settings,
-        'preview_mode' => true
-    ]);
-}
 
 
 
