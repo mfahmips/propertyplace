@@ -139,7 +139,7 @@
 .preloader-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #B86C3A, #DAD3C5);
+    background: linear-gradient(to bottom left, #c4552e, #2a0f0b);
     transition: width 0.3s ease;
 }
 

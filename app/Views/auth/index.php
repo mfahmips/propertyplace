@@ -45,6 +45,38 @@
 
               <input type="submit" value="Masuk" class="sign-btn" />
 
+              <style>
+                /* BUTTONS */
+              .btn-wrap {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+              }
+
+              .sign-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                border: none;
+                color: #fff;
+                background: linear-gradient(to bottom left, #c4552e, #2a0f0b);
+                padding: 12px 24px;
+                border-radius: 40px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 10px rgba(32, 36, 41, 0.3);
+              }
+
+              .sign-btn:hover {
+                background: linear-gradient(to top right, #2a0f0b, #c4552e);
+                color: #fff;
+                box-shadow: 0 6px 15px rgba(196, 85, 46, 0.5);
+                transform: translateY(-2px);
+              }
+              </style>
+
               <p class="text" style="text-align:center;margin-top:16px;">
                 Lupa password? <a href="#">Klik di sini</a>
               </p>

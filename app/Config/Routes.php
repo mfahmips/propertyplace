@@ -79,48 +79,46 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     });
 
     // === CRUD Developer ===
-    $routes->group('developer', function($routes){
+    $routes->group('developer', function($routes) {
 
-        $routes->get('/',              'Dashboard\Developer::index');
-        $routes->get('create',         'Dashboard\Developer::create');
-        $routes->post('store',         'Dashboard\Developer::store');
-        $routes->get('edit/(:segment)',    'Dashboard\Developer::edit/$1');
-        $routes->post('update/(:segment)', 'Dashboard\Developer::update/$1');
-        $routes->get('delete/(:num)',  'Dashboard\Developer::delete/$1');
+        // === Developer CRUD ===
+        $routes->get('/',                     'Dashboard\Developer::index');
+        $routes->get('create',                'Dashboard\Developer::create');
+        $routes->post('store',                'Dashboard\Developer::store');
+        $routes->get('edit/(:segment)',       'Dashboard\Developer::edit/$1');
+        $routes->post('update/(:segment)',    'Dashboard\Developer::update/$1');
+        $routes->get('delete/(:num)',         'Dashboard\Developer::delete/$1');
 
-        // === Property CRUD khusus filter developer ===
-        $routes->get('(:segment)/property', 'Dashboard\Property::byDeveloper/$1'); // index property by developer
-        $routes->post('(:segment)/property/store', 'Dashboard\Property::storeByDeveloper/$1'); // create property
-        $routes->post('(:segment)/property/(:segment)/update', 'Dashboard\Property::updateByDeveloper/$1/$2'); // update property
-        $routes->get('(:segment)/property/(:segment)/delete', 'Dashboard\Property::deleteByDeveloper/$1/$2'); // delete property
+        // === PROPERTY (dipindahkan ke Developer Controller) ===
+        $routes->get('(:segment)',                                   'Dashboard\Developer::property/$1'); // index
+        $routes->post('(:segment)/store',                   'Dashboard\Developer::storeProperty/$1'); // create
+        $routes->post('(:segment)/(:segment)/update',       'Dashboard\Developer::updateProperty/$1/$2'); // update
+        $routes->get('(:segment)/(:segment)/delete',        'Dashboard\Developer::deleteProperty/$1/$2'); // delete
 
-        // Image property
-        $routes->get('(:segment)/property/image/(:num)/delete', 'Dashboard\Property::deleteImageByDeveloper/$1/$2');
+        // === DETAIL PROPERTY ===
+        $routes->get('(:segment)/(:segment)',                        'Dashboard\Developer::detailProperty/$1/$2');
+        $routes->post('(:segment)/(:segment)/update','Dashboard\Developer::updateDetailProperty/$1/$2');
+        $routes->post('(:segment)/(:segment)/save',  'Dashboard\Developer::saveDetailProperty/$1/$2');
 
-        // Detail Property
-        $routes->get('(:segment)/property/(:segment)/detail', 'Dashboard\Property::detailByDeveloper/$1/$2');
-        $routes->post('(:segment)/property/(:segment)/detail/update', 'Dashboard\Property::updateDetailByDeveloper/$1/$2');
-        $routes->post('(:segment)/property/(:segment)/detail/save', 'Dashboard\Property::saveDetailByDeveloper/$1/$2');
+        // === TYPE IMAGES (Floorplan) ===
+        $routes->get('(:segment)/(:segment)/typeimages',              'Dashboard\Developer::typeImagesProperty/$1/$2');
+        $routes->post('(:segment)/(:segment)/typeimages/save',        'Dashboard\Developer::storeTypeImagesProperty/$1/$2');
+        $routes->get('(:segment)/(:segment)/typeimages/(:num)/delete','Dashboard\Developer::deleteTypeImagesProperty/$1/$2/$3');
 
-
-       // === TYPE IMAGES (dulunya floorplan) ===
-        $routes->get('(:segment)/property/(:segment)/typeimages', 'Dashboard\Property::typeImagesByDeveloper/$1/$2');
-        $routes->post('(:segment)/property/(:segment)/typeimages/save', 'Dashboard\Property::storetypeimagesByDeveloper/$1/$2');
-        $routes->get('(:segment)/property/(:segment)/typeimages/(:num)/delete', 'Dashboard\Property::deletetypeimagesByDeveloper/$1/$2/$3');
-
-        // Document
-        $routes->get('(:segment)/property/(:segment)/documents', 'Dashboard\Property::documentsByDeveloper/$1/$2');
-        $routes->post('(:segment)/property/(:segment)/documents/store', 'Dashboard\Property::storeDocumentByDeveloper/$1/$2');
-        $routes->get('(:segment)/property/(:segment)/documents/(:num)/delete', 'Dashboard\Property::deleteDocumentByDeveloper/$1/$2/$3');
+        // === DOCUMENTS PROPERTY ===
+        $routes->get('(:segment)/(:segment)/documents',               'Dashboard\Developer::documentsProperty/$1/$2');
+        $routes->post('(:segment)/(:segment)/documents/store',        'Dashboard\Developer::storeDocumentProperty/$1/$2');
+        $routes->get('(:segment)/(:segment)/documents/(:num)/delete', 'Dashboard\Developer::deleteDocumentProperty/$1/$2/$3');
 
         // === PROPERTY TYPE ===
-        $routes->post('(:segment)/property/(:segment)/type/save', 'Dashboard\Property::saveTypeByDeveloper/$1/$2');
-        $routes->get('(:segment)/property/(:segment)/type/(:num)/delete', 'Dashboard\Property::deleteTypeByDeveloper/$1/$2/$3');
+        $routes->post('(:segment)/(:segment)/type/save',              'Dashboard\Developer::saveTypeProperty/$1/$2');
+        $routes->get('(:segment)/(:segment)/type/(:num)/delete',      'Dashboard\Developer::deleteTypeProperty/$1/$2/$3');
 
-        $routes->get('dashboard/developer/(:num)/export', 'Dashboard\Property::exportProperties/$1');
-        $routes->post('dashboard/developer/(:num)/import', 'Dashboard\Property::importProperties/$1');
-
+        // === EXPORT & IMPORT PROPERTY ===
+        $routes->get('(:num)/export',  'Dashboard\Developer::exportProperty/$1');
+        $routes->post('(:num)/import', 'Dashboard\Developer::importProperty/$1');
     });
+
 
 
     // === PROPERTY ===

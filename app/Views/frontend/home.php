@@ -166,10 +166,6 @@ Hero Area
 </select>
 
 
-
-
-
-
   <!-- ✅ Dropdown Property -->
   <select class="form-select custom-select" style="border-left: 0; max-width: 300px;" name="property" id="propertySelect" disabled>
     <option value="">Property</option>

@@ -58,7 +58,7 @@
                     <td><?= esc($d['name']) ?></td>
                     <td>
                       <a class="btn btn-info btn-sm" 
-                         href="<?= base_url('dashboard/developer/' . esc($d['slug']) . '/property') ?>">
+                         href="<?= base_url('dashboard/developer/' . esc($d['slug'])) ?>">
                         Listing Properties
                       </a>
                     </td>

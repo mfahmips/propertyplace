@@ -3,13 +3,46 @@
     
     <!-- Sidebar Logo -->
     <div class="logo-box text-center py-3">
-        <a href="<?= base_url('dashboard') ?>" class="d-block">
-            <img src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>"
-                alt="Logo"
-                class="logo-lg"
-                style="height: 48px; object-fit: contain;"
-                onerror="this.onerror=null;this.src='<?= base_url('uploads/default-logo.png') ?>';">
+        <a href="<?= base_url('/') ?>">
+            <img 
+              src="<?= base_url('uploads/' . ($settings['site_logo'] ?? 'default-logo.png')) ?>"
+              alt="<?= esc($settings['site_name'] ?? 'PropertyPlace') ?>"
+              class="glow-logo"
+              style="max-height:60px;">
         </a>
+
+        <style>
+        .glow-logo {
+          display: inline-block;
+          border: none;
+          border-radius: 0; /* pastikan tidak ada rounding yang memunculkan tepi */
+          background: transparent; /* hapus latar apapun */
+          transition: transform 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+          animation: logoGlow 3s infinite ease-in-out;
+          filter: drop-shadow(0 0 15px rgba(196, 85, 46, 0.4)); /* gunakan drop-shadow, bukan box-shadow */
+        }
+
+        /* Hover: lebih terang tanpa lingkaran tepi */
+        .glow-logo:hover {
+          transform: scale(1.07);
+          filter: drop-shadow(0 0 25px rgba(196, 85, 46, 0.7)) brightness(1.1);
+        }
+
+        /* Animasi glow lembut */
+        @keyframes logoGlow {
+          0% {
+            filter: drop-shadow(0 0 10px rgba(196, 85, 46, 0.2));
+          }
+          50% {
+            filter: drop-shadow(0 0 25px rgba(196, 85, 46, 0.5));
+          }
+          100% {
+            filter: drop-shadow(0 0 10px rgba(196, 85, 46, 0.2));
+          }
+        }
+
+        </style>
+
     </div>
 
     <!-- Sidebar Scrollable Menu -->
@@ -130,4 +163,24 @@
 
         </ul>
     </div>
+
+
+<!-- Footer Start -->
+<footer class="footer py-2 mt-auto" style="font-size: 0.8rem; background: transparent; position: relative; top: -5px;">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12 text-center text-muted">
+        Copyright &copy; <script>document.write(new Date().getFullYear())</script> <?= esc($settings['site_name'] ?? 'PropertyPlace') ?> All rights reserved
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Footer End -->
+<style>
+    .footer:hover {
+  color: #adb5bd !important;
+  transition: color 0.3s ease;
+}
+
+</style>
 </div>
