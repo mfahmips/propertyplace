@@ -160,7 +160,7 @@
         <?php endif ?>
 
           <div class="mt-4">
-            <p>Catatan Admin : <strong><?= $item['keterangan'] ?: '<i class="text-muted">-</i>' ?></strong></p>
+            <p>keterangan Admin : <strong><?= $item['keterangan'] ?: '<i class="text-muted">-</i>' ?></strong></p>
           </div>
         </div>
       </div>
@@ -185,7 +185,7 @@
             <tbody>
               <?php foreach ($pengajuan as $item): ?>
               <tr>
-                <td><?= date('d/m/Y', strtotime($item['tanggal_ajuan'])) ?></td>
+                <td><?= date('d/m/Y', strtotime($item['tanggal_pengajuan'])) ?></td>
                 <td><?= esc($item['user_name']) ?></td>
                 <td>
                   <span class="badge bg-<?= $item['status'] === 'disetujui' ? 'success' : ($item['status'] === 'ditolak' ? 'danger' : 'warning') ?>">
@@ -245,7 +245,7 @@
                             </div>
                             <div class="col-md-6">
                               <div class="small text-muted">Tanggal Ajuan</div>
-                              <div class="fw-semibold"><?= $item['tanggal_ajuan'] ? date('d/m/Y H:i', strtotime($item['tanggal_ajuan'])) : '-' ?></div>
+                              <div class="fw-semibold"><?= $item['tanggal_pengajuan'] ? date('d/m/Y H:i', strtotime($item['tanggal_pengajuan'])) : '-' ?></div>
                             </div>
                           </div>
                         </div>
@@ -270,8 +270,8 @@
                               </div>
                             </div>
                             <div class="col-12">
-                              <div class="small text-muted">Catatan</div>
-                              <div class="fst-italic"><?= $item['catatan'] ?: '<span class="text-muted">-</span>' ?></div>
+                              <div class="small text-muted">keterangan</div>
+                              <div class="fst-italic"><?= $item['keterangan'] ?: '<span class="text-muted">-</span>' ?></div>
                             </div>
                           </div>
                         </div>
@@ -323,8 +323,8 @@
                     </div>
 
                     <div class="mb-2">
-                      <label for="catatan<?= $item['id'] ?>" class="form-label">Catatan</label>
-                      <textarea class="form-control" id="catatan<?= $item['id'] ?>" name="catatan" rows="3"><?= $item['catatan'] ?></textarea>
+                      <label for="keterangan<?= $item['id'] ?>" class="form-label">keterangan</label>
+                      <textarea class="form-control" id="keterangan<?= $item['id'] ?>" name="keterangan" rows="3"><?= $item['keterangan'] ?></textarea>
                     </div>
                   </div>
                   <div class="modal-footer">

@@ -656,10 +656,14 @@ public function saveDetailByDeveloper($devSlug, $propSlug)
     }
 
     /**
- * EXPORT seluruh data properti (multi-sheet Excel)
+ * EXPORT seluruh data properti (multi-sheet Excel) berdasarkan developer_id
  */
-public function exportProperties()
+public function exportProperties($developerId = null)
 {
+    if (empty($developerId)) {
+        return redirect()->back()->with('error', 'Developer tidak ditemukan.');
+    }
+
     $models = [
         'properties'           => new PropertyModel(),
         'property_details'     => new PropertyDetailModel(),
@@ -673,7 +677,20 @@ public function exportProperties()
     $isFirst = true;
 
     foreach ($models as $sheetName => $model) {
-        $data = $model->findAll();
+        // Filter per developer_id (jika kolom ada)
+        if ($model->db->fieldExists('developer_id', $model->table)) {
+            $data = $model->where('developer_id', $developerId)->findAll();
+        } else {
+            // Ambil hanya data yang terkait melalui relasi properti
+            if (in_array($sheetName, ['property_details', 'property_documents', 'property_images', 'property_type', 'property_type_images'])) {
+                $propertyIds = $models['properties']->select('id')->where('developer_id', $developerId)->findColumn('id');
+                if (empty($propertyIds)) continue;
+                $data = $model->whereIn('property_id', $propertyIds)->findAll();
+            } else {
+                $data = $model->findAll();
+            }
+        }
+
         if (empty($data)) continue;
 
         // Buat sheet baru
@@ -685,33 +702,37 @@ public function exportProperties()
         $headers = array_keys($data[0]);
         $sheet->fromArray([$headers], null, 'A1');
 
-        // Isi data mulai dari baris ke-2
+        // Isi data
         $sheet->fromArray($data, null, 'A2');
     }
 
-    // Nama file hasil export
-    $fileName = 'data_property_' . date('Ymd_His') . '.xlsx';
+    // Nama file
+    $fileName = 'data_property_developer_' . $developerId . '_' . date('Ymd_His') . '.xlsx';
     $writer = new Xlsx($spreadsheet);
 
-    // Kirim file ke browser untuk diunduh
+    // Output ke browser
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header("Content-Disposition: attachment; filename=\"$fileName\"");
+    header('Cache-Control: max-age=0');
     $writer->save('php://output');
     exit;
 }
 
 
 /**
- * IMPORT seluruh data properti dari file Excel (multi-sheet)
+ * IMPORT seluruh data properti dari file Excel (multi-sheet) berdasarkan developer_id
  */
-public function importProperties()
+public function importProperties($developerId = null)
 {
+    if (empty($developerId)) {
+        return redirect()->back()->with('error', 'Developer tidak ditemukan.');
+    }
+
     $file = $this->request->getFile('file');
     if (!$file->isValid()) {
         return redirect()->back()->with('error', 'File tidak valid atau gagal diupload.');
     }
 
-    // Load file Excel
     $spreadsheet = IOFactory::load($file->getTempName());
 
     $models = [
@@ -720,20 +741,19 @@ public function importProperties()
         'property_documents'   => new PropertyDocumentModel(),
         'property_images'      => new PropertyImageModel(),
         'property_type'        => new PropertyTypeModel(),
-        'property_type_images' => new PropertyTypeImagesModel(), // ✅ pakai "s"
+        'property_type_images' => new PropertyTypeImagesModel(),
     ];
 
     foreach ($spreadsheet->getAllSheets() as $sheet) {
         $sheetName = $sheet->getTitle();
 
         if (!isset($models[$sheetName])) {
-            continue; // lewati jika sheet tidak ada model-nya
+            continue;
         }
 
         $rows = $sheet->toArray(null, true, true, true);
-        if (count($rows) < 2) continue; // sheet kosong
+        if (count($rows) < 2) continue;
 
-        // Baris pertama = header
         $headers = array_values($rows[1]);
         unset($rows[1]);
 
@@ -741,25 +761,35 @@ public function importProperties()
         foreach ($rows as $row) {
             $item = [];
             foreach ($headers as $index => $field) {
-                $colLetter = chr(65 + $index); // Kolom A, B, C, dst
+                $colLetter = chr(65 + $index);
                 if (!empty($field) && isset($row[$colLetter])) {
                     $item[$field] = $row[$colLetter];
                 }
             }
+
+            // Tambahkan developer_id untuk tabel yang relevan
+            if (isset($models[$sheetName]->allowedFields) && in_array('developer_id', $models[$sheetName]->allowedFields)) {
+                $item['developer_id'] = $developerId;
+            }
+
             if (!empty($item)) {
                 $data[] = $item;
             }
         }
 
-        // Import data (hapus data lama dulu agar rapi)
+        // Hapus data lama milik developer ini sebelum import
         if (!empty($data)) {
-            $models[$sheetName]->truncate();
+            if ($models[$sheetName]->db->fieldExists('developer_id', $models[$sheetName]->table)) {
+                $models[$sheetName]->where('developer_id', $developerId)->delete();
+            }
+
             $models[$sheetName]->insertBatch($data);
         }
     }
 
-    return redirect()->back()->with('success', 'Data properti berhasil diimport.');
+    return redirect()->back()->with('success', 'Data properti developer berhasil diimport.');
 }
+
 
 
 }

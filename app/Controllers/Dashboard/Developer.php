@@ -1,7 +1,20 @@
-<?php namespace App\Controllers\Dashboard;
+<?php 
+
+namespace App\Controllers\Dashboard;
 
 use App\Controllers\BaseController;
-use App\Models\DeveloperModel;
+use App\Models\{
+    DeveloperModel,
+    PropertyModel,
+    PropertyDetailModel,
+    PropertyDocumentModel,
+    PropertyImageModel,
+    PropertyTypeModel,
+    PropertyTypeImagesModel
+};
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Developer extends BaseController
 {
@@ -10,6 +23,7 @@ class Developer extends BaseController
     public function __construct()
     {
         $this->model = new DeveloperModel();
+        $this->propertyModel = new PropertyModel();
     }
 
    public function index()

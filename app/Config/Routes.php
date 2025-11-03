@@ -116,6 +116,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         // === PROPERTY TYPE ===
         $routes->post('(:segment)/property/(:segment)/type/save', 'Dashboard\Property::saveTypeByDeveloper/$1/$2');
         $routes->get('(:segment)/property/(:segment)/type/(:num)/delete', 'Dashboard\Property::deleteTypeByDeveloper/$1/$2/$3');
+
+        $routes->get('dashboard/developer/(:num)/export', 'Dashboard\Property::exportProperties/$1');
+        $routes->post('dashboard/developer/(:num)/import', 'Dashboard\Property::importProperties/$1');
+
     });
 
 
@@ -127,8 +131,6 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('unit/(:segment)', 'Dashboard\Property::unitTypes/$1');
         $routes->get('(:segment)/floorplan', 'Dashboard\Property::floorPlan/$1');
         $routes->get('(:segment)/documents', 'Dashboard\Property::documents/$1');
-        $routes->get('exportProperties', 'Dashboard\Property::exportProperties');
-        $routes->post('importProperties', 'Dashboard\Property::importProperties');
 
     });
 
