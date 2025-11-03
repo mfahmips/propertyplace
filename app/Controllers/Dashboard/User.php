@@ -36,26 +36,47 @@ class User extends BaseController
         'email'    => 'required|valid_email|is_unique[users.email]',
         'password' => 'required|min_length[6]',
         'role'     => 'required|in_list[admin,sales,management]',
+        'gender'   => 'permit_empty|in_list[Laki-laki,Perempuan]',
     ];
 
     if (!$this->validate($rules)) {
-        return redirect()->to('/dashboard/user')->withInput()->with('validation', \Config\Services::validation());
+        return redirect()->to('/dashboard/user')
+            ->withInput()
+            ->with('validation', \Config\Services::validation());
     }
 
-    if (!$this->userModel->save([
-        'name'     => $this->request->getPost('name'), // ← INI WAJIB ADA
-        'username' => $this->request->getPost('username'),
-        'slug'     => url_title($this->request->getPost('username'), '-', true),
-        'email'    => $this->request->getPost('email'),
-        'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-        'role'     => $this->request->getPost('role'),
-        'is_active'=> 1
-    ])) {
-        return redirect()->to('/dashboard/user')->withInput()->with('errors', $this->userModel->errors());
+    // Data dasar user baru
+    $data = [
+        'name'      => $this->request->getPost('name'),
+        'username'  => $this->request->getPost('username'),
+        'slug'      => url_title($this->request->getPost('username'), '-', true),
+        'email'     => $this->request->getPost('email'),
+        'password'  => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+        'role'      => $this->request->getPost('role'),
+        'gender'    => $this->request->getPost('gender'),
+        'is_active' => 1,
+        'created_at'=> date('Y-m-d H:i:s'),
+        'updated_at'=> date('Y-m-d H:i:s')
+    ];
+
+    // ====== Tambahkan foto default otomatis sesuai gender ======
+    if (!empty($data['gender'])) {
+        if ($data['gender'] === 'Laki-laki') {
+            $data['foto'] = 'default-male.png';
+        } elseif ($data['gender'] === 'Perempuan') {
+            $data['foto'] = 'default-female.png';
+        }
     }
 
-    return redirect()->to('/dashboard/user')->with('success', 'User berhasil ditambahkan');
+    if (!$this->userModel->save($data)) {
+        return redirect()->to('/dashboard/user')
+            ->withInput()
+            ->with('errors', $this->userModel->errors());
+    }
+
+    return redirect()->to('/dashboard/user')->with('success', 'User berhasil ditambahkan.');
 }
+
 
 
     public function update($id)
@@ -103,7 +124,8 @@ class User extends BaseController
         'phone'           => $this->request->getPost('phone'),
         'facebook'        => $this->request->getPost('facebook'),
         'instagram'       => $this->request->getPost('instagram'),
-        'tiktok'          => $this->request->getPost('tiktok')
+        'tiktok'          => $this->request->getPost('tiktok'),
+        'updated_at'      => date('Y-m-d H:i:s')
     ];
 
     // Jika password diisi, update
@@ -124,9 +146,19 @@ class User extends BaseController
         $data['foto'] = $fotoName;
     }
 
+    // ====== Tambahkan FOTO DEFAULT berdasarkan gender jika kosong ======
+    if (empty($user['foto']) && empty($data['foto'])) {
+        if ($data['gender'] === 'Laki-laki') {
+            $data['foto'] = 'default-male.png';
+        } elseif ($data['gender'] === 'Perempuan') {
+            $data['foto'] = 'default-female.png';
+        }
+    }
+
     $this->userModel->save($data);
     return redirect()->back()->with('success', 'Profil berhasil diperbarui');
 }
+
 
 
     public function profile($slug = null)
@@ -176,34 +208,85 @@ class User extends BaseController
 
 
     public function autosave()
-    {
-        $userId = $this->request->getPost('id') ?? session('id');
-        $field  = $this->request->getPost('field');
-        $value  = $this->request->getPost('value');
+{
+    // Ambil ID user aktif dari session atau request
+    $userId = $this->request->getPost('id') ?? session('id');
+    $field  = $this->request->getPost('field');
+    $value  = $this->request->getPost('value');
 
-        // Daftar field yang diizinkan untuk autosave
-        $allowed = [
-            'name', 'username', 'phone', 'gender', 'place_of_birth', 'date_of_birth', 'position',
-            'facebook', 'instagram', 'tiktok', 'address'
-        ];
+    // Daftar kolom yang boleh diubah melalui autosave
+    $allowed = [
+        'name', 'username', 'phone', 'gender',
+        'place_of_birth', 'date_of_birth', 'position',
+        'facebook', 'instagram', 'tiktok', 'address'
+    ];
 
-        if (!in_array($field, $allowed)) {
-            return $this->response->setStatusCode(400)->setJSON(['message' => 'Field tidak diizinkan']);
-        }
-
-        // Validasi tambahan untuk username (optional)
-        if ($field === 'username') {
-            $exists = $this->userModel->where('username', $value)->where('id !=', $userId)->first();
-            if ($exists) {
-                return $this->response->setStatusCode(409)->setJSON(['message' => 'Username sudah digunakan']);
-            }
-        }
-
-        // Simpan perubahan
-        $this->userModel->update($userId, [$field => $value ?: null]);
-
-        return $this->response->setJSON(['message' => 'Data berhasil disimpan']);
+    // Cegah field ilegal
+    if (!in_array($field, $allowed)) {
+        return $this->response->setStatusCode(400)->setJSON([
+            'status' => 'error',
+            'message' => 'Field tidak diizinkan.',
+            'csrfToken' => csrf_hash()
+        ]);
     }
+
+    // Validasi khusus untuk username unik
+    if ($field === 'username') {
+        $exists = $this->userModel
+            ->where('username', $value)
+            ->where('id !=', $userId)
+            ->first();
+
+        if ($exists) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'status' => 'error',
+                'message' => 'Username sudah digunakan oleh pengguna lain.',
+                'csrfToken' => csrf_hash()
+            ]);
+        }
+    }
+
+    // Pastikan user valid
+    $user = $this->userModel->find($userId);
+    if (!$user) {
+        return $this->response->setStatusCode(404)->setJSON([
+            'status' => 'error',
+            'message' => 'User tidak ditemukan.',
+            'csrfToken' => csrf_hash()
+        ]);
+    }
+
+    // Siapkan data untuk update
+    $data = [
+        $field => $value ?: null,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+
+    // ✅ Jika name diubah, otomatis update slug juga
+    if ($field === 'name') {
+        $data['slug'] = strtolower(url_title($value ?: $user['username'], '-', true));
+    }
+
+    // Simpan perubahan ke database
+    $updated = $this->userModel->update($userId, $data);
+
+    if ($updated) {
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => ucfirst($field) . ' berhasil diperbarui.',
+            'csrfToken' => csrf_hash()
+        ]);
+    }
+
+    // Jika gagal update
+    return $this->response->setStatusCode(500)->setJSON([
+        'status' => 'error',
+        'message' => 'Gagal menyimpan data ke database.',
+        'csrfToken' => csrf_hash()
+    ]);
+}
+
+
 
     public function updatePassword()
     {

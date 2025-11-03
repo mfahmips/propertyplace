@@ -26,26 +26,23 @@ class Index extends BaseController
 
     public function index()
     {
+        // Pastikan user sudah login
         if (!session()->get('logged_in')) {
             return redirect()->to('/login');
         }
 
-        // Ambil user lengkap dari database
+        // Ambil data user dari database
         $user = $this->userModel->find(session('id'));
 
-        // Cek field yang wajib diisi
-        $profileIncomplete =
-            trim($user['place_of_birth'] ?? '') === '' ||
-            trim($user['date_of_birth'] ?? '') === '' ||
-            trim($user['gender'] ?? '') === '' ||
-            trim($user['address'] ?? '') === '';
+        // Cek apakah akun aktif (menunggu persetujuan admin)
+        $waitingApproval = ($user['is_active'] ?? 0) == 0 && !in_array($user['role'], ['admin', 'management']);
 
         // Hitung total penjualan
         $jumlahPenjualan = (int) ($this->penjualanModel->selectSum('total')->first()['total'] ?? 0);
 
-        // Ambil semua developer untuk dropdown
+        // Ambil filter developer
         $developerId = $this->request->getGet('developer_id');
-        $developers = $this->developerModel->findAll();
+        $developers  = $this->developerModel->findAll();
 
         // Builder properti dengan join ke developers
         $builder = $this->propertyModel
@@ -57,33 +54,33 @@ class Index extends BaseController
             $builder->where('properties.developer_id', $developerId);
         }
 
-        $properties = $builder->paginate(4, 'property'); // gunakan alias "property" untuk pagination
-        $pager = $this->propertyModel->pager;
+        // Pagination (gunakan alias property)
+        $properties = $builder->paginate(4, 'property');
+        $pager      = $this->propertyModel->pager;
 
-        // Ambil types untuk tiap property
+        // Ambil type untuk tiap property
         $typeModel = new PropertyTypeModel();
         foreach ($properties as &$property) {
-            $property['Types'] = $typeModel
-                ->where('property_id', $property['id'])
-                ->findAll();
+            $property['Types'] = $typeModel->where('property_id', $property['id'])->findAll();
         }
-        unset($property); // clean reference
+        unset($property); // Bersihkan reference
 
+        // Kirim data ke view
         $data = [
-            'title'             => 'Dashboard',
-            'breadcrumb'        => [['label' => 'Dashboard']],
-            'username'          => $user['name'],
-            'foto'              => $user['foto'],
-            'totalProperty'     => $this->propertyModel->countAll(),
-            'totalUser'         => $this->userModel->countAll(),
-            'totalPenjualan'    => $jumlahPenjualan,
-            'totalDeveloper'    => $this->developerModel->countAll(),
-            'profileIncomplete' => $profileIncomplete,
-            'user'              => $user,
-            'developers'        => $developers,
-            'developerId'       => $developerId,
-            'properties'        => $properties,
-            'pager'             => $pager,
+            'title'          => 'Dashboard',
+            'breadcrumb'     => [['label' => 'Dashboard']],
+            'username'       => $user['name'],
+            'foto'           => $user['foto'],
+            'totalProperty'  => $this->propertyModel->countAll(),
+            'totalUser'      => $this->userModel->countAll(),
+            'totalPenjualan' => $jumlahPenjualan,
+            'totalDeveloper' => $this->developerModel->countAll(),
+            'waitingApproval'=> $waitingApproval,
+            'user'           => $user,
+            'developers'     => $developers,
+            'developerId'    => $developerId,
+            'properties'     => $properties,
+            'pager'          => $pager,
         ];
 
         return view('admin/index', $data);

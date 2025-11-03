@@ -27,24 +27,23 @@ $routes->group('', ['namespace' => 'App\Controllers\Frontend'], static function(
 
 
 
-// === DETAIL USER BERDASARKAN SLUG (contoh: /user/john-doe)
+// === DETAIL USER BERDASARKAN SLUG
 $routes->get('user/(:segment)', 'User::detail/$1');
 
-// Auth routes
-$routes->get('login', 'Auth::loginForm');     // tampilkan form login
-$routes->post('login', 'Auth::login');        // proses login
-$routes->get('logout', 'Auth::logout');       // logout
+// === AUTH (login & register gabung)
+$routes->get('login', 'Auth::index');              // tampilkan halaman login/register (default login)
+$routes->get('register', 'Auth::index');           // tampilkan halaman register (langsung mode daftar)
+$routes->post('login', 'Auth::login');             // proses login
+$routes->post('register', 'Auth::register');       // proses register
+$routes->get('logout', 'Auth::logout');            // logout
 
-// Register routes
-$routes->get('register', 'Auth::registerForm');  // tampilkan form register
-$routes->post('register', 'Auth::register');     // proses simpan user baru
-
-
-
+// === LOGIN GOOGLE (opsional)
 $routes->get('auth/google', 'AuthGoogle::redirect');
 $routes->get('auth/google/callback', 'AuthGoogle::callback');
 
+// === TEST SESSION
 $routes->get('session-test', 'SessionTest::index');
+
 
 
 

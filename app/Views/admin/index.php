@@ -254,26 +254,53 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- Lengkapi Profil Modal -->
-<?php if (!empty($profileIncomplete)) : ?>
-<div class="modal fade" id="profileReminderModal" tabindex="-1">
+
+<!-- Menunggu Persetujuan Admin Modal -->
+<?php if (!empty($waitingApproval)) : ?>
+<div class="modal fade" id="waitingApprovalModal" tabindex="-1" aria-labelledby="waitingApprovalLabel" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false"> <!-- ❗ Tidak bisa ditutup klik luar / ESC -->
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Profil Anda Belum Lengkap</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Mohon lengkapi profil terlebih dahulu untuk menggunakan sistem secara optimal.</p>
-      </div>
-      <div class="modal-footer">
-        <a href="<?= base_url('dashboard/user/profile/' . session('slug')) ?>" class="btn btn-light w-100">Lengkapi Profil</a>
+      <div class="modal-body text-center p-4">
+        <!-- Ikon jam menunggu -->
+        <i class="bi bi-hourglass-split text-warning display-4 mb-3"></i>
+
+        <h5 class="modal-title fw-bold text-warning mb-3" id="waitingApprovalLabel" style="text-align: center;">
+          Menunggu Persetujuan Admin
+        </h5>
+
+        <p class="mb-4">
+          Akun Anda <strong>belum diaktifkan</strong> oleh admin.<br>
+          Silakan menunggu proses verifikasi agar dapat mengakses sistem sepenuhnya.
+        </p>
+
+        <a href="<?= base_url('logout') ?>" class="btn btn-warning fw-semibold w-100">
+          <i class="bi bi-box-arrow-right me-1"></i> Kembali ke Halaman Login
+        </a>
       </div>
     </div>
   </div>
 </div>
-<script> new bootstrap.Modal(document.getElementById('profileReminderModal')).show(); </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = new bootstrap.Modal(document.getElementById('waitingApprovalModal'), {
+        backdrop: 'static',
+        keyboard: false
+    });
+    modal.show();
+
+    // 🔒 Nonaktifkan semua klik di luar modal
+    document.querySelectorAll('a, button, input, select, textarea').forEach(el => {
+        if (!el.closest('#waitingApprovalModal')) {
+            el.setAttribute('disabled', 'disabled');
+            el.style.pointerEvents = 'none';
+        }
+    });
+});
+</script>
 <?php endif; ?>
+
 
 <!-- Absen Toast -->
 <?php if (session()->getFlashdata('absen_masuk_success')): ?>

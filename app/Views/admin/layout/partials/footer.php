@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12 text-center">
-                <?= date('Y') ?> &copy; <?= esc($settings['site_name'] ?? 'PropertyPlace') ?>
+                 Copyright &copy; <script>document.write(new Date().getFullYear())</script> <?= esc($settings['site_name'] ?? 'PropertyPlace') ?>, All rights reserved.</a>
             </div>
         </div>
     </div>

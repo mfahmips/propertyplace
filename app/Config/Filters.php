@@ -26,36 +26,46 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
 
-        // custom
+        // Custom filters
         'login'         => \App\Filters\LoginFilter::class,
         'auth'          => \App\Filters\Auth::class,
         'role'          => \App\Filters\RoleFilter::class,
-
-
+        'inactiveUser'  => \App\Filters\InactiveUserFilter::class, // ✅ baru ditambahkan
     ];
 
-    // Middleware global (semua route)
+    // =========================
+    // GLOBAL FILTERS
+    // =========================
     public array $globals = [
-    'before' => [
-        'auth' => [
-            'except' => [
-                '/', // home
-                'login', 'login/*',
-                'logout', 'logout/*',
-                'register', 'register/*',
-                'property', 'property/*',
-            ]
-        ]
-    ],
-    'after' => [
-        'toolbar',
-    ],
-];
-
+        'before' => [
+            'auth' => [
+                'except' => [
+                    '/', 
+                    'login', 'login/*',
+                    'logout', 'logout/*',
+                    'register', 'register/*',
+                    'property', 'property/*',
+                    'auth/google', 'auth/google/*',
+                    'dashboard/user/autosave', // AJAX autosave tetap bisa diakses
+                ]
+            ],
+        ],
+        'after' => [
+            'toolbar',
+        ],
+    ];
 
     public array $methods = [];
 
-    public array $filters = [];
-
-
+    // =========================
+    // KHUSUS UNTUK DASHBOARD
+    // =========================
+    public array $filters = [
+        // ⬇️ Filter untuk mencegah user belum aktif mengakses halaman selain dashboard
+        'inactiveUser' => [
+            'before' => [
+                'dashboard/*',
+            ]
+        ],
+    ];
 }

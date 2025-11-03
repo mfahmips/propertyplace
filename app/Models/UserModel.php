@@ -23,12 +23,13 @@ class UserModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    // 🔹 Validasi default (untuk create atau full update)
     protected $validationRules = [
-        'name'     => 'required|min_length[3]',
-        'username' => 'required|alpha_dash|is_unique[users.username]',
-        'email'    => 'required|valid_email|is_unique[users.email]',
-        'password' => 'required|min_length[6]',
-        'role'     => 'required|in_list[admin,sales,management]',
+        'name'     => 'permit_empty|min_length[3]',
+        'username' => 'permit_empty|alpha_dash|is_unique[users.username,id,{id}]',
+        'email'    => 'permit_empty|valid_email|is_unique[users.email,id,{id}]',
+        'password' => 'permit_empty|min_length[6]',
+        'role'     => 'permit_empty|in_list[admin,sales,management]',
         'position' => 'permit_empty|string|max_length[100]',
         'is_active'=> 'permit_empty|in_list[0,1]',
         'foto'     => 'permit_empty|is_image[foto]|max_size[foto,2048]',
@@ -51,7 +52,6 @@ class UserModel extends Model
             'alpha_dash'  => 'Username hanya boleh huruf, angka, garis bawah, dan strip.',
         ],
         'password' => [
-            'required'   => 'Password wajib diisi.',
             'min_length' => 'Password minimal 6 karakter.',
         ],
         'foto' => [
@@ -72,22 +72,19 @@ class UserModel extends Model
         ],
     ];
 
-    protected $skipValidation = false;
+    protected $skipValidation = true; // ✅ Ubah ini jadi true agar autosave tidak gagal validasi
 
     /**
      * Validation rules untuk update user (allow same email/username)
-     *
-     * @param int $id
-     * @return array
      */
     public function getUpdateRules($id)
     {
         return [
-            'name'     => 'required|min_length[3]',
-            'username' => "required|alpha_dash|is_unique[users.username,id,{$id}]",
-            'email'    => "required|valid_email|is_unique[users.email,id,{$id}]",
+            'name'     => 'permit_empty|min_length[3]',
+            'username' => "permit_empty|alpha_dash|is_unique[users.username,id,{$id}]",
+            'email'    => "permit_empty|valid_email|is_unique[users.email,id,{$id}]",
             'password' => 'permit_empty|min_length[6]',
-            'role'     => 'required|in_list[admin,sales,management]',
+            'role'     => 'permit_empty|in_list[admin,sales,management]',
             'position' => 'permit_empty|string|max_length[100]',
             'foto'     => 'permit_empty|is_image[foto]|max_size[foto,2048]',
             'phone'    => 'permit_empty|max_length[20]',

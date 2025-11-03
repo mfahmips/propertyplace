@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 13 Agu 2025 pada 17.31
--- Versi server: 8.0.30
--- Versi PHP: 8.1.10
+-- Waktu pembuatan: 03 Nov 2025 pada 09.43
+-- Versi server: 8.0.32
+-- Versi PHP: 8.3.27
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `propertyplace`
+-- Basis data: `propertyplace`
 --
 
 -- --------------------------------------------------------
@@ -80,22 +80,23 @@ INSERT INTO `blogs` (`id`, `title`, `slug`, `content`, `cover_image`, `created_a
 
 CREATE TABLE `bookings` (
   `id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
   `developer_id` int UNSIGNED NOT NULL,
   `property_id` int NOT NULL,
   `type_id` int NOT NULL,
-  `unit_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `buyer_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `buyer_phone` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `buyer_email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `unit_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `buyer_name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `buyer_phone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `buyer_email` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` bigint DEFAULT NULL,
-  `payment_plan` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_plan` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deposit_amount` bigint DEFAULT NULL,
-  `deposit_receipt` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','reserved','confirmed','cancelled','expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `deposit_receipt` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','reserved','confirmed','cancelled','expired') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `reserved_by_user_id` int DEFAULT NULL,
   `reserved_at` datetime DEFAULT NULL,
   `expires_at` datetime DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -104,9 +105,9 @@ CREATE TABLE `bookings` (
 -- Dumping data untuk tabel `bookings`
 --
 
-INSERT INTO `bookings` (`id`, `developer_id`, `property_id`, `type_id`, `unit_number`, `buyer_name`, `buyer_phone`, `buyer_email`, `price`, `payment_plan`, `deposit_amount`, `deposit_receipt`, `status`, `reserved_by_user_id`, `reserved_at`, `expires_at`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 1, 'A1', 'Dewi Lestari', '081234567890', 'dewi@gmail.com', 950000000, 'Cash Bertahap', 15000000, 'uploads/receipt_a1.jpg', 'pending', 6, '2025-08-13 23:27:49', NULL, 'Pembeli serius, bayar tunai.', '2025-08-13 23:27:49', '2025-08-13 23:27:49'),
-(2, 1, 1, 2, 'A2', 'Budi Santoso', '081298765432', 'budi@gmail.com', 1200000000, 'KPR Bank BSI', 20000000, 'uploads/receipt_a2.jpg', 'reserved', 6, '2025-08-13 23:27:49', NULL, 'Akan booking minggu depan.', '2025-08-13 23:27:49', '2025-08-13 23:27:49');
+INSERT INTO `bookings` (`id`, `user_id`, `developer_id`, `property_id`, `type_id`, `unit_number`, `buyer_name`, `buyer_phone`, `buyer_email`, `price`, `payment_plan`, `deposit_amount`, `deposit_receipt`, `status`, `reserved_by_user_id`, `reserved_at`, `expires_at`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 6, 1, 1, 1, 'A1', 'Dewi Lestari', '081234567890', 'dewi@gmail.com', 950000000, 'Cash Bertahap', 15000000, 'uploads/user/booking/receipt_a1.jpg', 'confirmed', 6, '2025-08-13 23:27:49', NULL, 'Pembeli serius, bayar tunai.', '2025-08-13 23:27:49', '2025-08-16 11:43:34'),
+(2, 6, 1, 1, 2, 'A2', 'Budi Santoso', '081298765432', 'budi@gmail.com', 1200000000, 'KPR Bank BSI', 20000000, 'uploads/user/booking/receipt_a2.jpg', 'reserved', 6, '2025-08-13 23:27:49', NULL, 'Akan booking minggu depan.', '2025-08-13 23:27:49', '2025-08-13 23:27:49');
 
 -- --------------------------------------------------------
 
@@ -161,15 +162,15 @@ INSERT INTO `developers` (`id`, `slug`, `name`, `logo`, `created_at`, `updated_a
 
 CREATE TABLE `komisi_sales` (
   `id` int NOT NULL,
+  `booking_id` int NOT NULL,
   `user_id` int NOT NULL,
-  `property_id` int NOT NULL,
-  `developer_id` int NOT NULL,
-  `harga` decimal(15,2) NOT NULL,
-  `komisi` decimal(15,2) NOT NULL,
-  `status` enum('diajukan','diproses','disetujui','ditolak','cair') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'diajukan',
-  `keterangan` text,
-  `file_bukti` varchar(255) DEFAULT NULL,
+  `komisi_persen` float NOT NULL,
+  `komisi_nominal` bigint NOT NULL,
+  `status` enum('diajukan','diproses','disetujui','ditolak','selesai') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'diajukan',
   `tanggal_pengajuan` datetime DEFAULT CURRENT_TIMESTAMP,
+  `tanggal_acc` datetime DEFAULT NULL,
+  `keterangan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -177,8 +178,8 @@ CREATE TABLE `komisi_sales` (
 -- Dumping data untuk tabel `komisi_sales`
 --
 
-INSERT INTO `komisi_sales` (`id`, `user_id`, `property_id`, `developer_id`, `harga`, `komisi`, `status`, `keterangan`, `file_bukti`, `tanggal_pengajuan`, `updated_at`) VALUES
-(1, 6, 6, 2, 2800000000.00, 1.75, 'diproses', '', '1754219591_aff0e3d1b88023ad0de8.png', '2025-08-03 18:13:11', '2025-08-04 00:43:21');
+INSERT INTO `komisi_sales` (`id`, `booking_id`, `user_id`, `komisi_persen`, `komisi_nominal`, `status`, `tanggal_pengajuan`, `tanggal_acc`, `keterangan`, `created_at`, `updated_at`) VALUES
+(1, 1, 6, 2, 15000000, 'disetujui', '2025-08-16 11:59:28', '2025-08-16 12:53:32', 'Mohon tunggu maksimal 14 hari untuk proses pencairan', '2025-08-16 11:59:28', '2025-08-16 12:53:32');
 
 -- --------------------------------------------------------
 
@@ -304,7 +305,8 @@ CREATE TABLE `property_details` (
 INSERT INTO `property_details` (`id`, `property_id`, `price`, `price_text`, `location`, `type`, `purpose`, `description`, `created_at`, `updated_at`) VALUES
 (1, 1, 800000000, '800 Juta', 'Bogor', 'Rumah', 'For Sale', 'Arcadia Residence adalah hunian modern yang menawarkan kenyamanan dan kemudahan di lokasi strategis Sentul City. Dikelilingi oleh berbagai fasilitas unggulan, rumah ini dirancang untuk memenuhi kebutuhan Anda akan gaya hidup praktis dan berkualitas.\r\n\r\n✅ Lokasi strategis dengan panorama alam yang memukau\r\n✅ Berada di pusat Sentul City, dekat dengan berbagai fasilitas\r\n✅ Dilengkapi dengan Smart Home System untuk kemudahan hidup\r\n✅ Garansi Bangunan 2 Tahun untuk rasa tenang dan aman\r\n\r\nDengan lokasi yang strategis, Arcadia Residence memungkinkan Anda mengakses pusat perbelanjaan, sekolah, fasilitas kesehatan, dan tempat rekreasi hanya dalam hitungan menit.', '2025-07-26 10:25:46', '2025-07-26 10:26:11'),
 (2, 3, 2500000000, '2.5 M', 'Bogor', 'Rumah', 'For Sale', 'Centronia Residence adalah rumah 3 lantai dengan rooftop yang terletak di kawasan premium Sentul City. Rumah ini memiliki lokasi yang strategis tepat di belakang Argenia Sport Club dan Centronia Square, yang membuatnya sangat mudah dijangkau dan dekat dengan berbagai fasilitas penting di sekitarnya:\r\n\r\n✅ Rooftop dengan view perkotaan yang hijau\r\n✅ Dilengkapi dengan Smart Home System\r\n✅ Berlokasi tepat di belakang Argenia Sport Club & Centronia Square\r\n✅ Garansi Bangunan 2 Tahun!\r\n\r\nDengan lokasi yang strategis serta dekat dengan berbagai fasilitas mumpuni, Centronia Residence akan menjadi hunian yang nyaman untuk Anda dan keluarga.', '2025-07-26 11:25:36', '2025-07-26 11:25:36'),
-(3, 5, 1000000000, '1 M', 'Bogor', 'Rumah', 'For Sale', 'Spring Garden adalah hunian 1 & 2 lantai dengan view indah Gunung Pancar, berada di ketinggian 370 - 440 mdpl. Dikelilingi oleh Flowing Garden yang menambah keindahan dan kenyamanan hunian ini, Spring Garden berada di kawasan terbaru Spring City, Sentul City, membuat hunian ini semakin menarik dan nyaman untuk ditinggali.\r\n\r\n✅ Dilengkapi dengan Smart Home System\r\n✅ 11 Fasilitas Unggulan; Barbeque Garden, Menteng Garden, Reflexology Garden, Suropati Garden, Children Playground, Rock Garden, Spring City Club House, Ayodya Garden, Adventure Playground, Mataram Garden, dan Communal Garden\r\n✅ Garansi Bangunan 2 Tahun!\r\n\r\nSpring Garden menghadirkan fasilitas lengkap yang mengintegrasikan keindahan alam dengan teknologi modern, menciptakan gaya hidup sehat dan seimbang. Jadikan Spring Garden sebagai pilihan utama untuk ciptakan momen-momen berharga bersama keluarga, di lingkungan yang menenangkan dan penuh gaya.', '2025-07-26 15:21:00', '2025-07-26 15:21:00');
+(3, 5, 1000000000, '1 M', 'Bogor', 'Rumah', 'For Sale', 'Spring Garden adalah hunian 1 & 2 lantai dengan view indah Gunung Pancar, berada di ketinggian 370 - 440 mdpl. Dikelilingi oleh Flowing Garden yang menambah keindahan dan kenyamanan hunian ini, Spring Garden berada di kawasan terbaru Spring City, Sentul City, membuat hunian ini semakin menarik dan nyaman untuk ditinggali.\r\n\r\n✅ Dilengkapi dengan Smart Home System\r\n✅ 11 Fasilitas Unggulan; Barbeque Garden, Menteng Garden, Reflexology Garden, Suropati Garden, Children Playground, Rock Garden, Spring City Club House, Ayodya Garden, Adventure Playground, Mataram Garden, dan Communal Garden\r\n✅ Garansi Bangunan 2 Tahun!\r\n\r\nSpring Garden menghadirkan fasilitas lengkap yang mengintegrasikan keindahan alam dengan teknologi modern, menciptakan gaya hidup sehat dan seimbang. Jadikan Spring Garden sebagai pilihan utama untuk ciptakan momen-momen berharga bersama keluarga, di lingkungan yang menenangkan dan penuh gaya.', '2025-07-26 15:21:00', '2025-07-26 15:21:00'),
+(4, 2, 895000000, '895 Juta', 'Bogor', 'Rumah', 'For Sale', 'Spring Valley Extension adalah perluasan dari hunian Spring Valley dengan view keindahan Gunung Pancar di Sentul City. Memiliki kualitas udara yang sangat baik & bebas polusi, fasilitas lengkap di dalam hunian, serta fitur Smart Home System yang memberikan kemudahan dan kenyamanan maksimal bagi Anda.\r\n\r\n✅ AQI 8 - Kualitas udara yang sangat baik!\r\n✅ Dilengkapi dengan Smart Home System\r\n✅ Fasilitas lengkap di dalam hunian; Children Playground, Yoga Area, Reflexology Path, & Pine Forest Walking Track\r\n✅ CCTV di dalam hunian Spring Valley Extension\r\n✅ Garansi bangunan 2 tahun*\r\n\r\nDengan fasilitas yang lengkap di dalam hunian, Spring Valley Extension dapat memberikan Anda rasa aman dan tenang dalam menjalani kehidupan sehari-hari.', '2025-10-27 22:13:57', '2025-10-27 22:13:57');
 
 -- --------------------------------------------------------
 
@@ -366,7 +368,10 @@ CREATE TABLE `property_type` (
 INSERT INTO `property_type` (`id`, `property_id`, `name`, `slug`, `type_unit`, `floors`, `land_area`, `building_area`, `bedrooms`, `bathrooms`, `carport`, `elevator`, `created_at`, `updated_at`) VALUES
 (1, 1, '33 F', '33-f', 'Flat', 1, 60, 36, 2, 1, 1, 0, '2025-07-26 11:19:21', '2025-07-26 18:21:47'),
 (2, 1, '36 F', '36-f', 'Flat', 1, 80, 36, 2, 1, 1, 0, '2025-07-26 11:20:20', '2025-07-26 18:21:53'),
-(3, 1, '36 U', '36-u', 'Upslope', 2, 120, 36, 3, 2, 2, 0, '2025-07-26 11:20:59', '2025-07-26 18:21:57');
+(3, 1, '36 U', '36-u', 'Upslope', 2, 120, 36, 3, 2, 2, 0, '2025-07-26 11:20:59', '2025-07-26 18:21:57'),
+(4, 2, 'Spring 45B', 'spring-45b', 'Flat', 1, 84, 45, 2, 1, 1, 0, '2025-10-27 22:15:43', '2025-10-27 22:16:24'),
+(6, 2, 'Spring 111', 'spring-111', 'Flat', 2, 171, 111, 4, 4, 1, 0, '2025-10-27 22:17:32', '2025-10-27 22:17:32'),
+(7, 2, 'Spring 112B', 'spring-112b', 'Upslope', 2, 161, 112, 4, 4, 1, 0, '2025-10-27 22:18:07', '2025-10-27 22:18:07');
 
 -- --------------------------------------------------------
 
@@ -415,7 +420,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `site_name`, `site_logo`, `site_icon`, `tagline`, `about`, `phone`, `instagram`, `tiktok`, `location`, `maintenance`, `created_at`, `updated_at`, `timezone`, `date_format`, `datetime_format`, `language`) VALUES
-(1, 'Property Place', 'logo_1751820210.png', 'icon_1751820210.png', 'Pilihan tepat mencari property terbaik', 'OK', '08561331998', 'propertyplace.id', 'propertyplace.id', 'Bogor', 0, '2025-07-06 16:42:38', '2025-07-06 16:44:47', 'UTC', 'Y-m-d', 'Y-m-d H:i:s', 'en');
+(1, 'Property Place', 'logo_1761492316.png', 'icon_1761492316.png', 'Pilihan tepat mencari property terbaik', 'OK', '08561331998', 'propertyplace.id', 'propertyplace.id', 'Bogor', 0, '2025-07-06 16:42:38', '2025-10-26 22:25:16', 'UTC', 'Y-m-d', 'Y-m-d H:i:s', 'en');
 
 -- --------------------------------------------------------
 
@@ -468,15 +473,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `username`, `slug`, `email`, `phone`, `password`, `foto`, `gender`, `place_of_birth`, `date_of_birth`, `address`, `facebook`, `instagram`, `tiktok`, `role`, `position`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Muhamad Fahmi PS', 'mfahmips', 'muhamad-fahmi-ps', 'fahmi@propertyplace.id', '08123456789', '$2y$10$KjP7ZxAM6cycuo9PDdN4jOva/kgGcLqhq0pDMjKABlRD7BMGE7vwe', '1752170761_7e62da6707fe75eb19a6.jpg', 'Laki-laki', 'Bogor', '1998-03-13', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', NULL, 'mfahmips', 'mfahmips', 'admin', 'Digital Marketing', 1, '2025-07-05 06:30:18', '2025-07-31 16:46:05', NULL),
-(2, 'Maulidina Fadzri', 'maulidinafzr', 'maulidina-fadzri', 'maulidina@propertyplace.id', NULL, '$2y$10$9vzcjgw09eqZiWxQlPD1O6.L7aN8pwoHajkGwWk6LC843KndFr1FDS', '1752170842_190de76ecd37e540440d.jpg', 'Perempuan', 'Bogor', '1998-07-17', NULL, NULL, NULL, NULL, 'admin', 'Public Relation', 1, '2025-07-05 10:00:21', '2025-07-31 16:46:44', NULL),
-(6, 'Muhamad Wildan', 'wildan123', 'wildan123', 'wildan@propertyplace.id', '0856123456789', '$2y$10$zzZcJ/bIrU9wJzOurA3wouSIh2x27/uro6oVhU2jRnTy.FN9PZq2q', NULL, 'Laki-laki', 'Bogor', '2005-05-10', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'wildan', 'wildan', 'wildan', 'sales', 'Sales Executive', 1, '2025-07-31 17:53:07', '2025-08-04 22:39:15', NULL),
-(7, 'Admin Satu', 'admin1', 'admin1', 'admin1@propertyplace.com', '081234567891', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', 'Laki-laki.jpg', 'Laki-laki', 'Jakarta', '1990-01-01', 'Jl. Admin 1', 'admin.fb', 'admin.ig', 'admin.tt', 'sales', 'Administrator', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:05', NULL),
-(8, 'Sales Dua', 'sales2', 'sales2', 'sales2@propertyplace.com', '082222222222', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', 'Perempuan.jpg', 'Perempuan', 'Bandung', '1995-02-02', 'Jl. Sales 2', 'sales.fb', 'sales.ig', 'sales.tt', 'sales', 'Sales Executive', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:04', NULL),
-(9, 'Manajer Tiga', 'manager3', 'manager3', 'manager3@propertyplace.com', '083333333333', '$2y$10$ZzkGn3K0FhI7tApkdcA0y.nyOEcPvT8OK8zyGHAmrPfGNNkJ6sczq', NULL, 'Laki-laki', 'Surabaya', '1985-03-03', 'Jl. Manager 3', 'manager.fb', 'manager.ig', 'manager.tt', 'management', 'Manajer Umum', 0, '2025-08-01 23:38:15', '2025-08-01 19:31:03', NULL);
+(1, 'Muhamad Fahmi Purnama Sidiq', 'mfahmips', 'muhamad-fahmi-purnama-sidiq', 'fahmi@propertyplace.id', '08123456789', '$2y$10$KjP7ZxAM6cycuo9PDdN4jOva/kgGcLqhq0pDMjKABlRD7BMGE7vwe', '1752170761_7e62da6707fe75eb19a6.jpg', 'Laki-laki', 'Bogor', '1998-03-13', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'mfahmips', 'mfahmips', 'mfahmips', 'admin', 'Digital Marketing', 1, '2025-07-05 06:30:18', '2025-11-03 16:19:28', NULL),
+(2, 'Maulidina Fadzri', 'maulidinafzr', 'maulidina-fadzri', 'maulidina@propertyplace.id', NULL, '$2y$10$9vzcjgw09eqZiWxQlPD1O6.L7aN8pwoHajkGwWk6LC843KndFr1FDS', '1752170842_190de76ecd37e540440d.jpg', 'Perempuan', 'Bogor', '1998-07-17', NULL, NULL, NULL, NULL, 'management', 'Public Relation', 1, '2025-07-05 10:00:21', '2025-11-03 16:06:28', NULL),
+(6, 'Muhamad Wildan Hoerul Azmi', 'wildan123', 'muhamad-wildan-hoerul-azmi', 'wildan@propertyplace.id', '0856123456789', '$2y$10$zzZcJ/bIrU9wJzOurA3wouSIh2x27/uro6oVhU2jRnTy.FN9PZq2q', NULL, 'Laki-laki', 'Bogor', '2005-05-10', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'wildan', 'wildan', 'wildan', 'sales', 'Sales Executive', 1, '2025-07-31 17:53:07', '2025-11-03 16:20:40', NULL),
+(10, 'Nyai Patonah', 'nyai123', 'nyai-patonah', 'nyaipatonah@propertyplace.id', '08123456789', '$2y$10$9etveJ56jentWHcQQeX9WeADSdW5CG0ipnlWq.tVWmXiFdR7/EOQ2', NULL, 'Perempuan', 'Bogor', '1971-05-10', 'JALAN JEMBATAN HITAM NO. 1 RT. 03/10, CIJUJUNG, SUKARAJA, KABUPATEN BOGOR, JAWA BARAT, 16710', 'nyaipatonah', 'nyaipatonah', 'nyaipaotnah', 'management', 'Direktur', 1, '2025-11-03 12:04:41', '2025-11-03 16:22:55', NULL);
 
 --
--- Indexes for dumped tables
+-- Indeks untuk tabel yang dibuang
 --
 
 --
@@ -673,7 +676,7 @@ ALTER TABLE `properties`
 -- AUTO_INCREMENT untuk tabel `property_details`
 --
 ALTER TABLE `property_details`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `property_documents`
@@ -691,7 +694,7 @@ ALTER TABLE `property_images`
 -- AUTO_INCREMENT untuk tabel `property_type`
 --
 ALTER TABLE `property_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `property_type_images`
@@ -715,7 +718,7 @@ ALTER TABLE `settings_images`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

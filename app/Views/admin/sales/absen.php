@@ -22,7 +22,7 @@
 <div class="card">
   <div class="card-body">
 
-    <div class="d-flex flex-column align-items-center gap-3 mb-3">
+    <div class="d-flex flex-column align-items-center gap-3">
       <button class="btn btn-success w-50" data-bs-toggle="modal" data-bs-target="#modalAbsenMasuk">
         Absen Masuk
       </button>

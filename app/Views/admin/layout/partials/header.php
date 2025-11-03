@@ -35,36 +35,38 @@
                         <a type="button" class="topbar-button" id="page-header-user-dropdown"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
-                            <?php
-                            // Ambil data dari session
-                            $gender = strtolower(trim(session('gender') ?? ''));
-                            $fotoDB = trim(session('foto') ?? ''); // ambil nama file foto dari database (session)
+                        <?php
+                        // Ambil data dari session
+                        $gender = strtolower(trim(session('gender') ?? ''));
+                        $fotoDB = trim(session('foto') ?? ''); // nama file dari database
 
-                            // Cek apakah foto dari database tersedia
-                            if (!empty($fotoDB) && file_exists(FCPATH . 'uploads/user/' . $fotoDB)) {
-                                $foto = $fotoDB;
+                        // Cek apakah foto custom tersedia di folder uploads/user/
+                        $fotoPath = FCPATH . 'uploads/user/' . $fotoDB;
+                        if ($fotoDB !== '' && file_exists($fotoPath)) {
+                            $foto = $fotoDB;
+                        } else {
+                            // Tentukan default avatar berdasarkan gender
+                            if ($gender === 'Perempuan') {
+                                $foto = 'Perempuan.jpg';
                             } else {
-                                // Default berdasarkan gender
-                                if ($gender === 'perempuan') {
-                                    $foto = 'Perempuan.jpg';
-                                } else {
-                                    $foto = 'Laki-laki.jpg';
-                                }
+                                $foto = 'Laki-laki.jpg';
                             }
+                        }
 
-                            // Buat URL gambar
-                            $avatarUrl = base_url('uploads/user/' . $foto);
-                            ?>
+                        // Buat URL foto
+                        $avatarUrl = base_url('uploads/user/' . $foto);
+                        ?>
 
-                            <span class="d-flex align-items-center">
-                                <img src="<?= $avatarUrl ?>" alt="User Avatar"
-                                     width="32" height="32"
-                                     class="rounded-circle border"
-                                     style="object-fit: cover;"
-                                     onerror="this.onerror=null;this.src='<?= base_url('uploads/user/Laki-laki.jpg') ?>';">
-                            </span>
+                        <span class="d-flex align-items-center">
+                            <img src="<?= esc($avatarUrl) ?>" alt="User Avatar"
+                                 width="32" height="32"
+                                 class="rounded-circle border"
+                                 style="object-fit: cover;"
+                                 onerror="this.onerror=null;this.src='<?= base_url('uploads/user/Laki-laki.jpg') ?>';">
+                        </span>
 
                         </a>
+
 
                         <div class="dropdown-menu dropdown-menu-end">
                             <h5 class="dropdown-header">

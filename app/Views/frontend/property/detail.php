@@ -2,44 +2,10 @@
 
 <?= $this->section('content') ?>
 
-<!--======== / Hero Section ========--><!--==============================
-Counter Area  
-==============================-->
-    <div class="bg-light overflow-hidden pt-60 pb-60">
-        <div class="container">
-            <div class="counter-card-wrap">
-                <div class="counter-card style4">
-                    <div class="media-body">
-                        <h2 class="box-number text-theme"><span class="counter-number text-theme">850</span>+</h2>
-                        <p class="box-text text-theme">Elegant Apartments</p>
-                    </div>
-                </div>
-                <div class="counter-card style4">
-                    <div class="media-body">
-                        <h2 class="box-number text-theme"><span class="counter-number text-theme">950</span>+</h2>
-                        <p class="box-text text-theme">Luxury Houses</p>
-                    </div>
-                </div>
-                <div class="counter-card style4">
-                    <div class="media-body">
-                        <h2 class="box-number text-theme"><span class="counter-number text-theme">18</span>k+</h2>
-                        <p class="box-text text-theme">Satisfied Guests</p>
-                    </div>
-                </div>
-                <div class="counter-card style4">
-                    <div class="media-body">
-                        <h2 class="box-number text-theme"><span class="counter-number text-theme">2</span>k+</h2>
-                        <p class="box-text text-theme">Happy Owners</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
  <!--==============================
 About Area  
 ==============================-->
-    <div class="overflow-hidden space" id="about-sec">
+    <div class="overflow-hidden space" id="about-sec" style="background: #DAD3C5; padding-top: 30px;">
         <div class="sec-bg-shape2-1 spin shape-mockup d-xl-block d-none" data-bottom="9%" data-right="13%">
             <img src="<?= base_url('assets/frontend/img/shape/section_shape_2_1.jpg') ?>" alt="img">
         </div>
@@ -95,8 +61,8 @@ About Area
                 </div>
                 <div class="col-xl-5">
                     <div class="title-area mb-32">
-                        <h2 class="sec-title style2">About Us</h2>
-                        <p class="sec-text">We are a real estate firm with over 20 years of expertise, and our main goal is to provide amazing locations to our partners and clients. Within the luxury real estate market, our agency offers customized solutions. We are a real estate firm with over 20 years of expertise. Our main goal is to provide amazing locations to our partners and clients.</p>
+                        <h2 class="sec-title style2"><?= esc($property['title']) ?></h2>
+                        <p class="sec-text"><?= esc($property['description']) ?></p>
                     </div>
                     <div class="about-wrap2">
                         <div class="checklist style2">
