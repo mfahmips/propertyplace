@@ -24,68 +24,69 @@
           + Create Property<?= isset($filterDeveloper['name']) ? ' for ' . esc($filterDeveloper['name']) : '' ?>
         </button>
 
-        <?php if (isset($filterDeveloper) && !empty($filterDeveloper['id'])): ?>
-        <div class="d-flex align-items-center gap-2">
-          <!-- Export Data -->
-          <a href="<?= base_url('dashboard/developer/' . esc($filterDeveloper['id']) . '/export') ?>" 
-             class="btn btn-success d-flex align-items-center gap-1">
-            <i class="bi bi-download"></i> Export Data
-          </a>
+        <?php if (isset($filterDeveloper) && !empty($filterDeveloper['slug'])): ?>
+  <div class="d-flex align-items-center gap-2">
+    <!-- Export Data -->
+    <a href="<?= base_url('dashboard/developer/' . esc($filterDeveloper['slug']) . '/export') ?>" 
+       class="btn btn-success d-flex align-items-center gap-1">
+      <i class="bi bi-download"></i> Export Data
+    </a>
 
-          <!-- Import Data (via Modal) -->
-          <button type="button" 
-                  class="btn btn-info text-white d-flex align-items-center gap-1" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#importPropertyModal">
-            <i class="bi bi-upload"></i> Import Data
-          </button>
-        </div>
-        <?php endif; ?>
+    <!-- Import Data (via Modal) -->
+    <button type="button" 
+            class="btn btn-info text-white d-flex align-items-center gap-1" 
+            data-bs-toggle="modal" 
+            data-bs-target="#importPropertyModal">
+      <i class="bi bi-upload"></i> Import Data
+    </button>
+  </div>
+<?php endif; ?>
+</div>
+
+<!-- Modal Import -->
+<?php if (isset($filterDeveloper) && !empty($filterDeveloper['slug'])): ?>
+<div class="modal fade" id="importPropertyModal" tabindex="-1" aria-labelledby="importPropertyLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title w-100 text-center" id="importPropertyLabel">
+          <i class="bi bi-upload me-2"></i> Import Data Properti Developer
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
-      <!-- Modal Import -->
-      <?php if (isset($filterDeveloper) && !empty($filterDeveloper['id'])): ?>
-      <div class="modal fade" id="importPropertyModal" tabindex="-1" aria-labelledby="importPropertyLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-              <h5 class="modal-title w-100 text-center" id="importPropertyLabel">
-                <i class="bi bi-upload me-2"></i> Import Data Properti Developer
-              </h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <form action="<?= base_url('dashboard/developer/' . esc($filterDeveloper['slug']) . '/import') ?>" 
+            method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
+        <div class="modal-body">
+          <div class="alert alert-info small d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle text-info fs-5"></i>
+            <div>
+              Pastikan file berformat <strong>.xlsx</strong> 
+              dan menggunakan template hasil <em>Export</em> sebelumnya.
             </div>
+          </div>
 
-            <form action="<?= base_url('dashboard/developer/' . esc($filterDeveloper['id']) . '/import') ?>" 
-                  method="post" enctype="multipart/form-data">
-              <?= csrf_field() ?>
-              <div class="modal-body">
-                <div class="alert alert-info small d-flex align-items-start gap-2">
-                  <i class="bi bi-info-circle text-info fs-5"></i>
-                  <div>
-                    Pastikan file berformat <strong>.xlsx</strong> 
-                    dan menggunakan template hasil <em>Export</em> sebelumnya.
-                  </div>
-                </div>
-
-                <div class="mb-3">
-                  <label for="file" class="form-label fw-semibold">Pilih File Excel</label>
-                  <input type="file" name="file" id="file" class="form-control" accept=".xlsx,.xls" required>
-                </div>
-              </div>
-
-              <div class="modal-footer d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                  <i class="bi bi-x-circle"></i> Batal
-                </button>
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-cloud-upload"></i> Import Sekarang
-                </button>
-              </div>
-            </form>
+          <div class="mb-3">
+            <label for="file" class="form-label fw-semibold">Pilih File Excel</label>
+            <input type="file" name="file" id="file" class="form-control" accept=".xlsx,.xls" required>
           </div>
         </div>
-      </div>
-      <?php endif; ?>
+
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Batal
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-cloud-upload"></i> Import Sekarang
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 
       <!-- Table Property -->
       <div class="table-responsive">

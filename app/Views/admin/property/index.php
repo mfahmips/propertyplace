@@ -3,7 +3,7 @@
 
   <?php $role = session('role'); ?>
 
-  <?php if (in_array($role, ['sales', 'admin'])): ?>
+  <?php if (in_array($role, ['sales', 'admin', 'management'])): ?>
   <div class="row g-4">
 
 

@@ -82,7 +82,7 @@
               </p>
 
               <p class="text" style="text-align:center;margin-top:16px;">
-                Atau masuk dengan <br>
+                Atau masuk dengan <br><br>
                 <a href="<?= base_url('auth/google') ?>" style="text-align:center;margin-top:16px;">
                   <i class="fab fa-google"></i>
                 </a>
@@ -149,10 +149,13 @@
             <img src="<?= base_url('assets/admin/img/image3.png') ?>" class="image img-3" alt="" />
           </div>
 
+          <!-- ======================= -->
+          <!-- 🔹 TEXT SLIDER SECTION -->
+          <!-- ======================= -->
           <div class="text-slider">
             <div class="text-wrap">
               <div class="text-group">
-                <h2>Gabung bersama tim sukses kami</h2>
+                <h2>Gabung bersama tim kami</h2>
                 <h2>Bangun karier dari properti</h2>
                 <h2>Capai impian finansialmu</h2>
               </div>
@@ -164,10 +167,45 @@
               <span data-value="3"></span>
             </div>
           </div>
+
         </div>
       </div>
     </div>
   </main>
+
+<!-- ======================= -->
+<!-- 🔹 JAVASCRIPT LOGIC -->
+<!-- ======================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const textGroup = document.querySelector(".text-group");
+  const bullets = document.querySelectorAll(".bullets span");
+  let index = 0;
+  const total = bullets.length;
+
+  // Fungsi ganti slide
+  function changeSlide(newIndex) {
+    index = newIndex;
+    const translateY = -35 * index; // tinggi per teks = 60px
+    textGroup.style.transform = `translateY(${translateY}px)`;
+    bullets.forEach(b => b.classList.remove("active"));
+    bullets[index].classList.add("active");
+  }
+
+  // Klik bullet manual
+  bullets.forEach((bullet, i) => {
+    bullet.addEventListener("click", () => {
+      changeSlide(i);
+    });
+  });
+
+  // Auto-slide setiap 3 detik
+  setInterval(() => {
+    index = (index + 1) % total;
+    changeSlide(index);
+  }, 3000);
+});
+</script>
 
 <script>
   const toggleLinks = document.querySelectorAll('.toggle');

@@ -358,4 +358,33 @@ class User extends BaseController
         $this->userModel->update($id, ['foto' => null]);
         return redirect()->back()->with('success', 'Foto berhasil dihapus.');
     }
+
+    public function resetPassword($slug)
+{
+    // Hanya admin yang boleh reset password
+    if (session('role') !== 'admin') {
+        return redirect()->back()->with('error', 'Akses ditolak.');
+    }
+
+    // Cari user berdasarkan slug
+    $user = $this->userModel->where('slug', $slug)->first();
+
+    if (!$user) {
+        return redirect()->back()->with('error', 'User tidak ditemukan.');
+    }
+
+    // Password baru = username + 123
+    $newPasswordPlain = $user['username'] . '123';
+    $newPasswordHash  = password_hash($newPasswordPlain, PASSWORD_DEFAULT);
+
+    // Update password
+    $this->userModel->update($user['id'], ['password' => $newPasswordHash]);
+
+    return redirect()->back()->with(
+        'success',
+        'Password berhasil direset menjadi: <b>' . esc($newPasswordPlain) . '</b>'
+    );
+}
+
+
 }

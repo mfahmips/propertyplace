@@ -73,6 +73,7 @@ class Auth extends BaseController
             'username'  => $user['username'],
             'slug'      => $user['slug'],
             'foto'      => $user['foto'] ?? null,
+            'gender'    => $user['gender'],
             'role'      => $user['role'] ?? 'sales',
             'is_active' => (int) $user['is_active'], // ⬅️ tambahkan ini agar filter bisa bekerja
             'logged_in' => true

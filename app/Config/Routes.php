@@ -37,6 +37,8 @@ $routes->post('login', 'Auth::login');             // proses login
 $routes->post('register', 'Auth::register');       // proses register
 $routes->get('logout', 'Auth::logout');            // logout
 
+
+
 // === LOGIN GOOGLE (opsional)
 $routes->get('auth/google', 'AuthGoogle::redirect');
 $routes->get('auth/google/callback', 'AuthGoogle::callback');
@@ -74,6 +76,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('autosave', 'Dashboard\User::autosave');
         $routes->post('updateRole/(:num)', 'Dashboard\User::updateRole/$1');
         $routes->post('updateStatus/(:num)', 'Dashboard\User::updateStatus/$1');
+        $routes->get('resetPassword/(:segment)', 'Dashboard\User::resetPassword/$1');
 
 
     });
@@ -88,6 +91,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->get('edit/(:segment)',       'Dashboard\Developer::edit/$1');
         $routes->post('update/(:segment)',    'Dashboard\Developer::update/$1');
         $routes->get('delete/(:num)',         'Dashboard\Developer::delete/$1');
+
+        // === EXPORT & IMPORT PROPERTY ===
+        $routes->get('(:segment)/export',  'Dashboard\Developer::exportProperty/$1');
+        $routes->post('(:segment)/import', 'Dashboard\Developer::importProperty/$1');
 
         // === PROPERTY (dipindahkan ke Developer Controller) ===
         $routes->get('(:segment)',                                   'Dashboard\Developer::property/$1'); // index
@@ -114,9 +121,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/(:segment)/type/save',              'Dashboard\Developer::saveTypeProperty/$1/$2');
         $routes->get('(:segment)/(:segment)/type/(:num)/delete',      'Dashboard\Developer::deleteTypeProperty/$1/$2/$3');
 
-        // === EXPORT & IMPORT PROPERTY ===
-        $routes->get('(:num)/export',  'Dashboard\Developer::exportProperty/$1');
-        $routes->post('(:num)/import', 'Dashboard\Developer::importProperty/$1');
+        
     });
 
 

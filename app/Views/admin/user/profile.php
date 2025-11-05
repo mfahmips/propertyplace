@@ -199,9 +199,20 @@
                                                 <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirm_password"><i class="bi bi-eye-slash"></i></button>
                                             </div>
                                         </div>
-                                        <div class="col-12 text-end">
-                                            <button type="submit" class="btn" style="background-color:#B86C3A;color:#fff;">Simpan</button>
+                                        <div class="col-12 text-end d-flex justify-content-end gap-2">
+                                            <?php if (session('role') === 'admin'): ?>
+                                                <a href="<?= base_url('dashboard/user/resetPassword/' . $user['slug']) ?>"
+                                                   class="btn btn-  "
+                                                   onclick="return confirm('Yakin ingin mereset password user ini ke default ?');">
+                                                    <i class="bi bi-arrow-repeat"></i> Reset Password
+                                                </a>
+                                            <?php endif; ?>
+
+                                            <button type="submit" class="btn" style="background-color:#B86C3A;color:#fff;">
+                                                <i class="bi bi-save"></i> Simpan
+                                            </button>
                                         </div>
+
                                     </div>
                                     <?= form_close() ?>
                                 </div>
