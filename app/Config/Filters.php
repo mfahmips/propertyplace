@@ -37,23 +37,28 @@ class Filters extends BaseFilters
     // GLOBAL FILTERS
     // =========================
     public array $globals = [
-        'before' => [
-            'auth' => [
-                'except' => [
-                    '/', 
-                    'login', 'login/*',
-                    'logout', 'logout/*',
-                    'register', 'register/*',
-                    'property', 'property/*',
-                    'auth/google', 'auth/google/*',
-                    'dashboard/user/autosave', // AJAX autosave tetap bisa diakses
-                ]
-            ],
+    'before' => [
+        'auth' => [
+            'except' => [
+                '/', 
+                'login', 'login/*',
+                'logout', 'logout/*',
+                'register', 'register/*',
+                'property', 'property/*',
+                'developer', 'developer/*',
+                'properties/by-developer', 'properties/by-developer/*',
+                'auth/google', 'auth/google/*',
+                'contact', 'contact/*',
+                'about',
+                'dashboard/user/autosave', // AJAX autosave tetap bisa diakses
+            ]
         ],
-        'after' => [
-            'toolbar',
-        ],
-    ];
+    ],
+    'after' => [
+        'toolbar',
+    ],
+];
+
 
     public array $methods = [];
 
