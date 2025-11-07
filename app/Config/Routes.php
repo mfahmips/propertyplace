@@ -162,6 +162,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('locale', 'Dashboard\Settings::saveLocale');
         $routes->get('maintenance', 'Dashboard\Settings::maintenance');
         $routes->post('maintenance', 'Dashboard\Settings::saveMaintenance');
+        $routes->get('theme-colors', 'Dashboard\Settings::themeColors');
+        $routes->post('theme-colors/save', 'Dashboard\Settings::saveThemeColors');
+
     });
 
         $routes->group('SalesActivity', ['filter' => 'auth'], function ($routes) {

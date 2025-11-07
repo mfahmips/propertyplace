@@ -2,19 +2,26 @@
 <?= $this->section('content') ?>
 
 <div class="container-fluid">
-  <div class="page-title-box">
-    <h4 class="mb-0"><?= esc($title) ?></h4>
-    <ol class="breadcrumb mb-0">
-      <?php foreach ($breadcrumb as $item): ?>
-        <?php if (isset($item['url'])): ?>
-          <li class="breadcrumb-item">
-            <a href="<?= esc($item['url']) ?>"><?= esc($item['label']) ?></a>
-          </li>
-        <?php else: ?>
-          <li class="breadcrumb-item active"><?= esc($item['label']) ?></li>
-        <?php endif ?>
-      <?php endforeach ?>
-    </ol>
+  <div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <?= esc($title) ?>
+                </h5>
+            </div>
+                <div class="w-100">
+                    <ul class="list-group">
+                        <li class="list-group-item">Site Info</li>
+                        <li class="list-group-item">Contact &amp; Social</li>
+                        <li class="list-group-item">Logo &amp; Icon</li>
+                        <li class="list-group-item">Locale Settings</li>
+                        <li class="list-group-item">Maintenance</li>
+                    </ul>
+                </div>
+    
+        </div>
+    </div>
   </div>
 
   <div class="card">

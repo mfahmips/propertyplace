@@ -323,6 +323,35 @@ class Settings extends BaseController
 }
 
 
+public function themeColors()
+{
+    $settingsModel = new \App\Models\SettingsModel();
+    $settings = $settingsModel->first(); // karena cuma 1 baris di tabel settings
+
+    return view('admin/settings/theme_colors', [
+        'title' => 'Pengaturan Tema Warna',
+        'settings' => $settings,
+    ]);
+}
+
+public function saveThemeColors()
+{
+    $settingsModel = new \App\Models\SettingsModel();
+
+    $data = [
+    'theme_primary_color'   => $this->request->getPost('theme_primary_color'),
+    'theme_secondary_color' => $this->request->getPost('theme_secondary_color'),
+    'theme_accent_color'    => $this->request->getPost('theme_accent_color'),
+    'theme_background_color'=> $this->request->getPost('theme_background_color'),
+    'theme_card_color'      => $this->request->getPost('theme_card_color'),
+];
+
+
+    $settingsModel->update(1, $data); // id = 1 karena cuma satu record
+
+    return redirect()->back()->with('success', 'Tema warna berhasil diperbarui!');
+}
+
 
 
 }

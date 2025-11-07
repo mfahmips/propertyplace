@@ -72,6 +72,8 @@
     </style>
 
 
+
+
     <!-- Theme Config js -->
     <script src="<?= base_url('assets/admin/js/config.js') ?>"></script>
 </head>
