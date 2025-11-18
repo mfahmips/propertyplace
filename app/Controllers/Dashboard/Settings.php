@@ -6,53 +6,52 @@ use App\Controllers\BaseController;
 use App\Models\SettingsModel;
 use App\Models\SettingsImageModel;
 
-
 class Settings extends BaseController
 {
     protected $model;
+    protected $imageModel;
 
     public function __construct()
     {
         $this->model = new SettingsModel();
+        $this->imageModel = new SettingsImageModel();
     }
 
-    // Dashboard → Settings
+    // =============================
+    // DASHBOARD → SETTINGS (INDEX)
+    // =============================
     public function index()
     {
-        $settingsModel      = $this->model;
-        $settingsImageModel = new \App\Models\SettingsImageModel();
-
         $data = [
             'title'      => 'Settings',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings'],
             ],
-            'settings' => $settingsModel->first(),
-            'banners'  => $settingsImageModel
-                ->whereIn('type', ['home', 'about', 'property', 'blog', 'contact']) // Ambil hanya banner-page
-                ->orderBy('type', 'ASC') // gunakan 'type' bukan 'title'
+            'settings' => $this->model->first(),
+            'banners'  => $this->imageModel
+                ->whereIn('type', ['home', 'about', 'property', 'blog', 'contact'])
+                ->orderBy('type', 'ASC')
                 ->findAll(),
         ];
 
         return view('admin/settings/index', $data);
     }
 
-
-
-    // Dashboard → Settings → Site Info
+    // =============================
+    // SITE INFO
+    // =============================
     public function siteInfo()
     {
-        $data = [
-            'title'      => 'Site Info',
+        return view('admin/settings/site_info', [
+            'title' => 'Site Info',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
                 ['label' => 'Site Info'],
             ],
-            'settings'   => $this->model->first(),
-        ];
-        return view('admin/settings/site_info', $data);
+            'settings' => $this->model->first(),
+        ]);
     }
 
     public function saveSiteInfo()
@@ -72,38 +71,32 @@ class Settings extends BaseController
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        if ($this->model->find(1)) {
-            $this->model->update(1, $data);
-        } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $this->model->insert($data);
-        }
+        $this->model->save($data + ['id' => 1]);
 
-        return redirect()
-            ->to(base_url('dashboard/settings'))
-            ->with('success', 'Site Info updated.');
+        return redirect()->to(base_url('dashboard/settings'))->with('success', 'Site Info updated.');
     }
 
-    // Dashboard → Settings → Contact & Social
+    // =============================
+    // CONTACT & SOCIAL
+    // =============================
     public function contactSocial()
     {
-        $data = [
-            'title'      => 'Contact & Social',
+        return view('admin/settings/contact_social', [
+            'title' => 'Contact & Social',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
                 ['label' => 'Contact & Social'],
             ],
-            'settings'   => $this->model->first(),
-        ];
-        return view('admin/settings/contact_social', $data);
+            'settings' => $this->model->first(),
+        ]);
     }
 
     public function saveContactSocial()
     {
         helper('form');
         $rules = [
-            'phone'     => 'permit_empty|regex_match[/^[0-9+\\-\\s]+$/]',
+            'phone'     => 'permit_empty|regex_match[/^[0-9+\-\s]+$/]',
             'instagram' => 'permit_empty',
             'tiktok'    => 'permit_empty',
         ];
@@ -119,37 +112,32 @@ class Settings extends BaseController
             'updated_at'  => date('Y-m-d H:i:s'),
         ];
 
-        if ($this->model->find(1)) {
-            $this->model->update(1, $data);
-        } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $this->model->insert($data);
-        }
+        $this->model->save($data + ['id' => 1]);
 
-        return redirect()
-            ->to(base_url('dashboard/settings'))
-            ->with('success', 'Contact & Social updated.');
+        return redirect()->to(base_url('dashboard/settings'))->with('success', 'Contact & Social updated.');
     }
 
-    // Dashboard → Settings → Logo & Icon
+    // =============================
+    // LOGO & ICON
+    // =============================
     public function logoIcon()
     {
-        $data = [
-            'title'      => 'Logo & Icon',
+        return view('admin/settings/logo_icon', [
+            'title' => 'Logo & Icon',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
                 ['label' => 'Logo & Icon'],
             ],
-            'settings'   => $this->model->first(),
-        ];
-        return view('admin/settings/logo_icon', $data);
+            'settings' => $this->model->first(),
+        ]);
     }
 
     public function saveLogoIcon()
     {
         $data = ['updated_at' => date('Y-m-d H:i:s')];
 
+        // Upload Logo
         $logo = $this->request->getFile('site_logo');
         if ($logo && $logo->isValid() && ! $logo->hasMoved()) {
             $name = 'logo_' . time() . '.' . $logo->getExtension();
@@ -157,6 +145,7 @@ class Settings extends BaseController
             $data['site_logo'] = $name;
         }
 
+        // Upload Icon
         $icon = $this->request->getFile('site_icon');
         if ($icon && $icon->isValid() && ! $icon->hasMoved()) {
             $name = 'icon_' . time() . '.' . $icon->getExtension();
@@ -164,31 +153,25 @@ class Settings extends BaseController
             $data['site_icon'] = $name;
         }
 
-        if ($this->model->find(1)) {
-            $this->model->update(1, $data);
-        } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $this->model->insert($data);
-        }
+        $this->model->save($data + ['id' => 1]);
 
-        return redirect()
-            ->to(base_url('dashboard/settings'))
-            ->with('success', 'Logo & Icon updated.');
+        return redirect()->to(base_url('dashboard/settings'))->with('success', 'Logo & Icon updated.');
     }
 
-    // Dashboard → Settings → Locale Settings
+    // =============================
+    // LOCALE SETTINGS
+    // =============================
     public function locale()
     {
-        $data = [
-            'title'      => 'Locale Settings',
+        return view('admin/settings/locale', [
+            'title' => 'Locale Settings',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
                 ['label' => 'Locale Settings'],
             ],
-            'settings'   => $this->model->first(),
-        ];
-        return view('admin/settings/locale', $data);
+            'settings' => $this->model->first(),
+        ]);
     }
 
     public function saveLocale()
@@ -203,31 +186,25 @@ class Settings extends BaseController
             'updated_at'      => date('Y-m-d H:i:s'),
         ];
 
-        if ($this->model->find(1)) {
-            $this->model->update(1, $data);
-        } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $this->model->insert($data);
-        }
+        $this->model->save($data + ['id' => 1]);
 
-        return redirect()
-            ->to(base_url('dashboard/settings'))
-            ->with('success', 'Locale Settings updated.');
+        return redirect()->to(base_url('dashboard/settings'))->with('success', 'Locale Settings updated.');
     }
 
-    // Dashboard → Settings → Maintenance Mode (alternate view)
+    // =============================
+    // MAINTENANCE MODE
+    // =============================
     public function maintenance()
     {
-        $data = [
-            'title'      => 'Maintenance Mode',
+        return view('admin/settings/maintenance', [
+            'title' => 'Maintenance Mode',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
                 ['label' => 'Maintenance Mode'],
             ],
-            'settings'   => $this->model->first(),
-        ];
-        return view('admin/settings/maintenance', $data);
+            'settings' => $this->model->first(),
+        ]);
     }
 
     public function saveMaintenance()
@@ -237,121 +214,110 @@ class Settings extends BaseController
             'updated_at'  => date('Y-m-d H:i:s'),
         ];
 
-        if ($this->model->find(1)) {
-            $this->model->update(1, $data);
-        } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $this->model->insert($data);
-        }
+        $this->model->save($data + ['id' => 1]);
 
-        return redirect()
-            ->to(base_url('dashboard/settings'))
-            ->with('success', 'Maintenance Mode updated.');
+        return redirect()->to(base_url('dashboard/settings'))->with('success', 'Maintenance Mode updated.');
     }
 
+    // =============================
+    // BANNER MANAGEMENT
+    // =============================
     public function banner()
     {
-        $bannerModel = new SettingsImageModel();
-        $banners = $bannerModel->orderBy('sort_order', 'ASC')->findAll();
+        $banners = $this->imageModel->orderBy('sort_order', 'ASC')->findAll();
 
         return view('admin/settings/banner', [
             'title' => 'Banner Image Settings',
             'breadcrumb' => [
                 ['label' => 'Dashboard', 'url' => base_url('dashboard')],
                 ['label' => 'Settings', 'url' => base_url('dashboard/settings')],
-                ['label' => 'Banner Images']
+                ['label' => 'Banner Images'],
             ],
             'banners' => $banners
         ]);
     }
 
     public function saveBanner()
-{
-    $model = new SettingsImageModel();
-    $id = $this->request->getPost('id');
+    {
+        $id = $this->request->getPost('id');
 
-    $data = [
-        'type'       => $this->request->getPost('type'),
-        'status'     => $this->request->getPost('status'),
-        'sort_order' => $this->request->getPost('sort_order') ?? 0,
-    ];
+        $data = [
+            'type'       => $this->request->getPost('type'),
+            'status'     => $this->request->getPost('status') ?: 'active',
+            'sort_order' => $this->request->getPost('sort_order') ?? 0,
+        ];
 
-    // Upload file jika ada
-    $file = $this->request->getFile('filename');
-    if ($file && $file->isValid() && !$file->hasMoved()) {
-        $newName = $file->getRandomName();
-        $file->move(FCPATH . 'uploads/settings/banner/', $newName);
-        $data['filename'] = $newName;
+        // Upload File
+        $file = $this->request->getFile('filename');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/settings/banner/', $newName);
+            $data['filename'] = $newName;
 
-        // Jika update, hapus file lama
-        if ($id) {
-            $old = $model->find($id);
-            if ($old && !empty($old['filename'])) {
-                $oldPath = FCPATH . 'uploads/settings/banner/' . $old['filename'];
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
+            // Hapus lama jika update
+            if ($id) {
+                $old = $this->imageModel->find($id);
+                if ($old && !empty($old['filename'])) {
+                    $oldPath = FCPATH . 'uploads/settings/banner/' . $old['filename'];
+                    if (file_exists($oldPath)) {
+                        unlink($oldPath);
+                    }
                 }
             }
         }
+
+        $id ? $this->imageModel->update($id, $data) : $this->imageModel->insert($data);
+
+        return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner saved successfully.');
     }
-
-    if ($id) {
-        $model->update($id, $data);
-    } else {
-        $model->insert($data);
-    }
-
-    return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner saved successfully.');
-}
-
 
     public function deleteBanner($id)
-{
-    $model = new SettingsImageModel();
-    $banner = $model->find($id);
+    {
+        $banner = $this->imageModel->find($id);
 
-    if ($banner && !empty($banner['filename'])) {
-        $filePath = FCPATH . 'uploads/settings/banner/' . $banner['filename'];
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        if ($banner && !empty($banner['filename'])) {
+            $filePath = FCPATH . 'uploads/settings/banner/' . $banner['filename'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
         }
+
+        $this->imageModel->delete($id);
+
+        return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner deleted successfully.');
     }
 
-    $model->delete($id);
-
-    return redirect()->to(base_url('dashboard/settings/banner'))->with('success', 'Banner deleted successfully.');
-}
-
-
+    // =============================
+// THEME COLORS
+// =============================
 public function themeColors()
 {
-    $settingsModel = new \App\Models\SettingsModel();
-    $settings = $settingsModel->first(); // karena cuma 1 baris di tabel settings
-
     return view('admin/settings/theme_colors', [
-        'title' => 'Pengaturan Tema Warna',
-        'settings' => $settings,
+        'title'    => 'Pengaturan Tema Warna',
+        'settings' => $this->model->first(),
     ]);
 }
 
+/**
+ * Simpan pengaturan tema warna
+ */
 public function saveThemeColors()
 {
-    $settingsModel = new \App\Models\SettingsModel();
-
     $data = [
-    'theme_primary_color'   => $this->request->getPost('theme_primary_color'),
-    'theme_secondary_color' => $this->request->getPost('theme_secondary_color'),
-    'theme_accent_color'    => $this->request->getPost('theme_accent_color'),
-    'theme_background_color'=> $this->request->getPost('theme_background_color'),
-    'theme_card_color'      => $this->request->getPost('theme_card_color'),
-];
+        'theme_primary_color'      => $this->request->getPost('theme_primary_color'),
+        'theme_primary_hover'      => $this->request->getPost('theme_primary_hover'),
+        'theme_background_color'   => $this->request->getPost('theme_background_color'),
+        'theme_panel_color'        => $this->request->getPost('theme_panel_color'),
+        'theme_card_color'         => $this->request->getPost('theme_card_color'),
+        'theme_text_color'         => $this->request->getPost('theme_text_color'),
+        'theme_muted_text_color'   => $this->request->getPost('theme_muted_text_color'),
+        'updated_at'               => date('Y-m-d H:i:s'),
+    ];
 
+    // Simpan semua data ke row ID=1 (global settings)
+    $this->model->updateSettings($data);
 
-    $settingsModel->update(1, $data); // id = 1 karena cuma satu record
-
-    return redirect()->back()->with('success', 'Tema warna berhasil diperbarui!');
+    return redirect()->back()->with('success', '🎨 Tema warna berhasil diperbarui!');
 }
-
-
 
 }

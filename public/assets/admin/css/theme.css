@@ -1,0 +1,34 @@
+:root {
+  --primary-color: <?= esc($settings->theme_primary_color ?? '#B86C3A') ?>;
+  --primary-hover: <?= esc($settings->theme_primary_hover ?? '#8D4E29') ?>;
+  --bg-color: <?= esc($settings->theme_background_color ?? '#20242A') ?>;
+  --card-bg: <?= esc($settings->theme_card_color ?? '#FFFFFF') ?>;
+  --panel-bg: <?= esc($settings->theme_panel_color ?? '#DAD3C5') ?>;
+  --text-color: <?= esc($settings->theme_text_color ?? '#20242A') ?>;
+  --muted-text: <?= esc($settings->theme_muted_text_color ?? '#9B9B9B') ?>;
+}
+
+/* override warna dari database */
+body {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+}
+
+.card {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.btn-primary {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+.text-muted {
+  color: var(--muted-text) !important;
+}

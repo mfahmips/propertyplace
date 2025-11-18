@@ -15463,7 +15463,7 @@ textarea.form-control-lg {
   -webkit-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
   height: var(--bs-topbar-height);
-  background-color: var(--bs-topbar-bg);
+  background-color: var(--panel-bg);
   padding-left: var(--bs-sidebar-width);
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
 }
@@ -15614,7 +15614,7 @@ html[data-sidebar-size=hidden] .app-topbar {
   transition: all 0.3s ease-in-out;
   width: var(--bs-sidebar-width);
   font-family: "Play", sans-serif;
-  background: var(--bs-sidebar-bg);
+  background: var(--panel-bg);
   min-width: var(--bs-sidebar-width);
   padding-bottom: 1.5rem;
   border-right: var(--bs-border-width) solid var(--bs-sidebar-border-color);

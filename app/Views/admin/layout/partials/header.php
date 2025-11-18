@@ -1,11 +1,8 @@
-
-
-
 <!-- START Wrapper -->
 <div class="app-wrapper">
 
     <!-- Topbar Start -->
-    <header class="app-topbar">
+    <header class="app-topbar" style="background: var(--panel-bg) !important;">
         <div class="container-fluid">
             <div class="navbar-header">
                 <div class="d-flex align-items-center gap-2">

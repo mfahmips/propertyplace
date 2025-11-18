@@ -30,7 +30,26 @@
 
 
     <!-- App css -->
-    <link href="<?= base_url('assets/admin/css/style.min.css') ?>" rel="stylesheet" type="text/css" />
+    <link href="<?= base_url('assets/admin/css/style.min.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/admin/css/theme.css') ?>" rel="stylesheet">
+
+    <?php
+    $db = \Config\Database::connect();
+    $settings = $db->table('settings')->get()->getRow();
+    ?>
+
+    <style>
+    :root {
+      --primary-color: <?= $settings->theme_primary_color ?? '#B86C3A' ?>;
+      --primary-hover: <?= $settings->theme_primary_hover ?? '#8D4E29' ?>;
+      --bg-color: <?= $settings->theme_background_color ?? '#20242A' ?>;
+      --card-bg: <?= $settings->theme_card_color ?? '#FFFFFF' ?>;
+      --panel-bg: <?= $settings->theme_panel_color ?? '#DAD3C5' ?>;
+      --text-color: <?= $settings->theme_text_color ?? '#20242A' ?>;
+      --muted-text: <?= $settings->theme_muted_text_color ?? '#9B9B9B' ?>;
+    }
+    </style>
+
     <style>
       /* Fix: Cegah scroll shift saat modal tampil */
       body.modal-open {

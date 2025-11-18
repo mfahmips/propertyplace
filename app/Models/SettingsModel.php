@@ -11,7 +11,12 @@ class SettingsModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    /**
+     * Daftar field yang dapat diubah lewat sistem admin.
+     * Termasuk konfigurasi umum + warna tema.
+     */
     protected $allowedFields = [
+        // General info
         'site_name',
         'tagline',
         'about',
@@ -26,10 +31,19 @@ class SettingsModel extends Model
         'date_format',
         'datetime_format',
         'maintenance',
+
+        // 🎨 Theme colors
+        'theme_primary_color',
+        'theme_primary_hover',
+        'theme_background_color',
+        'theme_panel_color',
+        'theme_card_color',
+        'theme_text_color',
+        'theme_muted_text_color',
     ];
 
     /**
-     * Get setting by key name.
+     * Ambil satu setting berdasarkan key.
      *
      * @param string $key
      * @return string|null
@@ -41,7 +55,7 @@ class SettingsModel extends Model
     }
 
     /**
-     * Get multiple settings by array of keys.
+     * Ambil beberapa setting sekaligus berdasarkan array key.
      *
      * @param array $keys
      * @return array
@@ -53,13 +67,14 @@ class SettingsModel extends Model
     }
 
     /**
-     * Update multiple settings in one call.
+     * Update beberapa setting sekaligus.
+     * Asumsi: hanya ada satu baris global settings dengan ID=1.
      *
      * @param array $data
      * @return bool
      */
     public function updateSettings(array $data): bool
     {
-        return $this->update(1, $data); // asumsi ID = 1 untuk global settings
+        return $this->update(1, $data);
     }
 }
